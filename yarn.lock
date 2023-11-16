@@ -5234,7 +5234,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-hash@npm:^1.1.0, create-hash@npm:^1.2.0":
+"create-hash@npm:^1.1.0, create-hash@npm:^1.1.2, create-hash@npm:^1.2.0":
   version: 1.2.0
   resolution: "create-hash@npm:1.2.0"
   dependencies:
@@ -5247,7 +5247,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-hmac@npm:^1.1.0, create-hmac@npm:^1.1.2, create-hmac@npm:^1.1.7":
+"create-hmac@npm:^1.1.0, create-hmac@npm:^1.1.2, create-hmac@npm:^1.1.4, create-hmac@npm:^1.1.7":
   version: 1.1.7
   resolution: "create-hmac@npm:1.1.7"
   dependencies:
@@ -11179,12 +11179,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pbkdf2@npm:3.0.8, pbkdf2@npm:^3.0.3":
+"pbkdf2@npm:3.0.8":
   version: 3.0.8
   resolution: "pbkdf2@npm:3.0.8"
   dependencies:
     create-hmac: ^1.1.2
   checksum: e63a29896a148f758a91b7933bd414830c4cb40673d93e4da379e4204c7182da7c6aac53ce6f4dabd25b21ab2892f4b9dca89a8beb567e90d31f1bb2dec593dc
+  languageName: node
+  linkType: hard
+
+"pbkdf2@npm:^3.0.3":
+  version: 3.1.2
+  resolution: "pbkdf2@npm:3.1.2"
+  dependencies:
+    create-hash: ^1.1.2
+    create-hmac: ^1.1.4
+    ripemd160: ^2.0.1
+    safe-buffer: ^5.0.1
+    sha.js: ^2.4.8
+  checksum: 2c950a100b1da72123449208e231afc188d980177d021d7121e96a2de7f2abbc96ead2b87d03d8fe5c318face097f203270d7e27908af9f471c165a4e8e69c92
   languageName: node
   linkType: hard
 
@@ -11866,7 +11879,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^1.0.26-4, readable-stream@npm:^1.0.27-1":
+"readable-stream@npm:^1.0.26-4, readable-stream@npm:^1.0.27-1, readable-stream@npm:^1.0.33":
   version: 1.1.14
   resolution: "readable-stream@npm:1.1.14"
   dependencies:
@@ -11875,18 +11888,6 @@ __metadata:
     isarray: 0.0.1
     string_decoder: ~0.10.x
   checksum: 17dfeae3e909945a4a1abc5613ea92d03269ef54c49288599507fc98ff4615988a1c39a999dcf9aacba70233d9b7040bc11a5f2bfc947e262dedcc0a8b32b5a0
-  languageName: node
-  linkType: hard
-
-"readable-stream@npm:^1.0.33":
-  version: 1.0.33
-  resolution: "readable-stream@npm:1.0.33"
-  dependencies:
-    core-util-is: ~1.0.0
-    inherits: ~2.0.1
-    isarray: 0.0.1
-    string_decoder: ~0.10.x
-  checksum: 3179fdc5c0d030940d1283ec0e369f3363996f0ffec3569a11a01315fca48079259d40f112481830c3c93a36c91e5922c96b7922be01ccc406101ddf1dec000f
   languageName: node
   linkType: hard
 
