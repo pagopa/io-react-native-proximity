@@ -45,10 +45,7 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
  */
 const ProximityManager = () => {
   const SECONDS_TO_SCAN_FOR = 7;
-  // a random UUID is used to identify the mDL-reader
-  // it should be generated at the first start of the manager
-  // and updated on every restart
-  let RANDOM_UUID = '';
+
   const ALLOW_DUPLICATES = true;
 
   const STATE_CHARACTERISTIC_UUID = '00000005-A123-48CE-896B4C76973373E6';
@@ -57,6 +54,11 @@ const ProximityManager = () => {
 
   // a temporary buffer is used to store the chunks of the message
   let tempBuffer: number[] = [];
+
+  // a random UUID is used to identify the mDL-reader
+  // it should be generated at the first start of the manager
+  // and updated on every restart
+  let randomVerifierUUID: string;
 
   const eventManager = createEventManager();
 
@@ -86,7 +88,7 @@ const ProximityManager = () => {
             type: 'ON_BLE_START',
             message: 'ble manager is started.',
           });
-          RANDOM_UUID = uuid.v4().toString();
+          randomVerifierUUID = uuid.v4().toString();
           resolve();
         })
         .catch((error) => {
@@ -126,7 +128,11 @@ const ProximityManager = () => {
 
   const startScan = () => {
     return new Promise<void>((resolve, reject) => {
-      BleManager.scan([RANDOM_UUID], SECONDS_TO_SCAN_FOR, ALLOW_DUPLICATES)
+      BleManager.scan(
+        [randomVerifierUUID],
+        SECONDS_TO_SCAN_FOR,
+        ALLOW_DUPLICATES
+      )
         .then(() => {
           resolve();
           eventManager.emit('onEvent', {
@@ -141,7 +147,7 @@ const ProximityManager = () => {
   };
 
   const handleDiscoverPeripheral = async (peripheral: Peripheral) => {
-    if (peripheral.id === RANDOM_UUID) {
+    if (peripheral.id === randomVerifierUUID) {
       await BleManager.stopScan();
       await BleManager.connect(peripheral.id);
       console.debug(`[connectPeripheral][${peripheral.id}] connected.`);
