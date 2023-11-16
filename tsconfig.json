@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "io-react-native-proximity": ["./src/index"]
+      "@pagopa/io-react-native-proximity": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
