@@ -45,7 +45,6 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
  */
 const ProximityManager = () => {
   const SECONDS_TO_SCAN_FOR = 7;
-
   const ALLOW_DUPLICATES = true;
 
   const STATE_CHARACTERISTIC_UUID = '00000005-A123-48CE-896B4C76973373E6';

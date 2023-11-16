@@ -550,7 +550,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
-  - react-native-ble-manager (from `../../node_modules/react-native-ble-manager`)
+  - react-native-ble-manager (from `../node_modules/react-native-ble-manager`)
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -637,7 +637,7 @@ EXTERNAL SOURCES:
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-ble-manager:
-    :path: "../../node_modules/react-native-ble-manager"
+    :path: "../node_modules/react-native-ble-manager"
   react-native-randombytes:
     :path: "../node_modules/react-native-randombytes"
   React-NativeModulesApple:
@@ -739,6 +739,6 @@ SPEC CHECKSUMS:
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 2ec5923b00171e13044bd0d837983238cb070e45
+PODFILE CHECKSUM: a72871d9c573e84020538a5edf3bf28cd9af412a
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.14.2
