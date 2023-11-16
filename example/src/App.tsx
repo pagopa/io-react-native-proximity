@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ProximityManager from 'io-react-native-proximity';
+import { ProximityManager } from '@pagopa/io-react-native-proximity';
 import {
   StyleSheet,
   View,
@@ -9,7 +9,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
-import type { EventData } from '../../src/utils/EventManager';
+import { type EventData } from '@pagopa/io-react-native-proximity';
 
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();

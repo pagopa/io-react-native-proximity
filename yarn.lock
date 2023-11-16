@@ -2603,6 +2603,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/io-react-native-proximity@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@pagopa/io-react-native-proximity@workspace:."
+  dependencies:
+    "@commitlint/config-conventional": ^17.0.2
+    "@evilmartians/lefthook": ^1.5.0
+    "@react-native/eslint-config": ^0.72.2
+    "@release-it/conventional-changelog": ^5.0.0
+    "@types/jest": ^28.1.2
+    "@types/react": ~17.0.21
+    "@types/react-native": 0.70.0
+    commitlint: ^17.0.2
+    del-cli: ^5.0.0
+    eslint: ^8.4.1
+    eslint-config-prettier: ^8.5.0
+    eslint-plugin-prettier: ^4.0.0
+    jest: ^28.1.1
+    pod-install: ^0.1.0
+    prettier: ^2.0.5
+    react: 18.2.0
+    react-native: 0.72.6
+    react-native-ble-manager: ^10.1.5
+    react-native-builder-bob: ^0.20.0
+    react-native-uuid: ^2.0.1
+    release-it: ^15.0.0
+    turbo: ^1.10.7
+    typescript: ^5.0.2
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-ble-manager: "*"
+    react-native-uuid: "*"
+  languageName: unknown
+  linkType: soft
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -7232,40 +7267,9 @@ __metadata:
     pod-install: ^0.1.0
     react: 18.2.0
     react-native: 0.72.6
-    rn-qr-generator: ^1.3.1
-  languageName: unknown
-  linkType: soft
-
-"io-react-native-proximity@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "io-react-native-proximity@workspace:."
-  dependencies:
-    "@commitlint/config-conventional": ^17.0.2
-    "@evilmartians/lefthook": ^1.5.0
-    "@react-native/eslint-config": ^0.72.2
-    "@release-it/conventional-changelog": ^5.0.0
-    "@types/jest": ^28.1.2
-    "@types/react": ~17.0.21
-    "@types/react-native": 0.70.0
-    commitlint: ^17.0.2
-    del-cli: ^5.0.0
-    eslint: ^8.4.1
-    eslint-config-prettier: ^8.5.0
-    eslint-plugin-prettier: ^4.0.0
-    jest: ^28.1.1
-    pod-install: ^0.1.0
-    prettier: ^2.0.5
-    react: 18.2.0
-    react-native: 0.72.6
     react-native-ble-manager: ^10.1.5
-    react-native-builder-bob: ^0.20.0
     react-native-uuid: ^2.0.1
-    release-it: ^15.0.0
-    turbo: ^1.10.7
-    typescript: ^5.0.2
-  peerDependencies:
-    react: "*"
-    react-native: "*"
+    rn-qr-generator: ^1.3.1
   languageName: unknown
   linkType: soft
 
