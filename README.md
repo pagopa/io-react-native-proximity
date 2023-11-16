@@ -8,9 +8,29 @@ This package is base on [react-native-ble-manager](https://github.com/innoveit/r
 
 ## Installation
 
+Because this module depends on some node core modules, and react-native doesn't currently have a [resolve.alias a la webpack](https://productpains.com/post/react-native/packager-support-resolvealias-ala-webpack), you will need to use [rn-nodeify](https://github.com/tradle/rn-nodeify) for your shimming needs.
+
+A suggested workflow:
+
+1. Install
+
 ```sh
 yarn add @pagopa/io-react-native-proximity
+
+yarn add --dev patch-package
+yarn add --dev rn-nodeify
+
+#and run
+patch-package && rn-nodeify --install process,path,buffer,crypto,util,stream,constants,events,url,fs
 ```
+
+2. `rn-nodeify` will create a `shim.js` in the project root directory
+
+  ```js
+  // index.ios.js or index.android.js
+  // make sure you use `import` and not require!
+  import './shim.js'
+  // ...the rest of your code
 
 ## Usage
 
