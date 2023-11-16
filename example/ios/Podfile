@@ -25,8 +25,6 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-pod 'react-native-ble-manager', :path => '../../node_modules/react-native-ble-manager'
-
 target 'IoReactNativeProximityExample' do
   config = use_native_modules!
 
