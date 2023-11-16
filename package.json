@@ -57,6 +57,7 @@
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.70.0",
+    "cbor-x": "^1.5.4",
     "commitlint": "^17.0.2",
     "del-cli": "^5.0.0",
     "eslint": "^8.4.1",
@@ -78,6 +79,7 @@
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
+    "cbor-x": "*",
     "react": "*",
     "react-native": "*",
     "react-native-ble-manager": "*",
