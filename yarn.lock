@@ -2603,6 +2603,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/io-react-native-nodelibs@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "@pagopa/io-react-native-nodelibs@npm:0.0.2"
+  dependencies:
+    assert: ^1.4.1
+    base-64: ^0.1.0
+    browserify-zlib: ^0.2.0
+    buffer: ^6.0.3
+    console-browserify: ^1.1.0
+    constants-browserify: ^1.0.0
+    domain-browser: ^1.1.1
+    events: ^1.0.0
+    https-browserify: ^1.0.0
+    os-browserify: ^0.3.0
+    path-browserify: 0.0.0
+    process: ^0.11.0
+    punycode: ^2.1.0
+    querystring-es3: ^0.2.0
+    react-native-crypto: ^2.0.1
+    react-native-fs: ^2.20.0
+    react-native-randombytes: ^3.5.1
+    readable-stream: ^2.2.9
+    stream-http: ^2.3.1
+    string_decoder: ^1.0.3
+    timers-browserify: ^2.0.2
+    tty-browserify: 0.0.0
+    url: ^0.11.0
+    util: ^0.10.3
+  checksum: 2a14266e0d3076c65419af6df8d2059eb59f447247d395fe2198783fe6724bfa1e9a8dc40b3beb420a97241a239ead74321d2a0fb4530e3cb39c41d52507dcb7
+  languageName: node
+  linkType: hard
+
 "@pagopa/io-react-native-proximity@workspace:.":
   version: 0.0.0-use.local
   resolution: "@pagopa/io-react-native-proximity@workspace:."
@@ -2634,6 +2666,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-ble-manager: "*"
+    react-native-randombytes: "*"
     react-native-uuid: "*"
   languageName: unknown
   linkType: soft
@@ -7577,10 +7610,10 @@ __metadata:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
+    "@pagopa/io-react-native-nodelibs": ^0.0.2
     "@react-native/metro-config": ^0.72.11
     babel-plugin-module-resolver: ^5.0.0
     metro-react-native-babel-preset: 0.76.8
-    node-libs-react-native: ^1.2.1
     pod-install: ^0.1.0
     react: 18.2.0
     react-native: 0.72.6
@@ -10243,37 +10276,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-libs-react-native@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "node-libs-react-native@npm:1.2.1"
-  dependencies:
-    assert: ^1.4.1
-    base-64: ^0.1.0
-    browserify-zlib: ^0.2.0
-    buffer: ^6.0.3
-    console-browserify: ^1.1.0
-    constants-browserify: ^1.0.0
-    domain-browser: ^1.1.1
-    events: ^1.0.0
-    https-browserify: ^1.0.0
-    os-browserify: ^0.3.0
-    path-browserify: 0.0.0
-    process: ^0.11.0
-    punycode: ^2.1.0
-    querystring-es3: ^0.2.0
-    react-native-crypto: ^2.0.1
-    react-native-randombytes: ^3.5.1
-    readable-stream: ^2.2.9
-    stream-http: ^2.3.1
-    string_decoder: ^1.0.3
-    timers-browserify: ^2.0.2
-    tty-browserify: 0.0.0
-    url: ^0.11.0
-    util: ^0.10.3
-  checksum: 50223ee01505045a5d5728ea8458c89e0b0e94f0d792741b03635a8be43b99e68350e943327841affa00ef0497511c6b6a81823db7cf94c6b49bfd041e661a36
-  languageName: node
-  linkType: hard
-
 "node-releases@npm:^2.0.13":
   version: 2.0.13
   resolution: "node-releases@npm:2.0.13"
@@ -11404,6 +11406,22 @@ __metadata:
   peerDependencies:
     react-native-randombytes: ">=2.0.0 <4.0.0"
   checksum: 52631bf32e5d3e0aad9329e3271808a30b91f8a072d4a0c2791105cd3c3aac5d1a63a4016a570790342baa7fc4b10f15024e4d6df47e57906197d7587af450e1
+  languageName: node
+  linkType: hard
+
+"react-native-fs@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "react-native-fs@npm:2.20.0"
+  dependencies:
+    base-64: ^0.1.0
+    utf8: ^3.0.0
+  peerDependencies:
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 0be9bb9a5c13b501d0a3006efc3aa5c0b5b211456ee04718297f4e522532f3527f1daa220bd67d3b82d819ed8fdab8f64b7d6e0d7b768c1fd1d8ec9122d94316
   languageName: node
   linkType: hard
 
@@ -13521,6 +13539,13 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 5c639e0f8da3521d605f59ce5be9e094ca772bd44a4ce7322b055a6f58eeed8dda3c94cabd90c7a41fb6fa852210092008afe48f7038792fd47501f33299116a
+  languageName: node
+  linkType: hard
+
+"utf8@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "utf8@npm:3.0.0"
+  checksum: cb89a69ad9ab393e3eae9b25305b3ff08bebca9adc839191a34f90777eb2942f86a96369d2839925fea58f8f722f7e27031d697f10f5f39690f8c5047303e62d
   languageName: node
   linkType: hard
 

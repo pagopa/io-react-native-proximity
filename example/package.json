@@ -10,6 +10,7 @@
     "build:ios": "cd ios && xcodebuild -workspace IoReactNativeProximityExample.xcworkspace -scheme IoReactNativeProximityExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
+    "@pagopa/io-react-native-nodelibs": "^0.0.2",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-ble-manager": "^10.1.5",
@@ -24,7 +25,6 @@
     "@react-native/metro-config": "^0.72.11",
     "babel-plugin-module-resolver": "^5.0.0",
     "metro-react-native-babel-preset": "0.76.8",
-    "node-libs-react-native": "^1.2.1",
     "pod-install": "^0.1.0"
   },
   "engines": {

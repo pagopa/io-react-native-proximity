@@ -31,7 +31,7 @@ const config = {
         acc[name] = path.join(__dirname, 'node_modules', name);
         return acc;
       }, {}),
-      ...require('node-libs-react-native'),
+      ...require('@pagopa/io-react-native-nodelibs'),
     },
   },
 

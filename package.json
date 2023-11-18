@@ -81,6 +81,7 @@
     "react": "*",
     "react-native": "*",
     "react-native-ble-manager": "*",
+    "react-native-randombytes": "*",
     "react-native-uuid": "*"
   },
   "workspaces": [
