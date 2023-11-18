@@ -7,6 +7,7 @@ import {
   Image,
   Platform,
   PermissionsAndroid,
+  Text,
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
@@ -14,6 +15,7 @@ import { type EventData } from '@pagopa/io-react-native-proximity';
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
   const [isStarted, setIsStarted] = React.useState<boolean>(false);
+  const [debug, setDebug] = React.useState<string>('log here');
 
   React.useEffect(() => {
     handleAndroidPermissions();
@@ -150,7 +152,17 @@ export default function App() {
             />
           )}
         </>
-      )) || <Button title="Start 🏁" onPress={() => startProximityManager()} />}
+      )) || (
+        <>
+          <Button title="Start 🏁" onPress={() => startProximityManager()} />
+          <Button
+            title="Test crypto 🔐"
+            onPress={() => ProximityManager.testCrypto().then(setDebug)}
+          />
+        </>
+      )}
+
+      <Text style={styles.debug}>{debug}</Text>
     </View>
   );
 }
@@ -165,5 +177,12 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginVertical: 20,
+  },
+  debug: {
+    width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: '#eaeaea',
   },
 });

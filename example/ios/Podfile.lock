@@ -380,6 +380,8 @@ PODS:
     - glog
   - react-native-ble-manager (10.1.5):
     - React-Core
+  - react-native-randombytes (3.6.1):
+    - React-Core
   - React-NativeModulesApple (0.72.6):
     - hermes-engine
     - React-callinvoker
@@ -549,6 +551,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-ble-manager (from `../node_modules/react-native-ble-manager`)
+  - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -635,6 +638,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-ble-manager:
     :path: "../node_modules/react-native-ble-manager"
+  react-native-randombytes:
+    :path: "../node_modules/react-native-randombytes"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-perflogger:
@@ -710,6 +715,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-ble-manager: 09724bad4d06b86a85e0cd7bd97196fecca15e9a
+  react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
   React-NativeModulesApple: 02e35e9a51e10c6422f04f5e4076a7c02243fff2
   React-perflogger: e3596db7e753f51766bceadc061936ef1472edc3
   React-RCTActionSheet: 17ab132c748b4471012abbcdcf5befe860660485
