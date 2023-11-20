@@ -6,7 +6,7 @@ import BleManager, {
 } from 'react-native-ble-manager';
 import uuid from 'react-native-uuid';
 import createEventManager, { type EventData } from './../utils/EventManager';
-import * as crypto from 'crypto';
+
 /**
   * This package is a boilerplate for native modules. No native code is included here.
   * As the experimental implementation of ISO 18013-5 is not yet available, this package
@@ -59,15 +59,6 @@ const ProximityManager = () => {
   let tempBuffer: number[] = [];
 
   const eventManager = createEventManager();
-
-  const testCrypto = () => {
-    return new Promise<string>((resolve, reject) => {
-      let randomString = crypto.randomBytes(32).toString('hex');
-      randomString
-        ? resolve(randomString)
-        : reject(new Error('unable to generate random bytes'));
-    });
-  };
 
   const start = () => {
     // TODO: generate keypair
@@ -287,7 +278,6 @@ const ProximityManager = () => {
     generateQrCode,
     setListeners,
     stop,
-    testCrypto,
   };
 };
 
