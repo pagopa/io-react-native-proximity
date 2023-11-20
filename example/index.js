@@ -1,4 +1,4 @@
-require('@pagopa/io-react-native-nodelibs/globals');
+require('@pagopa/react-native-nodelibs/globals');
 
 import { AppRegistry } from 'react-native';
 import App from './src/App';
