@@ -150,7 +150,11 @@ export default function App() {
             />
           )}
         </>
-      )) || <Button title="Start 🏁" onPress={() => startProximityManager()} />}
+      )) || (
+        <>
+          <Button title="Start 🏁" onPress={() => startProximityManager()} />
+        </>
+      )}
     </View>
   );
 }
@@ -165,5 +169,12 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginVertical: 20,
+  },
+  debug: {
+    width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: '#eaeaea',
   },
 });
