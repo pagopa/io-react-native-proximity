@@ -6,6 +6,8 @@ import BleManager, {
 } from 'react-native-ble-manager';
 import uuid from 'react-native-uuid';
 import createEventManager, { type EventData } from './../utils/EventManager';
+import session from './session';
+import { fromJwkToCoseHex } from '../cbor/jwk';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -45,10 +47,6 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
  */
 const ProximityManager = () => {
   const SECONDS_TO_SCAN_FOR = 7;
-  // a random UUID is used to identify the mDL-reader
-  // it should be generated at the first start of the manager
-  // and updated on every restart
-  let RANDOM_UUID = '';
   const ALLOW_DUPLICATES = true;
 
   const STATE_CHARACTERISTIC_UUID = '00000005-A123-48CE-896B4C76973373E6';
@@ -58,13 +56,18 @@ const ProximityManager = () => {
   // a temporary buffer is used to store the chunks of the message
   let tempBuffer: number[] = [];
 
+  // a random UUID is used to identify the mDL-reader
+  // it should be generated at the first start of the manager
+  // and updated on every restart
+  let randomVerifierUUID: string;
+
   const eventManager = createEventManager();
 
   const start = () => {
     // TODO: generate keypair
-    return new Promise<void>((resolve, reject) => {
-      // TODO: this shouldn't be called multiple times
-      // add a method to check if it is already started
+    return new Promise<void>(async (resolve, reject) => {
+      await session.start();
+
       BleManager.start({ showAlert: false })
         .then(() => {
           bleManagerEmitter.addListener(
@@ -86,7 +89,7 @@ const ProximityManager = () => {
             type: 'ON_BLE_START',
             message: 'ble manager is started.',
           });
-          RANDOM_UUID = uuid.v4().toString();
+          randomVerifierUUID = uuid.v4().toString();
           resolve();
         })
         .catch((error) => {
@@ -96,7 +99,8 @@ const ProximityManager = () => {
   };
 
   const stop = () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
+      await session.close();
       BleManager.stopScan()
         .then(() => {
           resolve();
@@ -113,10 +117,14 @@ const ProximityManager = () => {
    * rendered in the UI.
    * @returns {Promise<string>} the QR code
    */
-  const generateQrCode = () => {
+  const generateQrCode = async () => {
     // 1. make payload
     // 2. encode in CBOR
     // 3. with COSE
+    let sessionKey = await session.getSessionPublicKey();
+    let coseSessionKey = fromJwkToCoseHex(sessionKey);
+
+    console.log(coseSessionKey);
     return new Promise<string>((resolve, _) => {
       const mockedQrCode =
         'mdoc:owBjMS4wAYIB2BhYS6QBAiABIVggUCnUgO0nCmTWOkqZLpQJh1uO2Q0YCTbYtUowBJU6ltEiWCBPkYpJZpEY4emfmR_2eFS5XQN68wihmgEoiMVEf8M3_gKBgwIBowD0AfULUJr9sL_rAkZCk114baNK4rY';
@@ -126,7 +134,11 @@ const ProximityManager = () => {
 
   const startScan = () => {
     return new Promise<void>((resolve, reject) => {
-      BleManager.scan([RANDOM_UUID], SECONDS_TO_SCAN_FOR, ALLOW_DUPLICATES)
+      BleManager.scan(
+        [randomVerifierUUID],
+        SECONDS_TO_SCAN_FOR,
+        ALLOW_DUPLICATES
+      )
         .then(() => {
           resolve();
           eventManager.emit('onEvent', {
@@ -141,7 +153,7 @@ const ProximityManager = () => {
   };
 
   const handleDiscoverPeripheral = async (peripheral: Peripheral) => {
-    if (peripheral.id === RANDOM_UUID) {
+    if (peripheral.id === randomVerifierUUID) {
       await BleManager.stopScan();
       await BleManager.connect(peripheral.id);
       console.debug(`[connectPeripheral][${peripheral.id}] connected.`);

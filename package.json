@@ -52,11 +52,13 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
+    "@pagopa/io-react-native-jwt": "^1.0.0",
     "@react-native/eslint-config": "^0.72.2",
     "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.70.0",
+    "cbor-x": "^1.5.6",
     "commitlint": "^17.0.2",
     "del-cli": "^5.0.0",
     "eslint": "^8.4.1",
@@ -78,6 +80,8 @@
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
+    "@pagopa/io-react-native-jwt": "*",
+    "cbor-x": "*",
     "react": "*",
     "react-native": "*",
     "react-native-ble-manager": "*",
@@ -162,5 +166,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "parse-cosekey": "^1.0.2"
   }
 }
