@@ -18,14 +18,12 @@ addExtension({
     return enc(buffer);
   },
   decode: (data) => {
-    //const decoded = encoder.decode(data as Buffer);
     return new CborDataItem(Buffer.from(data as Uint8Array).toString('hex'));
   },
 });
 
 export const encode = (value: any): Buffer => {
-  let encoded = encoder.encode(value);
-  return Buffer.from(encoded);
+  return Buffer.from(encoder.encode(value));
 };
 
 export const decode = (value: Buffer): any => {
