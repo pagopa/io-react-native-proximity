@@ -64,6 +64,9 @@ const ProximityManager = () => {
   // and updated on every restart
   let randomVerifierUUID: string;
 
+  // Device engagement Map
+  let deviceEngagement: Map<number, any> = new Map();
+
   const eventManager = createEventManager();
 
   const start = () => {
@@ -124,20 +127,32 @@ const ProximityManager = () => {
       const sessionKey = await session.getSessionPublicKey();
       const coseSessionKey = fromJwkToCoseHex(sessionKey);
 
+      /*
+       * Security array:
+       * first element: CipherSuiteIdentifier (1=EC)
+       * second element: Public session key CBOR encoded with TAG 24
+       */
       const security = [1, new CborDataItem(coseSessionKey)];
 
       const bleOptions = new Map();
-      bleOptions.set(0, false); //Support server mode
-      bleOptions.set(1, true); //Support client mode
-      bleOptions.set(11, uuidToBuffer(randomVerifierUUID)); //UUID for mdoc Client mode
+      bleOptions.set(0, false); //Support server mode (false)
+      bleOptions.set(1, true); //Support client mode (true)
+      bleOptions.set(11, uuidToBuffer(randomVerifierUUID)); //Buffer of UUID for mdoc Client mode
+
+      /*
+       * DeviceRetrievalMethods array:
+       * first element: type (2=BLE)
+       * second element: version (only version 1 is supported)
+       * third element: options (bleOptions)
+       */
       const bleClientRetievalMethod = [2, 1, bleOptions];
 
-      const deviceEng = new Map();
-      deviceEng.set(0, '1.0'); //set version
-      deviceEng.set(1, security); //set Security (EDeviceKeyBytes)
-      deviceEng.set(2, [bleClientRetievalMethod]); //set DeviceRetrievalMethods
+      deviceEngagement.set(0, '1.0'); //set version (only 1.0 is supported)
+      deviceEngagement.set(1, security); //set Security array (EDeviceKeyBytes)
+      deviceEngagement.set(2, [bleClientRetievalMethod]); //set array of DeviceRetrievalMethods array (we only support one type)
 
-      const encodedDeviceEng = encode(deviceEng);
+      //Encode to CBOR
+      const encodedDeviceEng = encode(deviceEngagement);
       const qrcode =
         'mdoc:' + removePadding(encodedDeviceEng.toString('base64'));
 
