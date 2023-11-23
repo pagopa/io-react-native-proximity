@@ -8,6 +8,9 @@ import uuid from 'react-native-uuid';
 import createEventManager, { type EventData } from './../utils/EventManager';
 import session from './session';
 import { fromJwkToCoseHex } from '../cbor/jwk';
+import { CborDataItem, encode } from '../cbor';
+import { uuidToBuffer } from '../utils';
+import { removePadding } from '@pagopa/io-react-native-jwt';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -61,10 +64,12 @@ const ProximityManager = () => {
   // and updated on every restart
   let randomVerifierUUID: string;
 
+  // Device engagement Map
+  let deviceEngagement: Map<number, any> = new Map();
+
   const eventManager = createEventManager();
 
   const start = () => {
-    // TODO: generate keypair
     return new Promise<void>(async (resolve, reject) => {
       await session.start();
 
@@ -117,18 +122,41 @@ const ProximityManager = () => {
    * rendered in the UI.
    * @returns {Promise<string>} the QR code
    */
-  const generateQrCode = async () => {
-    // 1. make payload
-    // 2. encode in CBOR
-    // 3. with COSE
-    let sessionKey = await session.getSessionPublicKey();
-    let coseSessionKey = fromJwkToCoseHex(sessionKey);
+  const generateQrCode = () => {
+    return new Promise<string>(async (resolve, _) => {
+      const sessionKey = await session.getSessionPublicKey();
+      const coseSessionKey = fromJwkToCoseHex(sessionKey);
 
-    console.log(coseSessionKey);
-    return new Promise<string>((resolve, _) => {
-      const mockedQrCode =
-        'mdoc:owBjMS4wAYIB2BhYS6QBAiABIVggUCnUgO0nCmTWOkqZLpQJh1uO2Q0YCTbYtUowBJU6ltEiWCBPkYpJZpEY4emfmR_2eFS5XQN68wihmgEoiMVEf8M3_gKBgwIBowD0AfULUJr9sL_rAkZCk114baNK4rY';
-      resolve(mockedQrCode);
+      /*
+       * Security array:
+       * first element: CipherSuiteIdentifier (1=EC)
+       * second element: Public session key CBOR encoded with TAG 24
+       */
+      const security = [1, new CborDataItem(coseSessionKey)];
+
+      const bleOptions = new Map();
+      bleOptions.set(0, false); //Support server mode (false)
+      bleOptions.set(1, true); //Support client mode (true)
+      bleOptions.set(11, uuidToBuffer(randomVerifierUUID)); //Buffer of UUID for mdoc Client mode
+
+      /*
+       * DeviceRetrievalMethods array:
+       * first element: type (2=BLE)
+       * second element: version (only version 1 is supported)
+       * third element: options (bleOptions)
+       */
+      const bleClientRetievalMethod = [2, 1, bleOptions];
+
+      deviceEngagement.set(0, '1.0'); //set version (only 1.0 is supported)
+      deviceEngagement.set(1, security); //set Security array (EDeviceKeyBytes)
+      deviceEngagement.set(2, [bleClientRetievalMethod]); //set array of DeviceRetrievalMethods array (we only support one type)
+
+      //Encode to CBOR
+      const encodedDeviceEng = encode(deviceEngagement);
+      const qrcode =
+        'mdoc:' + removePadding(encodedDeviceEng.toString('base64'));
+
+      resolve(qrcode);
     });
   };
 
