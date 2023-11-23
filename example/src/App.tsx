@@ -73,8 +73,9 @@ export default function App() {
       width: 300,
       correctionLevel: 'H',
     })
-      .then((response) => {
+      .then(async (response) => {
         setQrCodeUri(response.uri);
+        await ProximityManager.startScan();
       })
       .catch((error) => {
         console.log(error);
