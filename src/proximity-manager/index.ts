@@ -208,7 +208,7 @@ const ProximityManager = () => {
     await BleManager.connect(peripheral.id);
     console.debug(`[connectPeripheral][${peripheral.id}] connected.`);
     eventManager.emit('onEvent', {
-      type: 'ON_PERIHPERAL_CONNECTED',
+      type: 'ON_PERIPHERAL_CONNECTED',
       message: 'pheripheral connected.',
     });
     const peripheralData = await BleManager.retrieveServices(peripheral.id);
