@@ -52,9 +52,11 @@ const ProximityManager = () => {
   const SECONDS_TO_SCAN_FOR = 7;
   const ALLOW_DUPLICATES = true;
 
-  const STATE_CHARACTERISTIC_UUID = '00000005-A123-48CE-896B4C76973373E6';
+  const STATE_CHARACTERISTIC_UUID = '00000005-a123-48ce-896b-4c76973373e6';
   const SERVER_2_CLIENT_CHARACTERISTIC_UUID =
-    '00000007-A123-48CE-896B4C76973373E6';
+    '00000007-a123-48ce-896b-4c76973373e6';
+
+  let connectedPheripheral: Peripheral | undefined;
 
   // a temporary buffer is used to store the chunks of the message
   let tempBuffer: number[] = [];
@@ -105,14 +107,25 @@ const ProximityManager = () => {
 
   const stop = () => {
     return new Promise<void>(async (resolve, reject) => {
-      await session.close();
-      BleManager.stopScan()
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
+      try {
+        //Clean temp buffer
+        tempBuffer = [];
+        // Close session
+        await session.close();
+        // Stop BLE scan if is scanning
+        await BleManager.stopScan();
+        // Disconnect a pheripheral if is connected
+        if (connectedPheripheral) {
+          await BleManager.disconnect(connectedPheripheral.id, true);
+        }
+        resolve();
+        eventManager.emit('onEvent', {
+          type: 'ON_BLE_STOP',
+          message: 'BleManager is stopped.',
         });
+      } catch (error) {
+        reject(error);
+      }
     });
   };
 
@@ -181,71 +194,83 @@ const ProximityManager = () => {
   };
 
   const handleDiscoverPeripheral = async (peripheral: Peripheral) => {
-    if (peripheral.id === randomVerifierUUID) {
-      await BleManager.stopScan();
-      await BleManager.connect(peripheral.id);
-      console.debug(`[connectPeripheral][${peripheral.id}] connected.`);
-      eventManager.emit('onEvent', {
-        type: 'ON_PERIHPERAL_CONNECTED',
-        message: 'pheripheral connected.',
-      });
-      const peripheralData = await BleManager.retrieveServices(peripheral.id);
-      console.debug(
-        `[connectPeripheral][${peripheral.id}] retrieved peripheral services`,
-        peripheralData
-      );
-
-      const rssi = await BleManager.readRSSI(peripheral.id);
-      console.debug(
-        `[connectPeripheral][${peripheral.id}] retrieved current RSSI value: ${rssi}.`
-      );
-
-      const stateServiceId = peripheralData.characteristics?.filter(
-        (c) => c.characteristic === STATE_CHARACTERISTIC_UUID
-      )[0]?.service;
-
-      const server2clientServiceId = peripheralData.characteristics?.filter(
-        (c) => c.characteristic === SERVER_2_CLIENT_CHARACTERISTIC_UUID
-      )[0]?.service;
-
-      if (!stateServiceId || !server2clientServiceId) {
-        console.error(
-          `[connectPeripheral][${peripheral.id}] missing stateServiceId or server2clientServiceId.`
-        );
-        eventManager.emit('onError', {
-          type: 'ON_BLE_ERROR',
-          message: 'missing stateServiceId or server2clientServiceId.',
-        });
-        return;
+    const serviceUUIDs = peripheral.advertising.serviceUUIDs;
+    if (serviceUUIDs && serviceUUIDs.includes(randomVerifierUUID)) {
+      if (!connectedPheripheral) {
+        BleManager.stopScan();
+        connectToPeripheral(peripheral);
       }
-
-      const startNotification = [
-        BleManager.startNotification(
-          peripheralData.id,
-          stateServiceId,
-          STATE_CHARACTERISTIC_UUID
-        ),
-        BleManager.startNotification(
-          peripheralData.id,
-          server2clientServiceId,
-          SERVER_2_CLIENT_CHARACTERISTIC_UUID
-        ),
-      ];
-
-      await Promise.all(startNotification);
-
-      // start 0x01
-      // stop 0x00
-      await BleManager.writeWithoutResponse(
-        peripheralData.id,
-        stateServiceId,
-        STATE_CHARACTERISTIC_UUID,
-        [0x01]
-      );
     }
   };
 
-  const handleDisconnectedPeripheral = (data: BleDisconnectPeripheralEvent) => {
+  const connectToPeripheral = async (peripheral: Peripheral) => {
+    connectedPheripheral = peripheral;
+    await BleManager.connect(peripheral.id);
+    console.debug(`[connectPeripheral][${peripheral.id}] connected.`);
+    eventManager.emit('onEvent', {
+      type: 'ON_PERIPHERAL_CONNECTED',
+      message: 'pheripheral connected.',
+    });
+    const peripheralData = await BleManager.retrieveServices(peripheral.id);
+    console.debug(
+      `[connectPeripheral][${peripheral.id}] retrieved peripheral services`,
+      peripheralData
+    );
+
+    const rssi = await BleManager.readRSSI(peripheral.id);
+    console.debug(
+      `[connectPeripheral][${peripheral.id}] retrieved current RSSI value: ${rssi}.`
+    );
+
+    const stateServiceId = peripheralData.characteristics?.filter(
+      (c) => c.characteristic === STATE_CHARACTERISTIC_UUID
+    )[0]?.service;
+
+    const server2clientServiceId = peripheralData.characteristics?.filter(
+      (c) => c.characteristic === SERVER_2_CLIENT_CHARACTERISTIC_UUID
+    )[0]?.service;
+
+    if (!stateServiceId || !server2clientServiceId) {
+      console.error(
+        `[connectPeripheral][${peripheral.id}] missing stateServiceId or server2clientServiceId.`
+      );
+      eventManager.emit('onError', {
+        type: 'ON_BLE_ERROR',
+        message: 'missing stateServiceId or server2clientServiceId.',
+      });
+      return;
+    }
+
+    const startNotification = [
+      BleManager.startNotification(
+        peripheralData.id,
+        stateServiceId,
+        STATE_CHARACTERISTIC_UUID
+      ),
+      BleManager.startNotification(
+        peripheralData.id,
+        server2clientServiceId,
+        SERVER_2_CLIENT_CHARACTERISTIC_UUID
+      ),
+    ];
+
+    await Promise.all(startNotification);
+
+    // start 0x01
+    // stop 0x00
+    await BleManager.writeWithoutResponse(
+      peripheralData.id,
+      stateServiceId,
+      STATE_CHARACTERISTIC_UUID,
+      [0x01]
+    );
+  };
+
+  const handleDisconnectedPeripheral = async (
+    data: BleDisconnectPeripheralEvent
+  ) => {
+    connectedPheripheral = undefined;
+    await stop();
     console.debug(
       '[handleDisconnectedPeripheral] disconnected from BLE peripheral',
       data
@@ -254,10 +279,6 @@ const ProximityManager = () => {
 
   const handleStopScan = () => {
     console.debug('[handleStopScan] scan is stopped.');
-    eventManager.emit('onEvent', {
-      type: 'ON_BLE_STOP',
-      message: 'scan is stopped.',
-    });
   };
 
   const handleUpdateValueForCharacteristic = (
@@ -270,8 +291,10 @@ const ProximityManager = () => {
       if (shiftedValue === 0x00) {
         // STOP - latest chunk
         let buffer = Buffer.from(new Uint8Array(tempBuffer)); //Copy temp buffer
+        // Clean temp buffer
+        tempBuffer = [];
         //In this case this is sessionEstablishmentBuffer
-        console.log(buffer);
+        console.log(buffer.toString('hex'));
         // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey)
         // and decrypt the presentation data
       }
