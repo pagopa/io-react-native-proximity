@@ -4,7 +4,6 @@ import { rawToJwkEc, type JWK, jwkToPublicRaw } from '../utils/jwk';
 import * as hkdf from 'js-crypto-hkdf';
 import * as crypto from 'crypto';
 import { intTo4Bytes } from '../utils';
-import { DocumentRequest, sessionEstablishmentParser } from './parser';
 
 const HASH = 'SHA-256';
 const DERIVED_KEY_LENGTH = 32; // derived key length
@@ -83,11 +82,10 @@ const Session = () => {
 
   const startSessionEstablishment = (
     eReaderKeyBytes: any,
-    encryptedDataBuffer: Buffer,
     deviceEngagementBuffer: Buffer
   ) => {
     return sessionIsStarted().then(() => {
-      return new Promise<DocumentRequest[]>(async (resolve, reject) => {
+      return new Promise<void>(async (resolve, reject) => {
         eReaderKey = fromCoseToJwk(
           Buffer.from(eReaderKeyBytes.cborDataItem, 'hex')
         );
@@ -132,14 +130,7 @@ const Session = () => {
               secretSessionKey.toString('hex')
             );
 
-            const sessionEstablishmentCborEncodedData =
-              await decryptReaderMessage(encryptedDataBuffer);
-
-            const documentRequests = sessionEstablishmentParser(
-              sessionEstablishmentCborEncodedData
-            );
-
-            resolve(documentRequests);
+            resolve();
           })
           .catch((e) => {
             reject(
@@ -222,6 +213,7 @@ const Session = () => {
     getDevicePublicKey,
     getReaderPublicKey,
     startSessionEstablishment,
+    decryptReaderMessage,
   };
 };
 

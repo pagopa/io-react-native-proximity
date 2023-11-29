@@ -11,7 +11,7 @@ import { fromJwkToCoseHex } from '../cbor/jwk';
 import { CborDataItem, decode, encode } from '../cbor';
 import { uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
-import type { DocumentRequest } from './parser';
+import { documentsRequestParser, type DocumentRequest } from './parser';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -370,7 +370,9 @@ const ProximityManager = () => {
     // and decrypt the presentation data
     const decodedReceived = decode(buffer);
     const eReaderKeyBytes = decodedReceived.get('eReaderKey');
-    const encryptedDataBuffer = Buffer.from(decodedReceived.get('data'));
+    const encryptedDocumentsRequestBuffer = Buffer.from(
+      decodedReceived.get('data')
+    );
 
     const encodedDeviceEng = encode(deviceEngagement);
 
@@ -379,11 +381,14 @@ const ProximityManager = () => {
       message: 'Session establishment is started.',
     });
 
-    const documentRequests = await session.startSessionEstablishment(
-      eReaderKeyBytes,
-      encryptedDataBuffer,
-      encodedDeviceEng
+    await session.startSessionEstablishment(eReaderKeyBytes, encodedDeviceEng);
+
+    const documentsRequestDecrypted = await session.decryptReaderMessage(
+      encryptedDocumentsRequestBuffer
     );
+
+    const documentRequests = documentsRequestParser(documentsRequestDecrypted);
+
     handleDocumentsRequest(documentRequests);
 
     eventManager.emit('onEvent', {

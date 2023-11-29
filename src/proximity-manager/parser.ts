@@ -19,7 +19,7 @@ export const DocumentRequest = z
   .passthrough();
 export type DocumentRequest = z.infer<typeof DocumentRequest>;
 
-export const sessionEstablishmentParser = (
+export const documentsRequestParser = (
   sessionEstablishmentCborEncodedData: Buffer
 ): DocumentRequest[] => {
   const sessionEstablishmentData = decode(sessionEstablishmentCborEncodedData);
@@ -31,7 +31,7 @@ export const sessionEstablishmentParser = (
       (encodedDocRequest: Map<string, any>) => {
         const itemRequest = encodedDocRequest.get('itemsRequest');
         const cborData = itemRequest.cborDataItem;
-        const docRequest = docRequestParser(Buffer.from(cborData, 'hex'));
+        const docRequest = documentRequestParser(Buffer.from(cborData, 'hex'));
         return docRequest;
       }
     );
@@ -41,7 +41,7 @@ export const sessionEstablishmentParser = (
   }
 };
 
-const docRequestParser = (docRequestBuffer: Buffer): DocumentRequest => {
+const documentRequestParser = (docRequestBuffer: Buffer): DocumentRequest => {
   const decoded = decode(docRequestBuffer);
   const docType = decoded.get('docType');
   const nameSpacesMap = decoded.get('nameSpaces').get('org.iso.18013.5.1');

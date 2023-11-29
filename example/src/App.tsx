@@ -19,9 +19,6 @@ import { type EventData } from '@pagopa/io-react-native-proximity';
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
   const [isStarted, setIsStarted] = React.useState<boolean>(false);
-  const [documentsRequestData, setDocumentsRequestData] = React.useState<
-    DocumentRequest[] | undefined
-  >();
   const [debugLog, setDebugLog] = React.useState<string>('.. >');
 
   React.useEffect(() => {
@@ -54,11 +51,10 @@ export default function App() {
   const onDocumentsRequestReceived = (documentsRequest: DocumentRequest[]) => {
     console.log('documentRequest received:', documentsRequest);
     setQrCodeUri(undefined);
-    setDocumentsRequestData(documentsRequest);
 
     Alert.alert(
       'do you want to proceed with the presentation?',
-      JSON.stringify(documentsRequestData),
+      JSON.stringify(documentsRequest),
       [
         { text: 'Yes', onPress: () => console.log('TODO') },
         {
@@ -94,7 +90,6 @@ export default function App() {
     ProximityManager.stop().then(() => {
       setQrCodeUri(undefined);
       setIsStarted(false);
-      setDocumentsRequestData(undefined);
     });
   };
 
