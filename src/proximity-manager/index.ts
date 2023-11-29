@@ -37,6 +37,12 @@ const IoReactNativeProximity = NativeModules.IoReactNativeProximity
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
+/*
+ * This enum is used in order to understand what state our proximity flow is in.
+ * This is because communication with BLE is asynchronous and therefore not having a request/response mapping
+ * it is necessary to keep track of the status to understand the generated response to which request (part of the flow)
+ * it refers to.
+ */
 enum ProximityFlowPhases {
   DeviceEngagement = 'DeviceEngagement',
   DataRetrieval = 'DataRetrieval',
