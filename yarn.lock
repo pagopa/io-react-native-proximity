@@ -2677,6 +2677,7 @@ __metadata:
     eslint-config-prettier: ^8.5.0
     eslint-plugin-prettier: ^4.0.0
     jest: ^28.1.1
+    js-crypto-hkdf: ^1.0.7
     parse-cosekey: ^1.0.2
     pod-install: ^0.1.0
     prettier: ^2.0.5
@@ -4459,6 +4460,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer@npm:6.0.3, buffer@npm:^6.0.3, buffer@npm:~6.0.0":
+  version: 6.0.3
+  resolution: "buffer@npm:6.0.3"
+  dependencies:
+    base64-js: ^1.3.1
+    ieee754: ^1.2.1
+  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
+  languageName: node
+  linkType: hard
+
 "buffer@npm:^5.5.0":
   version: 5.7.1
   resolution: "buffer@npm:5.7.1"
@@ -4466,16 +4477,6 @@ __metadata:
     base64-js: ^1.3.1
     ieee754: ^1.1.13
   checksum: e2cf8429e1c4c7b8cbd30834ac09bd61da46ce35f5c22a78e6c2f04497d6d25541b16881e30a019c6fd3154150650ccee27a308eff3e26229d788bbdeb08ab84
-  languageName: node
-  linkType: hard
-
-"buffer@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "buffer@npm:6.0.3"
-  dependencies:
-    base64-js: ^1.3.1
-    ieee754: ^1.2.1
-  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
   languageName: node
   linkType: hard
 
@@ -4736,6 +4737,13 @@ __metadata:
   version: 0.7.0
   resolution: "chardet@npm:0.7.0"
   checksum: 6fd5da1f5d18ff5712c1e0aed41da200d7c51c28f11b36ee3c7b483f3696dabc08927fc6b227735eb8f0e1215c9a8abd8154637f3eff8cada5959df7f58b024d
+  languageName: node
+  linkType: hard
+
+"charenc@npm:0.0.2":
+  version: 0.0.2
+  resolution: "charenc@npm:0.0.2"
+  checksum: 81dcadbe57e861d527faf6dd3855dc857395a1c4d6781f4847288ab23cffb7b3ee80d57c15bba7252ffe3e5e8019db767757ee7975663ad2ca0939bb8fcaf2e5
   languageName: node
   linkType: hard
 
@@ -5461,6 +5469,13 @@ __metadata:
     shebang-command: ^2.0.0
     which: ^2.0.1
   checksum: 671cc7c7288c3a8406f3c69a3ae2fc85555c04169e9d611def9a675635472614f1c0ed0ef80955d5b6d4e724f6ced67f0ad1bb006c2ea643488fcfef994d7f52
+  languageName: node
+  linkType: hard
+
+"crypt@npm:0.0.2":
+  version: 0.0.2
+  resolution: "crypt@npm:0.0.2"
+  checksum: baf4c7bbe05df656ec230018af8cf7dbe8c14b36b98726939cef008d473f6fe7a4fad906cfea4062c93af516f1550a3f43ceb4d6615329612c6511378ed9fe34
   languageName: node
   linkType: hard
 
@@ -7398,7 +7413,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hash.js@npm:^1.0.0, hash.js@npm:^1.0.3":
+"hash.js@npm:^1.0.0, hash.js@npm:^1.0.3, hash.js@npm:~1.1.7":
   version: 1.1.7
   resolution: "hash.js@npm:1.1.7"
   dependencies:
@@ -7846,6 +7861,13 @@ __metadata:
     call-bind: ^1.0.2
     has-tostringtag: ^1.0.0
   checksum: c03b23dbaacadc18940defb12c1c0e3aaece7553ef58b162a0f6bba0c2a7e1551b59f365b91e00d2dbac0522392d576ef322628cb1d036a0fe51eb466db67222
+  languageName: node
+  linkType: hard
+
+"is-buffer@npm:~1.1.6":
+  version: 1.1.6
+  resolution: "is-buffer@npm:1.1.6"
+  checksum: 4a186d995d8bbf9153b4bd9ff9fd04ae75068fe695d29025d25e592d9488911eeece84eefbd8fa41b8ddcc0711058a71d4c466dcf6f1f6e1d83830052d8ca707
   languageName: node
   linkType: hard
 
@@ -9024,6 +9046,65 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-crypto-env@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "js-crypto-env@npm:1.0.5"
+  checksum: 35d33973bf20cb151ce1bc8ba2237235e4b49d35558a22798c955c065580b2e06849e532739bbc27fb3f8576933eb6605aaa5000bb2166898ffb54f5fe25f123
+  languageName: node
+  linkType: hard
+
+"js-crypto-hash@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "js-crypto-hash@npm:1.0.7"
+  dependencies:
+    buffer: ~6.0.0
+    hash.js: ~1.1.7
+    js-crypto-env: ^1.0.5
+    md5: ~2.3.0
+    sha3: ~2.1.0
+  checksum: 54ba686f7a83a627e926d1552a6e8f9c545da3bc000e08de73d1111369b0bb167977203a04c62ef815c2ba1cbd2ff3a7d41e467b96d57db2e5d78621d2997974
+  languageName: node
+  linkType: hard
+
+"js-crypto-hkdf@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "js-crypto-hkdf@npm:1.0.7"
+  dependencies:
+    js-crypto-env: ^1.0.5
+    js-crypto-hash: ^1.0.7
+    js-crypto-hmac: ^1.0.7
+    js-crypto-random: ^1.0.5
+    js-encoding-utils: 0.7.3
+  checksum: eb20b62048f2ea9b0409fd812a61147189f781e93bb7b905277a48d5cdfecb2a72bfd7bdb03e48c2eea2054bdf78508607b03d2ec487444742bb1a6aa5e050b6
+  languageName: node
+  linkType: hard
+
+"js-crypto-hmac@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "js-crypto-hmac@npm:1.0.7"
+  dependencies:
+    js-crypto-env: ^1.0.5
+    js-crypto-hash: ^1.0.7
+  checksum: c8fa4884c16f80f41c10333e5d02be1523fd05b2e63d3a4951888bba7899cdae049a68fea079d4a373103568096f629ddf4ae17e13ad0476283dcf7357adc720
+  languageName: node
+  linkType: hard
+
+"js-crypto-random@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "js-crypto-random@npm:1.0.5"
+  dependencies:
+    js-crypto-env: ^1.0.5
+  checksum: a2039ecbdf993cd5857fd619e28d17a5ce2ea01893aa7ff56a9b4a05020b21393f076670c532b3fb75410caaa86f0a6a5839f90e3e4e4e4fb4b05bf22cf92e65
+  languageName: node
+  linkType: hard
+
+"js-encoding-utils@npm:0.7.3":
+  version: 0.7.3
+  resolution: "js-encoding-utils@npm:0.7.3"
+  checksum: 0790f824a5e6424bc84e9f8346fe430453e29facf5b12af1e4c7fcf3abce88770fe104fcfbdee302f596d75fb04cc44905708bba6c4918acb90e6fa1f10e8602
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -9634,6 +9715,17 @@ __metadata:
     inherits: ^2.0.1
     safe-buffer: ^5.1.2
   checksum: 098494d885684bcc4f92294b18ba61b7bd353c23147fbc4688c75b45cb8590f5a95fd4584d742415dcc52487f7a1ef6ea611cfa1543b0dc4492fe026357f3f0c
+  languageName: node
+  linkType: hard
+
+"md5@npm:~2.3.0":
+  version: 2.3.0
+  resolution: "md5@npm:2.3.0"
+  dependencies:
+    charenc: 0.0.2
+    crypt: 0.0.2
+    is-buffer: ~1.1.6
+  checksum: a63cacf4018dc9dee08c36e6f924a64ced735b37826116c905717c41cebeb41a522f7a526ba6ad578f9c80f02cb365033ccd67fe186ffbcc1a1faeb75daa9b6e
   languageName: node
   linkType: hard
 
@@ -12419,6 +12511,15 @@ __metadata:
   bin:
     sha.js: ./bin.js
   checksum: ebd3f59d4b799000699097dadb831c8e3da3eb579144fd7eb7a19484cbcbb7aca3c68ba2bb362242eb09e33217de3b4ea56e4678184c334323eca24a58e3ad07
+  languageName: node
+  linkType: hard
+
+"sha3@npm:~2.1.0":
+  version: 2.1.4
+  resolution: "sha3@npm:2.1.4"
+  dependencies:
+    buffer: 6.0.3
+  checksum: fb49c8e18143cc46babc0e5d83d5f5d0149e645f26633a0e6a9aa2514df2ef91f10b6ece20da229e7ead8b8002d8e9514dcc747ef96a25b749294d6385c6f29f
   languageName: node
   linkType: hard
 

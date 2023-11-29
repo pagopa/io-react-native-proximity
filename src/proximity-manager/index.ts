@@ -8,7 +8,7 @@ import uuid from 'react-native-uuid';
 import createEventManager, { type EventData } from './../utils/EventManager';
 import session from './session';
 import { fromJwkToCoseHex } from '../cbor/jwk';
-import { CborDataItem, encode } from '../cbor';
+import { CborDataItem, decode, encode } from '../cbor';
 import { uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
 
@@ -37,6 +37,11 @@ const IoReactNativeProximity = NativeModules.IoReactNativeProximity
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
+enum ProximityFlowPhases {
+  DeviceEngagement = 'DeviceEngagement',
+  DataRetrieval = 'DataRetrieval',
+}
+
 /**
  * ProximityManager is a singleton that manages the BLE connection with the mDL-reader.
  * It is responsible for:
@@ -57,6 +62,8 @@ const ProximityManager = () => {
     '00000007-a123-48ce-896b-4c76973373e6';
 
   let connectedPheripheral: Peripheral | undefined;
+
+  let currentState: ProximityFlowPhases;
 
   // a temporary buffer is used to store the chunks of the message
   let tempBuffer: number[] = [];
@@ -137,8 +144,8 @@ const ProximityManager = () => {
    */
   const generateQrCode = () => {
     return new Promise<string>(async (resolve, _) => {
-      const sessionKey = await session.getSessionPublicKey();
-      const coseSessionKey = fromJwkToCoseHex(sessionKey);
+      const eDeviceKey = await session.getDevicePublicKey();
+      const coseSessionKey = fromJwkToCoseHex(eDeviceKey);
 
       /*
        * Security array:
@@ -256,6 +263,7 @@ const ProximityManager = () => {
 
     await Promise.all(startNotification);
 
+    currentState = ProximityFlowPhases.DeviceEngagement;
     // start 0x01
     // stop 0x00
     await BleManager.writeWithoutResponse(
@@ -293,10 +301,12 @@ const ProximityManager = () => {
         let buffer = Buffer.from(new Uint8Array(tempBuffer)); //Copy temp buffer
         // Clean temp buffer
         tempBuffer = [];
-        //In this case this is sessionEstablishmentBuffer
-        console.log(buffer.toString('hex'));
-        // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey)
-        // and decrypt the presentation data
+
+        switch (currentState) {
+          case ProximityFlowPhases.DeviceEngagement:
+            processSessionEstablishment(buffer);
+            break;
+        }
       }
     }
   };
@@ -333,6 +343,29 @@ const ProximityManager = () => {
         eventManager.addListener(key, listener);
       }
     });
+  };
+
+  const processSessionEstablishment = async (buffer: Buffer) => {
+    // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey and a cyper data)
+    // and decrypt the presentation data
+    const decodedReceived = decode(buffer);
+    const eReaderKeyBytes = decodedReceived.get('eReaderKey');
+    const encryptedDataBuffer = Buffer.from(decodedReceived.get('data'));
+
+    const encodedDeviceEng = encode(deviceEngagement);
+
+    eventManager.emit('onEvent', {
+      type: 'ON_SESSION_ESTABLISHMENT',
+      message: 'Session establishment is started.',
+    });
+
+    await session.startSessionEstablishment(
+      eReaderKeyBytes,
+      encryptedDataBuffer,
+      encodedDeviceEng
+    );
+
+    currentState = ProximityFlowPhases.DataRetrieval;
   };
 
   return {

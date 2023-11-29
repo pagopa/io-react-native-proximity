@@ -6,6 +6,8 @@ export type JWK = {
   x: string;
   y: string;
   d?: string;
+  n?: string;
+  e?: string;
 };
 
 //Convert EC key pair from raw to JWK format
@@ -29,4 +31,17 @@ export const rawToJwkEc = (pubHex: string, prvHex?: string): JWK => {
     };
   }
   return jwk;
+};
+
+/*
+ * In a raw uncompressed public key, the first byte 0x04
+ * indicates uncompressed form and X is first half and Y is the second half.
+ * https://davidederosa.com/basic-blockchain-programming/elliptic-curve-keys/
+ */
+export const jwkToPublicRaw = (publicKey: JWK) => {
+  const x = Buffer.from(publicKey.x, 'hex');
+  const y = Buffer.from(publicKey.y, 'hex');
+
+  var arr = [Buffer.from('04', 'hex'), x, y];
+  return Buffer.concat(arr);
 };

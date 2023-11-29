@@ -10,7 +10,8 @@ type EventType =
   | 'ON_CHARACTERISTIC_READ'
   | 'ON_CHARACTERISTIC_WRITTEN'
   | 'ON_CHARACTERISTIC_CHANGED'
-  | 'ON_BLE_ERROR';
+  | 'ON_BLE_ERROR'
+  | 'ON_SESSION_ESTABLISHMENT';
 
 export type EventData = {
   message: string;

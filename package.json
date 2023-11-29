@@ -168,6 +168,7 @@
     ]
   },
   "dependencies": {
+    "js-crypto-hkdf": "^1.0.7",
     "parse-cosekey": "^1.0.2"
   }
 }
