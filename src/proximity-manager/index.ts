@@ -11,6 +11,7 @@ import { fromJwkToCoseHex } from '../cbor/jwk';
 import { CborDataItem, decode, encode } from '../cbor';
 import { uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
+import type { DocumentRequest } from './parser';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -84,6 +85,8 @@ const ProximityManager = () => {
 
   const eventManager = createEventManager();
 
+  let handleDocumentsRequest: (documentsRequest: DocumentRequest[]) => void;
+
   const start = () => {
     return new Promise<void>(async (resolve, reject) => {
       await session.start();
@@ -128,9 +131,14 @@ const ProximityManager = () => {
         // Stop BLE scan if is scanning
         await BleManager.stopScan();
         // Disconnect a pheripheral if is connected
-        if (connectedPheripheral) {
-          await BleManager.disconnect(connectedPheripheral.id, true);
+        if (
+          connectedPheripheral &&
+          (await BleManager.isPeripheralConnected(connectedPheripheral.id))
+        ) {
+          await BleManager.disconnect(connectedPheripheral.id);
         }
+        // TODO: Add BleManager.stopNotification
+
         resolve();
         eventManager.emit('onEvent', {
           type: 'ON_BLE_STOP',
@@ -351,6 +359,12 @@ const ProximityManager = () => {
     });
   };
 
+  const setOnDocumentRequestHandler = (
+    handler: typeof handleDocumentsRequest
+  ) => {
+    handleDocumentsRequest = handler;
+  };
+
   const processSessionEstablishment = async (buffer: Buffer) => {
     // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey and a cypher data)
     // and decrypt the presentation data
@@ -365,11 +379,17 @@ const ProximityManager = () => {
       message: 'Session establishment is started.',
     });
 
-    await session.startSessionEstablishment(
+    const documentRequests = await session.startSessionEstablishment(
       eReaderKeyBytes,
       encryptedDataBuffer,
       encodedDeviceEng
     );
+    handleDocumentsRequest(documentRequests);
+
+    eventManager.emit('onEvent', {
+      type: 'ON_DOCUMENT_REQUESTS_RECEIVED',
+      message: 'Document requests received and parsed.',
+    });
 
     currentState = ProximityFlowPhases.DataRetrieval;
   };
@@ -379,6 +399,7 @@ const ProximityManager = () => {
     startScan,
     generateQrCode,
     setListeners,
+    setOnDocumentRequestHandler,
     stop,
   };
 };

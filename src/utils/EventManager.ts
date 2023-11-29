@@ -11,7 +11,8 @@ type EventType =
   | 'ON_CHARACTERISTIC_WRITTEN'
   | 'ON_CHARACTERISTIC_CHANGED'
   | 'ON_BLE_ERROR'
-  | 'ON_SESSION_ESTABLISHMENT';
+  | 'ON_SESSION_ESTABLISHMENT'
+  | 'ON_DOCUMENT_REQUESTS_RECEIVED';
 
 export type EventData = {
   message: string;

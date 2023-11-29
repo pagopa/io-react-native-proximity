@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { ProximityManager } from '@pagopa/io-react-native-proximity';
+import {
+  ProximityManager,
+  type DocumentRequest,
+} from '@pagopa/io-react-native-proximity';
 import {
   StyleSheet,
   View,
@@ -8,6 +11,7 @@ import {
   Platform,
   PermissionsAndroid,
   Text,
+  Alert,
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
@@ -15,6 +19,9 @@ import { type EventData } from '@pagopa/io-react-native-proximity';
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
   const [isStarted, setIsStarted] = React.useState<boolean>(false);
+  const [documentsRequestData, setDocumentsRequestData] = React.useState<
+    DocumentRequest[] | undefined
+  >();
   const [debugLog, setDebugLog] = React.useState<string>('.. >');
 
   React.useEffect(() => {
@@ -44,6 +51,29 @@ export default function App() {
     console.log('onError', event);
   };
 
+  const onDocumentsRequestReceived = (documentsRequest: DocumentRequest[]) => {
+    console.log('documentRequest received:', documentsRequest);
+    setQrCodeUri(undefined);
+    setDocumentsRequestData(documentsRequest);
+
+    Alert.alert(
+      'do you want to proceed with the presentation?',
+      //This is body text
+      JSON.stringify(documentsRequestData),
+      [
+        { text: 'Yes', onPress: () => console.log('TODO') },
+        {
+          text: 'No',
+          onPress: () => {
+            stopProximityManager();
+          },
+          style: 'cancel',
+        },
+      ]
+      //on clicking out side, Alert will not dismiss
+    );
+  };
+
   const startProximityManager = () => {
     console.log('startProximityManager');
     ProximityManager.start()
@@ -58,13 +88,15 @@ export default function App() {
       onSuccess,
       onError,
     });
+    //Set handler for document request
+    ProximityManager.setOnDocumentRequestHandler(onDocumentsRequestReceived);
   };
 
   const stopProximityManager = () => {
-    console.log('stopProximityManager');
     ProximityManager.stop().then(() => {
       setQrCodeUri(undefined);
       setIsStarted(false);
+      setDocumentsRequestData(undefined);
     });
   };
 
