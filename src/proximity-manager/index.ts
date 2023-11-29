@@ -346,7 +346,7 @@ const ProximityManager = () => {
   };
 
   const processSessionEstablishment = async (buffer: Buffer) => {
-    // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey and a cyper data)
+    // decode buffer in CBOR+COSE (the decode payload has the mDL reader pubkey and a cypher data)
     // and decrypt the presentation data
     const decodedReceived = decode(buffer);
     const eReaderKeyBytes = decodedReceived.get('eReaderKey');
