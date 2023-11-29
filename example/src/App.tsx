@@ -58,7 +58,6 @@ export default function App() {
 
     Alert.alert(
       'do you want to proceed with the presentation?',
-      //This is body text
       JSON.stringify(documentsRequestData),
       [
         { text: 'Yes', onPress: () => console.log('TODO') },
@@ -70,7 +69,6 @@ export default function App() {
           style: 'cancel',
         },
       ]
-      //on clicking out side, Alert will not dismiss
     );
   };
 
