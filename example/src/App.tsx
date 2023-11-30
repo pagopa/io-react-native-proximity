@@ -7,6 +7,7 @@ import {
   Image,
   Platform,
   PermissionsAndroid,
+  Text,
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
@@ -14,6 +15,7 @@ import { type EventData } from '@pagopa/io-react-native-proximity';
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
   const [isStarted, setIsStarted] = React.useState<boolean>(false);
+  const [debugLog, setDebugLog] = React.useState<string>('.. >');
 
   React.useEffect(() => {
     handleAndroidPermissions();
@@ -21,6 +23,7 @@ export default function App() {
 
   const onEvent = (event: EventData) => {
     console.log('onEvent', event);
+    setDebugLog(event.message);
     switch (event.type) {
       case 'ON_BLE_START':
         setIsStarted(true);
@@ -156,6 +159,9 @@ export default function App() {
           <Button title="Start 🏁" onPress={() => startProximityManager()} />
         </>
       )}
+      <View style={styles.debug}>
+        <Text>{debugLog}</Text>
+      </View>
     </View>
   );
 }
