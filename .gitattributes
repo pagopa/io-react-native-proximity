@@ -4,4 +4,3 @@
 
 example/ios/**/* linguist-generated=true
 example/android/**/* linguist-generated=true
-yarn.lock linguist-generated=true
