@@ -10,6 +10,7 @@ const DERIVED_KEY_LENGTH = 32; // derived key length
 const SESSION_READER_INFO = 'SKReader'; // information specified in rfc5869
 const SESSION_DEVICE_INFO = 'SKDevice';
 
+//As defined in ISO18013-5
 const READER_IDENTIFIER = [0, 0, 0, 0, 0, 0, 0, 0];
 const DEVICE_IDENTIFIER = [0, 0, 0, 0, 0, 0, 0, 1];
 
@@ -24,6 +25,7 @@ const Session = () => {
   let deviceSessionKey: Buffer | undefined;
   let readerSessionKey: Buffer | undefined;
 
+  //Separated message counter for mDoc (device) and mDoc reader
   let readerMessageCounter = 1;
   let deviceMessageCounter = 1;
 
@@ -123,8 +125,10 @@ const Session = () => {
           .digest();
         const salt = new Uint8Array(saltSha); // Uint8Array of arbitrary length
 
-        //Compute session key with HMAC-based Extract-and-Expand Key Derivation Function
-
+        /*
+         * Compute session key with HMAC-based Extract-and-Expand Key Derivation Function
+         * reader session key is different from device session key then I calculate and memorize both
+         */
         readerSessionKey = await hkdf
           .compute(
             masterSecret,
@@ -214,7 +218,7 @@ const Session = () => {
             resolve(plaintext);
           } else {
             reject(
-              new Error('Session not established. Invalid secret session key.')
+              new Error('Session not established. Invalid reader session key.')
             );
           }
         })
@@ -250,6 +254,7 @@ const Session = () => {
             const resultFinal = cipher.final();
             const authTag = cipher.getAuthTag();
 
+            //the authTag must be concatenated with the final buffer
             const chypherText = Buffer.concat([
               resultUpdate,
               resultFinal,
@@ -261,7 +266,7 @@ const Session = () => {
             resolve(chypherText);
           } else {
             reject(
-              new Error('Session not established. Invalid secret session key.')
+              new Error('Session not established. Invalid device session key.')
             );
           }
         })
