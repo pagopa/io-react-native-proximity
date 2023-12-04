@@ -3,10 +3,16 @@ import { fromCoseToJwk } from '../cbor/jwk';
 import { rawToJwkEc, type JWK, jwkToPublicRaw } from '../utils/jwk';
 import * as hkdf from 'js-crypto-hkdf';
 import * as crypto from 'crypto';
+import { intTo4Bytes } from '../utils';
 
 const HASH = 'SHA-256';
 const DERIVED_KEY_LENGTH = 32; // derived key length
-const SESSION_INFO = 'SKReader'; // information specified in rfc5869
+const SESSION_READER_INFO = 'SKReader'; // information specified in rfc5869
+const SESSION_DEVICE_INFO = 'SKDevice';
+
+//As defined in ISO18013-5
+const READER_IDENTIFIER = [0, 0, 0, 0, 0, 0, 0, 0];
+const DEVICE_IDENTIFIER = [0, 0, 0, 0, 0, 0, 0, 1];
 
 /*
  * Represents a session for exchanging information between an mDoc and an mDoc reader
@@ -16,7 +22,13 @@ const Session = () => {
   let eDeviceKey: JWK; // The session's public key in JWK format
   let eReaderKey: JWK; // The reader public key in JWK format
   let sessionKeys: crypto.ECDH;
-  let secretSessionKey: Buffer;
+  let deviceSessionKey: Buffer | undefined;
+  let readerSessionKey: Buffer | undefined;
+
+  //Separated message counter for mDoc (device) and mDoc reader
+  let readerMessageCounter = 1;
+  let deviceMessageCounter = 1;
+
   /*
    * Starts the session. Returns an exception if the session has already been started
    */
@@ -30,6 +42,9 @@ const Session = () => {
         // Converts the public key into JWK format
         eDeviceKey = rawToJwkEc(sessionKeys.getPublicKey('hex'));
         isStarted = true;
+
+        readerMessageCounter = 1;
+        deviceMessageCounter = 1;
         resolve('START');
       } else {
         reject(new Error('Session already started'));
@@ -74,7 +89,6 @@ const Session = () => {
 
   const startSessionEstablishment = (
     eReaderKeyBytes: any,
-    encryptedDataBuffer: Buffer,
     deviceEngagementBuffer: Buffer
   ) => {
     return sessionIsStarted().then(() => {
@@ -89,17 +103,6 @@ const Session = () => {
         // compute session secret
         const secret = sessionKeys.computeSecret(eReaderKeyRaw);
         const masterSecret = new Uint8Array(secret);
-
-        const cipherData = encryptedDataBuffer.subarray(
-          0,
-          encryptedDataBuffer.byteLength - 16
-        );
-
-        //auth tag is the last 16 bytes of received data from mDoc Reader
-        const authTag = encryptedDataBuffer.subarray(
-          encryptedDataBuffer.byteLength - 16,
-          encryptedDataBuffer.byteLength
-        );
 
         const deviceEngagementBytes = new CborDataItem(
           deviceEngagementBuffer.toString('hex')
@@ -122,36 +125,152 @@ const Session = () => {
           .digest();
         const salt = new Uint8Array(saltSha); // Uint8Array of arbitrary length
 
-        //Compute session key with HMAC-based Extract-and-Expand Key Derivation Function
-        await hkdf
-          .compute(masterSecret, HASH, DERIVED_KEY_LENGTH, SESSION_INFO, salt)
-          .then((derivedKey) => {
-            // now you get a key derived from the masterSecret
-            secretSessionKey = Buffer.from(derivedKey.key);
-
-            console.debug(
-              'secretSessionKey: ',
-              secretSessionKey.toString('hex')
-            );
-            console.debug(
-              'cipherData: ',
-              Buffer.from(cipherData).toString('hex')
-            );
-            console.debug('authTag: ', Buffer.from(authTag).toString('hex'));
-
-            //TODO: with these parameters it is now possible to decrypt the data content using AES256 Galois/Counter Mode
-            resolve();
-          })
+        /*
+         * Compute session key with HMAC-based Extract-and-Expand Key Derivation Function
+         * reader session key is different from device session key then I calculate and memorize both
+         */
+        readerSessionKey = await hkdf
+          .compute(
+            masterSecret,
+            HASH,
+            DERIVED_KEY_LENGTH,
+            SESSION_READER_INFO,
+            salt
+          )
+          .then(async (derivedKey) => Buffer.from(derivedKey.key))
           .catch((e) => {
             reject(
               new Error(
-                `Unable to compute session key with HMAC-based Extract-and-Expand Key Derivation Function\n Error: ${e}`
+                `Unable to compute reader session key with hkdf\n Error: ${e}`
               )
             );
+            return undefined;
           });
+
+        deviceSessionKey = await hkdf
+          .compute(
+            masterSecret,
+            HASH,
+            DERIVED_KEY_LENGTH,
+            SESSION_DEVICE_INFO,
+            salt
+          )
+          .then(async (derivedKey) => Buffer.from(derivedKey.key))
+          .catch((e) => {
+            reject(
+              new Error(
+                `Unable to compute reader session key with hkdf\n Error: ${e}`
+              )
+            );
+            return undefined;
+          });
+
+        resolve();
       });
     });
   };
+
+  const decryptReaderMessage = (encryptedDataBuffer: Buffer) =>
+    sessionIsStarted().then(
+      () =>
+        new Promise<Buffer>(async (resolve, reject) => {
+          if (readerSessionKey) {
+            const cipherData = encryptedDataBuffer.subarray(
+              0,
+              encryptedDataBuffer.byteLength - 16
+            );
+
+            //auth tag is the last 16 bytes of received data from mDoc Reader
+            const authTag = encryptedDataBuffer.subarray(
+              encryptedDataBuffer.byteLength - 16,
+              encryptedDataBuffer.byteLength
+            );
+
+            const readerIdentifier = Buffer.from(READER_IDENTIFIER);
+            const readerMessageCounterHex = intTo4Bytes(readerMessageCounter);
+
+            // IV is the concatenation of IDENTIFIER and message counter
+            const iv = Buffer.concat([
+              readerIdentifier,
+              readerMessageCounterHex,
+            ]);
+
+            const decipher = crypto.createDecipheriv(
+              'aes-256-gcm',
+              readerSessionKey,
+              iv,
+              {
+                authTagLength: 16,
+              }
+            );
+
+            // AAD need to be an empty string
+            decipher.setAAD(Buffer.from('', 'utf-8'));
+            decipher.setAuthTag(authTag);
+
+            const result_update = decipher.update(Buffer.from(cipherData));
+            const result_final = decipher.final();
+
+            const plaintext = Buffer.concat([result_update, result_final]);
+
+            readerMessageCounter++;
+
+            resolve(plaintext);
+          } else {
+            reject(
+              new Error('Session not established. Invalid reader session key.')
+            );
+          }
+        })
+    );
+
+  const encryptDeviceMessage = (plaintextMessage: Buffer) =>
+    sessionIsStarted().then(
+      () =>
+        new Promise<Buffer>(async (resolve, reject) => {
+          if (deviceSessionKey) {
+            const deviceIdentifier = Buffer.from(DEVICE_IDENTIFIER);
+            const deviceMessageCounterHex = intTo4Bytes(deviceMessageCounter);
+
+            // IV is the concatenation of IDENTIFIER and message counter
+            const iv = Buffer.concat([
+              deviceIdentifier,
+              deviceMessageCounterHex,
+            ]);
+
+            const cipher = crypto.createCipheriv(
+              'aes-256-gcm',
+              deviceSessionKey,
+              iv,
+              {
+                authTagLength: 16,
+              }
+            );
+
+            // AAD need to be an empty string
+            cipher.setAAD(Buffer.from('', 'utf-8'));
+
+            let resultUpdate = cipher.update(plaintextMessage);
+            const resultFinal = cipher.final();
+            const authTag = cipher.getAuthTag();
+
+            //the authTag must be concatenated with the final buffer
+            const chypherText = Buffer.concat([
+              resultUpdate,
+              resultFinal,
+              authTag,
+            ]);
+
+            deviceMessageCounter++;
+
+            resolve(chypherText);
+          } else {
+            reject(
+              new Error('Session not established. Invalid device session key.')
+            );
+          }
+        })
+    );
 
   /*
    * Closes the session. Returns an exception if the session is not started
@@ -170,6 +289,8 @@ const Session = () => {
     getDevicePublicKey,
     getReaderPublicKey,
     startSessionEstablishment,
+    decryptReaderMessage,
+    encryptDeviceMessage,
   };
 };
 

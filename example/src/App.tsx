@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { ProximityManager } from '@pagopa/io-react-native-proximity';
+import {
+  ProximityManager,
+  type DocumentRequest,
+} from '@pagopa/io-react-native-proximity';
 import {
   StyleSheet,
   View,
@@ -8,6 +11,7 @@ import {
   Platform,
   PermissionsAndroid,
   Text,
+  Alert,
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
@@ -44,6 +48,26 @@ export default function App() {
     console.log('onError', event);
   };
 
+  const onDocumentsRequestReceived = (documentsRequest: DocumentRequest[]) => {
+    console.log('documentRequest received:', documentsRequest);
+    setQrCodeUri(undefined);
+
+    Alert.alert(
+      'do you want to proceed with the presentation?',
+      JSON.stringify(documentsRequest),
+      [
+        { text: 'Yes', onPress: () => console.log('TODO') },
+        {
+          text: 'No',
+          onPress: () => {
+            stopProximityManager();
+          },
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
   const startProximityManager = () => {
     console.log('startProximityManager');
     ProximityManager.start()
@@ -58,10 +82,11 @@ export default function App() {
       onSuccess,
       onError,
     });
+    //Set handler for document request
+    ProximityManager.setOnDocumentRequestHandler(onDocumentsRequestReceived);
   };
 
   const stopProximityManager = () => {
-    console.log('stopProximityManager');
     ProximityManager.stop().then(() => {
       setQrCodeUri(undefined);
       setIsStarted(false);
