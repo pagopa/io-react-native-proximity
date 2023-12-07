@@ -168,7 +168,9 @@
     ]
   },
   "dependencies": {
+    "elliptic": "^6.5.4",
     "js-crypto-hkdf": "^1.0.7",
+    "node-rsa": "^1.1.1",
     "parse-cosekey": "^1.0.2",
     "zod": "^3.22.4"
   }
