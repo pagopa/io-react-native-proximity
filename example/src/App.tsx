@@ -110,6 +110,11 @@ export default function App() {
       });
   };
 
+  const signWithCose = async () => {
+    const mockedMessage = 'A plain text to be signed';
+    await ProximityManager.signMessage(mockedMessage);
+  };
+
   const handleAndroidPermissions = () => {
     if (
       Platform.OS === 'android' &&
@@ -169,6 +174,7 @@ export default function App() {
       {(isStarted && (
         <>
           <Button title="Generate QR 🏞️" onPress={() => generateQrCode()} />
+          <Button title="Sign with COSE 📝" onPress={() => signWithCose()} />
           <Button title="Stop 🛑" onPress={() => stopProximityManager()} />
           {qrCodeUri && (
             <Image

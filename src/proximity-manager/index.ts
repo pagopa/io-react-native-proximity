@@ -12,6 +12,7 @@ import { CborDataItem, decode, encode } from '../cbor';
 import { uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
 import { documentsRequestParser, type DocumentRequest } from './parser';
+import { sign } from '../cose';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -325,6 +326,30 @@ const ProximityManager = () => {
     }
   };
 
+  // TODO: this function is used to test COSE sign
+  // on a mocked plaintext. It should be removed
+  // or moved where appropriate.
+  const signMessage = async (message: string) => {
+    try {
+      const headers = {
+        p: { alg: 'ES256' },
+        u: { kid: '11' },
+      };
+      const signer = {
+        key: {
+          d: Buffer.from(
+            '6c1382765aec5358f117733d281c1c7bdc39884d04a45a1e6c67c858bc206c19',
+            'hex'
+          ),
+        },
+      };
+      const buf = await sign.create(headers, message, signer);
+      console.log('Signed message: ' + buf.toString('hex'));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   /**
    * This function is called when the mDL-reader is ready to receive the credential.
    * @param credential
@@ -403,6 +428,7 @@ const ProximityManager = () => {
     start,
     startScan,
     generateQrCode,
+    signMessage,
     setListeners,
     setOnDocumentRequestHandler,
     stop,
