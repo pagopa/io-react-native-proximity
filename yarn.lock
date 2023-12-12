@@ -2645,6 +2645,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/io-react-native-crypto@pagopa/io-react-native-proximity#SIW-742-add-cose-js":
+  version: 0.1.0
+  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-proximity.git#commit=6e5d6d2b12af93f8936ecb2d9db3c8fd2629ecf9"
+  dependencies:
+    elliptic: ^6.5.4
+    js-crypto-hkdf: ^1.0.7
+    node-rsa: ^1.1.1
+    parse-cosekey: ^1.0.2
+    zod: ^3.22.4
+  peerDependencies:
+    "@pagopa/io-react-native-jwt": "*"
+    cbor-x: "*"
+    react: "*"
+    react-native: "*"
+    react-native-ble-manager: "*"
+    react-native-uuid: "*"
+  checksum: a23b5cf39926640d13e12ba663cccc649f0c06faefea0615a508628b946fe411abfa19da0c186bb36dd700a4f104cd813ffdacdad2a36da66cb17ac70770384a
+  languageName: node
+  linkType: hard
+
 "@pagopa/io-react-native-jwt@npm:^1.0.0":
   version: 1.0.0
   resolution: "@pagopa/io-react-native-jwt@npm:1.0.0"
@@ -2664,6 +2684,7 @@ __metadata:
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-proximity#SIW-742-add-cose-js"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@react-native/eslint-config": ^0.72.2
     "@release-it/conventional-changelog": ^5.0.0
