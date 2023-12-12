@@ -10,6 +10,7 @@ const common = require('./common');
 const EMPTY_BUFFER = common.EMPTY_BUFFER;
 const Tagged = cbor.Tagged;
 const Buffer = require('buffer').Buffer;
+const rncrypto = require('@pagopa/io-react-native-crypto');
 
 const SignTag = (exports.SignTag = 98);
 const Sign1Tag = (exports.Sign1Tag = 18);
@@ -37,7 +38,7 @@ const COSEAlgToNodeAlg = {
   PS512: { alg: 'pss-sha512', saltLen: 64 },
 };
 
-function doSign(SigStructure, signer, alg) {
+async function doSign(SigStructure, keyTag, alg) {
   if (!AlgFromTags[alg]) {
     throw new Error('Unknown algorithm, ' + alg);
   }
@@ -47,46 +48,26 @@ function doSign(SigStructure, signer, alg) {
 
   let ToBeSigned = cbor.encode(SigStructure);
 
-  let sig;
-  if (AlgFromTags[alg].sign.startsWith('ES')) {
-    const hash = crypto.createHash(
-      COSEAlgToNodeAlg[AlgFromTags[alg].sign].digest
-    );
-    hash.update(ToBeSigned);
-    ToBeSigned = hash.digest();
-    const ec = new EC(COSEAlgToNodeAlg[AlgFromTags[alg].sign].sign);
-    const key = ec.keyFromPrivate(signer.key.d);
-    const signature = key.sign(ToBeSigned);
-    const bitLength = Math.ceil(ec.curve._bitLength / 8);
-    sig = Buffer.concat([
-      signature.r.toArrayLike(Buffer, undefined, bitLength),
-      signature.s.toArrayLike(Buffer, undefined, bitLength),
-    ]);
-  } else if (AlgFromTags[alg].sign.startsWith('PS')) {
-    signer.key.dmp1 = signer.key.dp;
-    signer.key.dmq1 = signer.key.dq;
-    signer.key.coeff = signer.key.qi;
-    const key = new NodeRSA().importKey(signer.key, 'components-private');
-    key.setOptions({
-      signingScheme: {
-        scheme: COSEAlgToNodeAlg[AlgFromTags[alg].sign].alg.split('-')[0],
-        hash: COSEAlgToNodeAlg[AlgFromTags[alg].sign].alg.split('-')[1],
-        saltLength: COSEAlgToNodeAlg[AlgFromTags[alg].sign].saltLen,
-      },
-    });
-    sig = key.sign(ToBeSigned);
-  } else {
-    const sign = crypto.createSign(
-      COSEAlgToNodeAlg[AlgFromTags[alg].sign].sign
-    );
-    sign.update(ToBeSigned);
-    sign.end();
-    sig = sign.sign(signer.key);
-  }
-  return sig;
+  const hash = crypto.createHash(
+    COSEAlgToNodeAlg[AlgFromTags[alg].sign].digest
+  );
+  hash.update(ToBeSigned);
+  ToBeSigned = hash.digest();
+
+  const pbKey = await rncrypto.getPublicKey(keyTag);
+
+  // TODO: verify pubKey same type as alg
+  const signature = await rncrypto.sign(ToBeSigned, keyTag);
+
+  // TODO: upack only if pubKey type is === EC
+  const unpacked = rncrypto.unpackBerEncodedASN1(
+    signature,
+    rncrypto.getCoordinateOctetLength(rncrypto.getAlgFromKey(pbKey))
+  );
+  return unpacked;
 }
 
-exports.create = function (headers, payload, signers, options) {
+exports.create = function (headers, payload, keyTag, options) {
   options = options || {};
   let u = headers.u || {};
   let p = headers.p || {};
@@ -95,54 +76,21 @@ exports.create = function (headers, payload, signers, options) {
   u = common.TranslateHeaders(u);
   let bodyP = p || {};
   bodyP = bodyP.size === 0 ? EMPTY_BUFFER : cbor.encode(bodyP);
-  if (Array.isArray(signers)) {
-    if (signers.length === 0) {
-      throw new Error('There has to be at least one signer');
-    }
-    if (signers.length > 1) {
-      throw new Error('Only one signer is supported');
-    }
-    // TODO handle multiple signers
-    const signer = signers[0];
-    const externalAAD = signer.externalAAD || EMPTY_BUFFER;
-    let signerP = signer.p || {};
-    let signerU = signer.u || {};
-
-    signerP = common.TranslateHeaders(signerP);
-    signerU = common.TranslateHeaders(signerU);
-    const alg = signerP.get(common.HeaderParameters.alg);
-    signerP = signerP.size === 0 ? EMPTY_BUFFER : cbor.encode(signerP);
-
-    const SigStructure = ['Signature', bodyP, signerP, externalAAD, payload];
-
-    const sig = doSign(SigStructure, signer, alg);
-    if (p.size === 0 && options.encodep === 'empty') {
-      p = EMPTY_BUFFER;
-    } else {
-      p = cbor.encode(p);
-    }
-    const signed = [p, u, payload, [[signerP, signerU, sig]]];
-    return cbor.encodeAsync(
-      options.excludetag ? signed : new Tagged(SignTag, signed)
-    );
+  const externalAAD = EMPTY_BUFFER;
+  const alg =
+    p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
+  const SigStructure = ['Signature1', bodyP, externalAAD, payload];
+  const sig = doSign(SigStructure, keyTag, alg);
+  if (p.size === 0 && options.encodep === 'empty') {
+    p = EMPTY_BUFFER;
   } else {
-    const signer = signers;
-    const externalAAD = signer.externalAAD || EMPTY_BUFFER;
-    const alg =
-      p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
-    const SigStructure = ['Signature1', bodyP, externalAAD, payload];
-    const sig = doSign(SigStructure, signer, alg);
-    if (p.size === 0 && options.encodep === 'empty') {
-      p = EMPTY_BUFFER;
-    } else {
-      p = cbor.encode(p);
-    }
-    const signed = [p, u, payload, sig];
-    return cbor.encodeAsync(
-      options.excludetag ? signed : new Tagged(Sign1Tag, signed),
-      { canonical: true }
-    );
+    p = cbor.encode(p);
   }
+  const signed = [p, u, payload, sig];
+  return cbor.encodeAsync(
+    options.excludetag ? signed : new Tagged(Sign1Tag, signed),
+    { canonical: true }
+  );
 };
 
 function doVerify(SigStructure, verifier, alg, sig) {
