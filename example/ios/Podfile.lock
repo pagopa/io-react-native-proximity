@@ -76,6 +76,8 @@ PODS:
   - JOSESwift (2.4.0)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
+  - pagopa-io-react-native-crypto (0.2.3):
+    - React-Core
   - pagopa-io-react-native-jwt (1.0.0):
     - JOSESwift (~> 2.3)
     - RCT-Folly (= 2021.07.22.00)
@@ -537,6 +539,7 @@ DEPENDENCIES:
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
   - OpenSSL-Universal (= 1.1.1100)
+  - "pagopa-io-react-native-crypto (from `../node_modules/@pagopa/io-react-native-crypto`)"
   - "pagopa-io-react-native-jwt (from `../node_modules/@pagopa/io-react-native-jwt`)"
   - pagopa-io-react-native-proximity (from `../..`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -611,6 +614,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2023-08-07-RNv0.72.4-813b2def12bc9df02654b3e3653ae4a68d0572e0
+  pagopa-io-react-native-crypto:
+    :path: "../node_modules/@pagopa/io-react-native-crypto"
   pagopa-io-react-native-jwt:
     :path: "../node_modules/@pagopa/io-react-native-jwt"
   pagopa-io-react-native-proximity:
@@ -708,6 +713,7 @@ SPEC CHECKSUMS:
   JOSESwift: 7ff178bb9173ff42c6e990929a9f2fa702a34f69
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
+  pagopa-io-react-native-crypto: 93f984df8711eb72f3fb030eca51be6268fc96d6
   pagopa-io-react-native-jwt: 637df21a8a7839c70e52c4a7614a04cca7335fb3
   pagopa-io-react-native-proximity: 5a91c68b65e84288af45d38ebff1d0a9a353c5f2
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
