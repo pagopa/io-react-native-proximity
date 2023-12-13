@@ -3,10 +3,10 @@ import { z } from 'zod';
 
 export const NameSpaces = z
   .object({
-    birth_date: z.boolean(),
-    birth_place: z.boolean(),
-    family_name: z.boolean(),
-    given_name: z.boolean(),
+    birth_date: z.boolean().optional(),
+    birth_place: z.boolean().optional(),
+    family_name: z.boolean().optional(),
+    given_name: z.boolean().optional(),
   })
   .passthrough();
 export type NameSpaces = z.infer<typeof NameSpaces>;

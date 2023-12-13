@@ -7,7 +7,9 @@ export class CborDataItem {
   }
 }
 
-const encoder = new Encoder();
+const encoder = new Encoder({
+  tagUint8Array: false, //Avoid to use tag 64 for Uint8Array
+});
 
 //Add support for tag 24 (CBOR data item RFC8949)
 addExtension({
