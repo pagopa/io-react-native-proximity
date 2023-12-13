@@ -56,7 +56,7 @@ async function doSign(SigStructure, keyTag, alg) {
   const pbKey = await rncrypto.getPublicKey(keyTag);
 
   // TODO: verify pubKey same type as alg
-  const signature = await rncrypto.sign(ToBeSigned.toString(), keyTag);
+  const signature = await rncrypto.sign(ToBeSigned.toString('hex'), keyTag);
 
   // TODO: unpack only if pubKey type is === EC
   const unpacked = await rncrypto.unpackBerEncodedASN1(
