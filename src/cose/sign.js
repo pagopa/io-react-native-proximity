@@ -47,12 +47,14 @@ async function doSign(SigStructure, keyTag, alg) {
   }
 
   let ToBeSigned = cbor.encode(SigStructure);
+  console.log('ToBeSigned HEX', ToBeSigned.toString('hex'));
 
   const hash = crypto.createHash(
     COSEAlgToNodeAlg[AlgFromTags[alg].sign].digest
   );
   hash.update(ToBeSigned);
   ToBeSigned = hash.digest();
+
   const pbKey = await rncrypto.getPublicKey(keyTag);
 
   const algType = AlgFromTags[alg].sign;
@@ -64,7 +66,7 @@ async function doSign(SigStructure, keyTag, alg) {
 
   const signature = await rncrypto.sign(ToBeSigned.toString('hex'), keyTag);
 
-  if (pubKeyType === 'EC') {
+  if (pbKey.kty === 'EC') {
     const unpacked = await rncrypto.unpackBerEncodedASN1(
       signature,
       rncrypto.getCoordinateOctetLength(rncrypto.getAlgFromKey(pbKey))
@@ -89,12 +91,16 @@ exports.create = async function (headers, payload, keyTag, options) {
     p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
   const SigStructure = ['Signature1', bodyP, externalAAD, payload];
   const sig = await doSign(SigStructure, keyTag, alg);
+  console.log('SIG', sig);
+  const bufferedSig = Buffer.from(sig, 'base64');
+  console.log('bufferedSig', bufferedSig);
   if (p.size === 0 && options.encodep === 'empty') {
     p = EMPTY_BUFFER;
   } else {
     p = cbor.encode(p);
   }
-  const signed = [p, u, payload, sig];
+  const signed = [p, u, payload, bufferedSig];
+  console.log('SIGNING', signed);
   return cbor.encodeAsync(
     options.excludetag ? signed : new Tagged(Sign1Tag, signed),
     { canonical: true }

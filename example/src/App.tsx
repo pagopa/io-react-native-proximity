@@ -115,9 +115,14 @@ export default function App() {
     const mockedMessage = 'A plain text to be signed';
     const KEY_TAG = 'PERSONAL_KEYTAG';
     await deleteKey(KEY_TAG);
-    const pubKey = await generate(KEY_TAG);
-    console.log(pubKey);
-    ProximityManager.signMessage(mockedMessage, KEY_TAG);
+    await generate(KEY_TAG);
+    const signedMessage = await ProximityManager.signMessage(
+      mockedMessage,
+      KEY_TAG
+    );
+    console.log('signedMessage', signedMessage.toString('hex'));
+    const verify = await ProximityManager.verifyMessage(signedMessage, KEY_TAG);
+    console.log('verify', verify);
   };
 
   const handleAndroidPermissions = () => {
