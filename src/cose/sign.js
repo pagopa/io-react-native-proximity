@@ -53,21 +53,21 @@ async function doSign(SigStructure, keyTag, alg) {
   );
   hash.update(ToBeSigned);
   ToBeSigned = hash.digest();
-
   const pbKey = await rncrypto.getPublicKey(keyTag);
 
   // TODO: verify pubKey same type as alg
-  const signature = await rncrypto.sign(ToBeSigned, keyTag);
+  const signature = await rncrypto.sign(ToBeSigned.toString(), keyTag);
 
-  // TODO: upack only if pubKey type is === EC
-  const unpacked = rncrypto.unpackBerEncodedASN1(
+  // TODO: unpack only if pubKey type is === EC
+  const unpacked = await rncrypto.unpackBerEncodedASN1(
     signature,
     rncrypto.getCoordinateOctetLength(rncrypto.getAlgFromKey(pbKey))
   );
+
   return unpacked;
 }
 
-exports.create = function (headers, payload, keyTag, options) {
+exports.create = async function (headers, payload, keyTag, options) {
   options = options || {};
   let u = headers.u || {};
   let p = headers.p || {};
@@ -80,7 +80,7 @@ exports.create = function (headers, payload, keyTag, options) {
   const alg =
     p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
   const SigStructure = ['Signature1', bodyP, externalAAD, payload];
-  const sig = doSign(SigStructure, keyTag, alg);
+  const sig = await doSign(SigStructure, keyTag, alg);
   if (p.size === 0 && options.encodep === 'empty') {
     p = EMPTY_BUFFER;
   } else {

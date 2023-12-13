@@ -335,8 +335,8 @@ const ProximityManager = () => {
         p: { alg: 'ES256' },
         u: { kid: '11' },
       };
-      const buf = await sign.create(headers, message, keyTag);
-      console.log('Signed message: ' + buf.toString('hex'));
+      const signedMessage = await sign.create(headers, message, keyTag);
+      console.log(signedMessage);
     } catch (error) {
       console.log(error);
     }
