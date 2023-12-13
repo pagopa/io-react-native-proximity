@@ -55,16 +55,24 @@ async function doSign(SigStructure, keyTag, alg) {
   ToBeSigned = hash.digest();
   const pbKey = await rncrypto.getPublicKey(keyTag);
 
-  // TODO: verify pubKey same type as alg
+  const algType = AlgFromTags[alg].sign;
+  const pubKeyType = rncrypto.getAlgFromKey(pbKey);
+
+  if (algType !== pubKeyType) {
+    throw new Error('Algorithm type of public key and alg do not match');
+  }
+
   const signature = await rncrypto.sign(ToBeSigned.toString('hex'), keyTag);
 
-  // TODO: unpack only if pubKey type is === EC
-  const unpacked = await rncrypto.unpackBerEncodedASN1(
-    signature,
-    rncrypto.getCoordinateOctetLength(rncrypto.getAlgFromKey(pbKey))
-  );
+  if (pubKeyType === 'EC') {
+    const unpacked = await rncrypto.unpackBerEncodedASN1(
+      signature,
+      rncrypto.getCoordinateOctetLength(rncrypto.getAlgFromKey(pbKey))
+    );
+    return unpacked;
+  }
 
-  return unpacked;
+  return signature;
 }
 
 exports.create = async function (headers, payload, keyTag, options) {
