@@ -140,7 +140,10 @@ const ProximityManager = () => {
     responseData.set('status', 20); //Status code 20 = Session termination
 
     const messageToSend = encode(responseData);
+    await sendMdocResponseChunks(messageToSend);
+  };
 
+  const sendMdocResponseChunks = async (messageToSend: Buffer) => {
     //TODO: [SIW-764] the maximum mtu must be obtained from the native part
     const maxMtu = 512;
     if (connectedPheripheral) {

@@ -3,4 +3,4 @@
  * In the real case, the device authentication will be calculated by the ProximityManager by passing the key tag (public key)
  * associated with the mDL credential.
  */
-export const mockedmDL = Buffer.from('', 'hex');
+export const mockedMocResponse = Buffer.from('', 'hex');

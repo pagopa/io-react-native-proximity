@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
-import { mockedmDL } from './mock';
+import { mockedMocResponse } from './mock';
 
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
@@ -59,7 +59,7 @@ export default function App() {
       [
         {
           text: 'Yes',
-          onPress: () => ProximityManager.dataPresentation(mockedmDL),
+          onPress: () => ProximityManager.dataPresentation(mockedMocResponse),
         },
         {
           text: 'No',
