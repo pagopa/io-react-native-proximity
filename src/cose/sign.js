@@ -55,7 +55,7 @@ async function doSign(SigStructure, keyTag, alg) {
     throw new Error('Algorithm type of public key and alg do not match');
   }
 
-  const signature = await rncrypto.sign(ToBeSigned.toString('hex'), keyTag);
+  const signature = await rncrypto.signHEX(ToBeSigned.toString('hex'), keyTag);
 
   if (pbKey.kty === 'EC') {
     const unpacked = await rncrypto.unpackBerEncodedASN1(

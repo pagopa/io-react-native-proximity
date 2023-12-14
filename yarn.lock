@@ -2645,13 +2645,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/io-react-native-crypto@pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3":
+"@pagopa/io-react-native-crypto@pagopa/io-react-native-crypto#6923cd66f88a91f4154836c888664edac5421b3b":
   version: 0.2.3
-  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-crypto.git#commit=898b752d933a39f1e6247e29e26fee4ee6aa40d3"
+  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-crypto.git#commit=6923cd66f88a91f4154836c888664edac5421b3b"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 18483c68cda842f788fafde46e8ee609d39872ed54b99ba5e99f2417aaa1e00dc22c3d21586e0a59e8f251dff4ef89b8832ce0bff6309a80d60be79656f39e23
+  checksum: 774622680627737627c249a6d7419fb4d206d1aa11e3ce92c968f91b33466efcdc8dfd71815ced8dbb98458664792bdaae877660ba4aa2e38a5ae6ab0f52c463
   languageName: node
   linkType: hard
 
@@ -2674,7 +2674,7 @@ __metadata:
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3"
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#6923cd66f88a91f4154836c888664edac5421b3b"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@react-native/eslint-config": ^0.72.2
     "@release-it/conventional-changelog": ^5.0.0
@@ -7791,7 +7791,7 @@ __metadata:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3"
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#6923cd66f88a91f4154836c888664edac5421b3b"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@pagopa/react-native-nodelibs": ^0.1.0
     "@react-native/metro-config": ^0.72.11

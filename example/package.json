@@ -10,7 +10,7 @@
     "build:ios": "cd ios && xcodebuild -workspace IoReactNativeProximityExample.xcworkspace -scheme IoReactNativeProximityExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3",
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#6923cd66f88a91f4154836c888664edac5421b3b",
     "@pagopa/io-react-native-jwt": "^1.0.0",
     "@pagopa/react-native-nodelibs": "^0.1.0",
     "cbor-x": "^1.5.6",

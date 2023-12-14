@@ -52,7 +52,7 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3",
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#6923cd66f88a91f4154836c888664edac5421b3b",
     "@pagopa/io-react-native-jwt": "^1.0.0",
     "@react-native/eslint-config": "^0.72.2",
     "@release-it/conventional-changelog": "^5.0.0",
