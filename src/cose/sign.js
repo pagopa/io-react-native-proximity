@@ -47,16 +47,7 @@ async function doSign(SigStructure, keyTag, alg) {
   }
 
   let ToBeSigned = cbor.encode(SigStructure);
-  console.log('ToBeSigned HEX', ToBeSigned.toString('hex'));
-
-  const hash = crypto.createHash(
-    COSEAlgToNodeAlg[AlgFromTags[alg].sign].digest
-  );
-  hash.update(ToBeSigned);
-  ToBeSigned = hash.digest();
-
   const pbKey = await rncrypto.getPublicKey(keyTag);
-
   const algType = AlgFromTags[alg].sign;
   const pubKeyType = rncrypto.getAlgFromKey(pbKey);
 

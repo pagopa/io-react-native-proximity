@@ -120,9 +120,9 @@ export default function App() {
       mockedMessage,
       KEY_TAG
     );
-    console.log('signedMessage', signedMessage.toString('hex'));
+    console.log('[COSE - SIGNED MESSAGE]: ', signedMessage.toString('hex'));
     const verify = await ProximityManager.verifyMessage(signedMessage, KEY_TAG);
-    console.log('verify', verify);
+    console.log('[COSE VERIFY]: ', verify);
   };
 
   const handleAndroidPermissions = () => {

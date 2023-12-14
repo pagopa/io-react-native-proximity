@@ -2645,13 +2645,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/io-react-native-crypto@pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1":
+"@pagopa/io-react-native-crypto@pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3":
   version: 0.2.3
-  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-crypto.git#commit=08c35cdb59988447656e7740609eda16ee597d6a"
+  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-crypto.git#commit=898b752d933a39f1e6247e29e26fee4ee6aa40d3"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: b0da9b4dac696a613c7bf6fb71e5aec85b15dbd00c79c32fa6243de963116a781e68811b517813149dd7a8c2f3a2cb29d137ae11d3309b45e163405bc4cb39c7
+  checksum: 18483c68cda842f788fafde46e8ee609d39872ed54b99ba5e99f2417aaa1e00dc22c3d21586e0a59e8f251dff4ef89b8832ce0bff6309a80d60be79656f39e23
   languageName: node
   linkType: hard
 
@@ -2674,13 +2674,14 @@ __metadata:
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1"
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@react-native/eslint-config": ^0.72.2
     "@release-it/conventional-changelog": ^5.0.0
     "@types/jest": ^28.1.2
     "@types/react": ~17.0.21
     "@types/react-native": 0.70.0
+    base64url: ^3.0.1
     cbor-x: ^1.5.6
     commitlint: ^17.0.2
     del-cli: ^5.0.0
@@ -7790,7 +7791,7 @@ __metadata:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
-    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1"
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#898b752d933a39f1e6247e29e26fee4ee6aa40d3"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@pagopa/react-native-nodelibs": ^0.1.0
     "@react-native/metro-config": ^0.72.11
