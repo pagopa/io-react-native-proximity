@@ -20,3 +20,25 @@ export const intTo4Bytes = (num: number) => {
   ]);
   return Buffer.from(arr);
 };
+
+/*
+ * Split a buffer in an array of buffer chunks of given size
+ */
+export const splitBufferInChunks = (buffer: Buffer, chunkSize: number) => {
+  if (chunkSize <= 0) {
+    throw new Error('Chunk size should be positive number greather than 0.');
+  }
+
+  let result = [];
+  let len = buffer.length;
+  let i = 0;
+
+  while (i < len) {
+    result.push(buffer.subarray(i, (i += chunkSize)));
+  }
+
+  return result;
+};
+
+//Sleep in milliseconds
+export const sleepMs = (ms: number) => new Promise((r) => setTimeout(r, ms));

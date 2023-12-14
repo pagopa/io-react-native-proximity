@@ -9,9 +9,19 @@ import createEventManager, { type EventData } from './../utils/EventManager';
 import session from './session';
 import { fromJwkToCoseHex } from '../cbor/jwk';
 import { CborDataItem, decode, encode } from '../cbor';
-import { uuidToBuffer } from '../utils';
+import { sleepMs, splitBufferInChunks, uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
 import { documentsRequestParser, type DocumentRequest } from './parser';
+
+const SECONDS_TO_SCAN_FOR = 20;
+const ALLOW_DUPLICATES = true;
+
+const STATE_CHARACTERISTIC_UUID = '00000005-a123-48ce-896b-4c76973373e6';
+const SERVER_2_CLIENT_CHARACTERISTIC_UUID =
+  '00000007-a123-48ce-896b-4c76973373e6';
+
+const CLIENT_2_SERVER_CHARACTERISTIC_UUID =
+  '00000006-a123-48ce-896b-4c76973373e6';
 
 /**
   * This package is a boilerplate for native modules. No native code is included here.
@@ -46,7 +56,7 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
  */
 enum ProximityFlowPhases {
   DeviceEngagement = 'DeviceEngagement',
-  DataRetrieval = 'DataRetrieval',
+  DataPresentation = 'DataPresentation',
 }
 
 /**
@@ -61,13 +71,6 @@ enum ProximityFlowPhases {
  * - stopping the BLE manager
  */
 const ProximityManager = () => {
-  const SECONDS_TO_SCAN_FOR = 7;
-  const ALLOW_DUPLICATES = true;
-
-  const STATE_CHARACTERISTIC_UUID = '00000005-a123-48ce-896b-4c76973373e6';
-  const SERVER_2_CLIENT_CHARACTERISTIC_UUID =
-    '00000007-a123-48ce-896b-4c76973373e6';
-
   let connectedPheripheral: Peripheral | undefined;
 
   let currentState: ProximityFlowPhases;
@@ -86,6 +89,12 @@ const ProximityManager = () => {
   const eventManager = createEventManager();
 
   let handleDocumentsRequest: (documentsRequest: DocumentRequest[]) => void;
+
+  let servicesId: {
+    server2Client: string;
+    client2Server: string;
+    state: string;
+  };
 
   const start = () => {
     return new Promise<void>(async (resolve, reject) => {
@@ -121,6 +130,59 @@ const ProximityManager = () => {
     });
   };
 
+  const dataPresentation = async (mDocResponse: Buffer) => {
+    currentState = ProximityFlowPhases.DataPresentation;
+
+    const encryptedMessage = await session.encryptDeviceMessage(mDocResponse);
+
+    const responseData = new Map();
+    responseData.set('data', encryptedMessage);
+    responseData.set('status', 20); //Status code 20 = Session termination
+
+    const messageToSend = encode(responseData);
+    await sendMdocResponseChunks(messageToSend);
+  };
+
+  const sendMdocResponseChunks = async (messageToSend: Buffer) => {
+    //TODO: [SIW-764] the maximum mtu must be obtained from the native part
+    const maxMtu = 512;
+    if (connectedPheripheral) {
+      const chunks = splitBufferInChunks(messageToSend, maxMtu - 1);
+      for (let index = 0; index < chunks.length; index++) {
+        let chunk = chunks[index]!;
+        let bytesToSend = [];
+        //if last chunk prepend 0x00 else 0x01
+        if (index === chunks.length - 1) {
+          bytesToSend = [0x00, ...chunk];
+        } else {
+          bytesToSend = [0x01, ...chunk];
+        }
+
+        //Write without response to Client2Server
+        await BleManager.writeWithoutResponse(
+          connectedPheripheral!.id,
+          servicesId.client2Server,
+          CLIENT_2_SERVER_CHARACTERISTIC_UUID,
+          bytesToSend,
+          maxMtu
+        );
+
+        //This sleep is necessary to prevent the BLE queue from being filled immediately
+        await sleepMs(10);
+      }
+
+      //Write without response END command (0x02) to State
+      await BleManager.writeWithoutResponse(
+        connectedPheripheral.id,
+        servicesId.state,
+        STATE_CHARACTERISTIC_UUID,
+        [0x02]
+      );
+    } else {
+      throw new Error('Device not connected to any peripheral');
+    }
+  };
+
   const stop = () => {
     return new Promise<void>(async (resolve, reject) => {
       try {
@@ -135,9 +197,45 @@ const ProximityManager = () => {
           connectedPheripheral &&
           (await BleManager.isPeripheralConnected(connectedPheripheral.id))
         ) {
-          await BleManager.disconnect(connectedPheripheral.id);
+          try {
+            await BleManager.stopNotification(
+              connectedPheripheral.id,
+              servicesId.state,
+              STATE_CHARACTERISTIC_UUID
+            );
+          } catch (error) {
+            console.log('Unable to stop notification from state', error);
+          }
+          try {
+            await BleManager.stopNotification(
+              connectedPheripheral.id,
+              servicesId.server2Client,
+              SERVER_2_CLIENT_CHARACTERISTIC_UUID
+            );
+          } catch (error) {
+            console.log(
+              'Unable to stop notification from Server2Client',
+              error
+            );
+          }
+          try {
+            await BleManager.stopNotification(
+              connectedPheripheral.id,
+              servicesId.client2Server,
+              CLIENT_2_SERVER_CHARACTERISTIC_UUID
+            );
+          } catch (error) {
+            console.log(
+              'Unable to stop notification from Client2Server',
+              error
+            );
+          }
+          try {
+            await BleManager.disconnect(connectedPheripheral.id);
+          } catch (error) {
+            console.log('Unable to disconnect from pheripheral', error);
+          }
         }
-        // TODO: Add BleManager.stopNotification
 
         resolve();
         eventManager.emit('onEvent', {
@@ -251,9 +349,13 @@ const ProximityManager = () => {
       (c) => c.characteristic === SERVER_2_CLIENT_CHARACTERISTIC_UUID
     )[0]?.service;
 
-    if (!stateServiceId || !server2clientServiceId) {
+    const client2serverServiceId = peripheralData.characteristics?.filter(
+      (c) => c.characteristic === CLIENT_2_SERVER_CHARACTERISTIC_UUID
+    )[0]?.service;
+
+    if (!stateServiceId || !server2clientServiceId || !client2serverServiceId) {
       console.error(
-        `[connectPeripheral][${peripheral.id}] missing stateServiceId or server2clientServiceId.`
+        `[connectPeripheral][${peripheral.id}] missing stateServiceId, server2clientServiceId or client2serverServiceId.`
       );
       eventManager.emit('onError', {
         type: 'ON_BLE_ERROR',
@@ -261,6 +363,12 @@ const ProximityManager = () => {
       });
       return;
     }
+
+    servicesId = {
+      state: stateServiceId,
+      server2Client: server2clientServiceId,
+      client2Server: client2serverServiceId,
+    };
 
     const startNotification = [
       BleManager.startNotification(
@@ -315,7 +423,6 @@ const ProximityManager = () => {
         let buffer = Buffer.from(new Uint8Array(tempBuffer)); //Copy temp buffer
         // Clean temp buffer
         tempBuffer = [];
-
         switch (currentState) {
           case ProximityFlowPhases.DeviceEngagement:
             processSessionEstablishment(buffer);
@@ -395,8 +502,6 @@ const ProximityManager = () => {
       type: 'ON_DOCUMENT_REQUESTS_RECEIVED',
       message: 'Document requests received and parsed.',
     });
-
-    currentState = ProximityFlowPhases.DataRetrieval;
   };
 
   return {
@@ -405,6 +510,7 @@ const ProximityManager = () => {
     generateQrCode,
     setListeners,
     setOnDocumentRequestHandler,
+    dataPresentation,
     stop,
   };
 };
