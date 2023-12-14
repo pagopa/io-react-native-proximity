@@ -326,16 +326,22 @@ const ProximityManager = () => {
     }
   };
 
+  type Header = {
+    alg?: string;
+    kid?: string;
+  };
+
+  type Headers = {
+    p: Header;
+    u: Header;
+  };
+
   // TODO: this function is used to test COSE sign
   // on a mocked plaintext. It should be removed
   // or moved where appropriate.
-  const signMessage = (message: string, keyTag: string) => {
+  const signMessage = (headers: Headers, message: string, keyTag: string) => {
     return new Promise<Buffer>(async (resolve, reject) => {
       try {
-        const headers = {
-          p: { alg: 'ES256' },
-          u: { kid: '11' },
-        };
         const signedMessage = await sign.create(headers, message, keyTag);
         resolve(signedMessage);
       } catch (error) {

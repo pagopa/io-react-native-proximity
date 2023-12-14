@@ -114,9 +114,14 @@ export default function App() {
   const signWithCose = async () => {
     const mockedMessage = 'A plain text to be signed';
     const KEY_TAG = 'PERSONAL_KEYTAG';
+    const headers = {
+      p: { alg: 'ES256' },
+      u: { kid: '11' },
+    };
     await deleteKey(KEY_TAG);
     await generate(KEY_TAG);
     const signedMessage = await ProximityManager.signMessage(
+      headers,
       mockedMessage,
       KEY_TAG
     );
