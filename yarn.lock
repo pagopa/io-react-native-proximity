@@ -2645,6 +2645,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/io-react-native-crypto@pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1":
+  version: 0.2.3
+  resolution: "@pagopa/io-react-native-crypto@https://github.com/pagopa/io-react-native-crypto.git#commit=6923cd66f88a91f4154836c888664edac5421b3b"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 774622680627737627c249a6d7419fb4d206d1aa11e3ce92c968f91b33466efcdc8dfd71815ced8dbb98458664792bdaae877660ba4aa2e38a5ae6ab0f52c463
+  languageName: node
+  linkType: hard
+
 "@pagopa/io-react-native-jwt@npm:^1.0.0":
   version: 1.0.0
   resolution: "@pagopa/io-react-native-jwt@npm:1.0.0"
@@ -2664,12 +2674,14 @@ __metadata:
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@react-native/eslint-config": ^0.72.2
     "@release-it/conventional-changelog": ^5.0.0
     "@types/jest": ^28.1.2
     "@types/react": ~17.0.21
     "@types/react-native": 0.70.0
+    base64url: ^3.0.1
     cbor-x: ^1.5.6
     commitlint: ^17.0.2
     del-cli: ^5.0.0
@@ -7779,6 +7791,7 @@ __metadata:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
+    "@pagopa/io-react-native-crypto": "pagopa/io-react-native-crypto#SIW-743-add-ber-encoder-asn1"
     "@pagopa/io-react-native-jwt": ^1.0.0
     "@pagopa/react-native-nodelibs": ^0.1.0
     "@react-native/metro-config": ^0.72.11

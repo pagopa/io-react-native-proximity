@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import RNQRGenerator from 'rn-qr-generator';
 import { type EventData } from '@pagopa/io-react-native-proximity';
+import { deleteKey, generate } from '@pagopa/io-react-native-crypto';
 
 export default function App() {
   const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
@@ -112,7 +113,21 @@ export default function App() {
 
   const signWithCose = async () => {
     const mockedMessage = 'A plain text to be signed';
-    await ProximityManager.signMessage(mockedMessage);
+    const KEY_TAG = 'PERSONAL_KEYTAG';
+    const headers = {
+      p: { alg: 'ES256' },
+      u: { kid: '11' },
+    };
+    await deleteKey(KEY_TAG);
+    await generate(KEY_TAG);
+    const signedMessage = await ProximityManager.signMessage(
+      headers,
+      mockedMessage,
+      KEY_TAG
+    );
+    console.log('[COSE - SIGNED MESSAGE]: ', signedMessage.toString('hex'));
+    const verify = await ProximityManager.verifyMessage(signedMessage, KEY_TAG);
+    console.log('[COSE VERIFY]: ', verify);
   };
 
   const handleAndroidPermissions = () => {

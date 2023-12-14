@@ -13,7 +13,7 @@ import { uuidToBuffer } from '../utils';
 import { removePadding } from '@pagopa/io-react-native-jwt';
 import { documentsRequestParser, type DocumentRequest } from './parser';
 import { sign } from '../cose';
-
+import { getPublicKey } from '@pagopa/io-react-native-crypto';
 /**
   * This package is a boilerplate for native modules. No native code is included here.
   * As the experimental implementation of ISO 18013-5 is not yet available, this package
@@ -326,28 +326,53 @@ const ProximityManager = () => {
     }
   };
 
+  type Header = {
+    alg?: string;
+    kid?: string;
+  };
+
+  type Headers = {
+    p: Header;
+    u: Header;
+  };
+
   // TODO: this function is used to test COSE sign
   // on a mocked plaintext. It should be removed
   // or moved where appropriate.
-  const signMessage = async (message: string) => {
-    try {
-      const headers = {
-        p: { alg: 'ES256' },
-        u: { kid: '11' },
-      };
-      const signer = {
-        key: {
-          d: Buffer.from(
-            '6c1382765aec5358f117733d281c1c7bdc39884d04a45a1e6c67c858bc206c19',
-            'hex'
-          ),
-        },
-      };
-      const buf = await sign.create(headers, message, signer);
-      console.log('Signed message: ' + buf.toString('hex'));
-    } catch (error) {
-      console.log(error);
-    }
+  const signMessage = (headers: Headers, message: string, keyTag: string) => {
+    return new Promise<Buffer>(async (resolve, reject) => {
+      try {
+        const signedMessage = await sign.create(headers, message, keyTag);
+        resolve(signedMessage);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  // TODO: this function is used to test COSE sign
+  // on a mocked plaintext. It should be removed
+  // or moved where appropriate.
+  const verifyMessage = (message: Buffer, keyTag: string) => {
+    return new Promise<boolean>(async (resolve, reject) => {
+      try {
+        const pubKey = await getPublicKey(keyTag);
+        if (pubKey.kty === 'EC') {
+          const verifier = {
+            key: {
+              x: Buffer.from(pubKey.x, 'base64'),
+              y: Buffer.from(pubKey.y, 'base64'),
+            },
+          };
+          const result = await sign.verify(message, verifier);
+          resolve(result);
+        } else {
+          reject(new Error('RSA not supported'));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
   };
 
   /**
@@ -429,6 +454,7 @@ const ProximityManager = () => {
     startScan,
     generateQrCode,
     signMessage,
+    verifyMessage,
     setListeners,
     setOnDocumentRequestHandler,
     stop,
