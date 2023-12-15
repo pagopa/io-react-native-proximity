@@ -2678,7 +2678,6 @@ __metadata:
     eslint-plugin-prettier: ^4.0.0
     jest: ^28.1.1
     js-crypto-hkdf: ^1.0.7
-    parse-cosekey: ^1.0.2
     pod-install: ^0.1.0
     prettier: ^2.0.5
     react: 18.2.0
@@ -4226,13 +4225,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64url@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "base64url@npm:3.0.1"
-  checksum: a77b2a3a526b3343e25be424de3ae0aa937d78f6af7c813ef9020ef98001c0f4e2323afcd7d8b2d2978996bf8c42445c3e9f60c218c622593e5fdfd54a3d6e18
-  languageName: node
-  linkType: hard
-
 "basic-ftp@npm:^5.0.2":
   version: 5.0.3
   resolution: "basic-ftp@npm:5.0.3"
@@ -4679,15 +4671,6 @@ __metadata:
     cbor-extract:
       optional: true
   checksum: 89900d78c4a9ccae907e960343fb89e87000480425eb86ba4758b2ec31961e200f1407ebfe715cdbedc0631216c17a47f0516d721abd27cfdc7729261472e916
-  languageName: node
-  linkType: hard
-
-"cbor@npm:^8.0.2":
-  version: 8.1.0
-  resolution: "cbor@npm:8.1.0"
-  dependencies:
-    nofilter: ^3.1.0
-  checksum: a90338435dc7b45cc01461af979e3bb6ddd4f2a08584c437586039cd5f2235014c06e49d664295debbfb3514d87b2f06728092ab6aa6175e2e85e9cd7dc0c1fd
   languageName: node
   linkType: hard
 
@@ -6581,13 +6564,6 @@ __metadata:
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
   checksum: 3d21519a4f8207c99f7457287291316306255a328770d320b401114ec8481986e4e467e854cb9914dd965e0a1ca810a23ccb559c642c88f4c7f55c55778a9b48
-  languageName: node
-  linkType: hard
-
-"extensible-custom-error@npm:0.0.7":
-  version: 0.0.7
-  resolution: "extensible-custom-error@npm:0.0.7"
-  checksum: 10286941f7e3d6c6e475ce8b598911edba74d445630ea7e6a477a3105a75b995bcbe0a3790e9351b05858d1f19127d7e9c569088760809c6f84ce47fb7c9618e
   languageName: node
   linkType: hard
 
@@ -9039,13 +9015,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.6.0":
-  version: 4.15.4
-  resolution: "jose@npm:4.15.4"
-  checksum: dccad91cb3357f36423774a0b89ad830dd84b31090de65cd139b85488439f16a00f8c59c0773825e8a1adb0dd9d13ad725ad66e6ea33880ecb3959bb99e1ea5b
-  languageName: node
-  linkType: hard
-
 "js-crypto-env@npm:^1.0.5":
   version: 1.0.5
   resolution: "js-crypto-env@npm:1.0.5"
@@ -10543,13 +10512,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nofilter@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "nofilter@npm:3.1.0"
-  checksum: 58aa85a5b4b35cbb6e42de8a8591c5e338061edc9f3e7286f2c335e9e9b9b8fa7c335ae45daa8a1f3433164dc0b9a3d187fa96f9516e04a17a1f9ce722becc4f
-  languageName: node
-  linkType: hard
-
 "nopt@npm:^7.0.0":
   version: 7.2.0
   resolution: "nopt@npm:7.2.0"
@@ -11032,18 +10994,6 @@ __metadata:
     pbkdf2: ^3.0.3
     safe-buffer: ^5.1.1
   checksum: 9243311d1f88089bc9f2158972aa38d1abd5452f7b7cabf84954ed766048fe574d434d82c6f5a39b988683e96fb84cd933071dda38927e03469dc8c8d14463c7
-  languageName: node
-  linkType: hard
-
-"parse-cosekey@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "parse-cosekey@npm:1.0.2"
-  dependencies:
-    cbor: ^8.0.2
-    extensible-custom-error: 0.0.7
-    jose: ^4.6.0
-    str2ab: ^1.1.0
-  checksum: 534874a99109e4b59e9c2ede5a3f21ad843e7817c478607d8bfdaceed9c05860f283d8e43052604db7d4f61c216c5d3106da7f915e8e0a57c66b82367aed372f
   languageName: node
   linkType: hard
 
@@ -12816,15 +12766,6 @@ __metadata:
   dependencies:
     internal-slot: ^1.0.4
   checksum: d04173690b2efa40e24ab70e5e51a3ff31d56d699550cfad084104ab3381390daccb36652b25755e420245f3b0737de66c1879eaa2a8d4fc0a78f9bf892fcb42
-  languageName: node
-  linkType: hard
-
-"str2ab@npm:^1.1.0":
-  version: 1.2.1
-  resolution: "str2ab@npm:1.2.1"
-  dependencies:
-    base64url: ^3.0.1
-  checksum: 47f300320ab100828ee513903f130e32a49918515a9fb6b980873e8dc036ea9fbf82f560f94ef3b15ff7c52b9431a3bf3c0c9302b596b1ba2042bbc68264a118
   languageName: node
   linkType: hard
 

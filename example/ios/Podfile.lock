@@ -80,7 +80,7 @@ PODS:
     - JOSESwift (~> 2.3)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
-  - pagopa-io-react-native-proximity (0.1.1):
+  - pagopa-io-react-native-proximity (0.1.5):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - RCT-Folly (2021.07.22.00):
@@ -709,7 +709,7 @@ SPEC CHECKSUMS:
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   pagopa-io-react-native-jwt: 637df21a8a7839c70e52c4a7614a04cca7335fb3
-  pagopa-io-react-native-proximity: 1fdf967a5afb3c75ef518c56309c297d90168139
+  pagopa-io-react-native-proximity: 6be867ccfe76df1468620fa876eaf50b8701a274
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: 28469809442eb4eb5528462705f7d852948c8a74
   RCTTypeSafety: e9c6c409fca2cc584e5b086862d562540cb38d29
