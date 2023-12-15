@@ -2692,7 +2692,6 @@ __metadata:
     zod: ^3.22.4
   peerDependencies:
     "@pagopa/io-react-native-jwt": "*"
-    cbor-x: "*"
     react: "*"
     react-native: "*"
     react-native-ble-manager: "*"
