@@ -29,7 +29,6 @@ export const fromCoseToJwk = (buffer: Buffer): JWK => {
       x: x.toString('hex'),
       y: y.toString('hex'),
     };
-    console.log('finalJwk', finalJwk);
     return finalJwk;
   } else {
     throw new Error('Not implemented');
