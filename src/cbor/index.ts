@@ -1,4 +1,4 @@
-import { Encoder, addExtension } from 'cbor-x';
+import { Encoder, addExtension } from 'cbor-x/encode';
 
 export class CborDataItem {
   cborDataItem: string;
