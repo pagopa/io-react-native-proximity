@@ -59,7 +59,10 @@ export default function App() {
       [
         {
           text: 'Yes',
-          onPress: () => ProximityManager.dataPresentation(mockedMocResponse),
+          onPress: () =>
+            ProximityManager.dataPresentation(mockedMocResponse).then(() => {
+              stopProximityManager();
+            }),
         },
         {
           text: 'No',
@@ -94,6 +97,7 @@ export default function App() {
     ProximityManager.stop().then(() => {
       setQrCodeUri(undefined);
       setIsStarted(false);
+      ProximityManager.removeListeners();
     });
   };
 
