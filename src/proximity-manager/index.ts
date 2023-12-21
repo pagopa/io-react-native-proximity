@@ -134,6 +134,7 @@ const ProximityManager = () => {
         type: 'ON_BLE_START',
         message: 'ble manager is started.',
       });
+      resolve();
     });
   };
 
