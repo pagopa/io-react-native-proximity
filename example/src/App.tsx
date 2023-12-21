@@ -36,6 +36,9 @@ export default function App() {
       case 'ON_BLE_STOP':
         setIsStarted(false);
         break;
+      case 'ON_DOCUMENT_PRESENTATION_COMPLETED':
+        stopProximityManager();
+        break;
       default:
         break;
     }
@@ -94,6 +97,7 @@ export default function App() {
     ProximityManager.stop().then(() => {
       setQrCodeUri(undefined);
       setIsStarted(false);
+      ProximityManager.removeListeners();
     });
   };
 

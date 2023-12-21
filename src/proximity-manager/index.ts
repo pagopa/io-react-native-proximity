@@ -96,37 +96,44 @@ const ProximityManager = () => {
     state: string;
   };
 
+  // This flag is used to understand if the BLE manager is started
+  // and avoid starting it multiple times causing multiple
+  // connection to the same peripheral
+  let isStarted = false;
+
   const start = () => {
     return new Promise<void>(async (resolve, reject) => {
       await session.start();
+      randomVerifierUUID = uuid.v4().toString();
+      if (!isStarted) {
+        BleManager.start({ showAlert: false })
+          .then(() => {
+            bleManagerEmitter.addListener(
+              'BleManagerDiscoverPeripheral',
+              handleDiscoverPeripheral
+            );
+            bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
 
-      BleManager.start({ showAlert: false })
-        .then(() => {
-          bleManagerEmitter.addListener(
-            'BleManagerDiscoverPeripheral',
-            handleDiscoverPeripheral
-          );
-          bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
+            bleManagerEmitter.addListener(
+              'BleManagerDisconnectPeripheral',
+              handleDisconnectedPeripheral
+            );
 
-          bleManagerEmitter.addListener(
-            'BleManagerDisconnectPeripheral',
-            handleDisconnectedPeripheral
-          );
-
-          bleManagerEmitter.addListener(
-            'BleManagerDidUpdateValueForCharacteristic',
-            handleUpdateValueForCharacteristic
-          );
-          eventManager.emit('onEvent', {
-            type: 'ON_BLE_START',
-            message: 'ble manager is started.',
+            bleManagerEmitter.addListener(
+              'BleManagerDidUpdateValueForCharacteristic',
+              handleUpdateValueForCharacteristic
+            );
+            isStarted = true;
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
           });
-          randomVerifierUUID = uuid.v4().toString();
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+      }
+      eventManager.emit('onEvent', {
+        type: 'ON_BLE_START',
+        message: 'ble manager is started.',
+      });
     });
   };
 
@@ -141,6 +148,10 @@ const ProximityManager = () => {
 
     const messageToSend = encode(responseData);
     await sendMdocResponseChunks(messageToSend);
+    eventManager.emit('onEvent', {
+      type: 'ON_DOCUMENT_PRESENTATION_COMPLETED',
+      message: 'Document presentation completed.',
+    });
   };
 
   const sendMdocResponseChunks = async (messageToSend: Buffer) => {
@@ -236,7 +247,6 @@ const ProximityManager = () => {
             console.log('Unable to disconnect from pheripheral', error);
           }
         }
-
         resolve();
         eventManager.emit('onEvent', {
           type: 'ON_BLE_STOP',
@@ -466,6 +476,15 @@ const ProximityManager = () => {
     });
   };
 
+  /**
+   * This function is to remove all the listeners
+   * @example
+   * ProximityManager.removeListeners();
+   */
+  const removeListeners = () => {
+    eventManager.removeAllListeners();
+  };
+
   const setOnDocumentRequestHandler = (
     handler: typeof handleDocumentsRequest
   ) => {
@@ -511,6 +530,7 @@ const ProximityManager = () => {
     setListeners,
     setOnDocumentRequestHandler,
     dataPresentation,
+    removeListeners,
     stop,
   };
 };

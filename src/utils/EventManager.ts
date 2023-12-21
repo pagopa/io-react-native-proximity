@@ -12,7 +12,8 @@ type EventType =
   | 'ON_CHARACTERISTIC_CHANGED'
   | 'ON_BLE_ERROR'
   | 'ON_SESSION_ESTABLISHMENT'
-  | 'ON_DOCUMENT_REQUESTS_RECEIVED';
+  | 'ON_DOCUMENT_REQUESTS_RECEIVED'
+  | 'ON_DOCUMENT_PRESENTATION_COMPLETED';
 
 export type EventData = {
   message: string;
@@ -42,6 +43,7 @@ export type EventData = {
 const createEventManager = () => {
   const listeners: { [key: string]: Array<(eventData: EventData) => void> } =
     {};
+
   const addListener = (
     eventName: string,
     callback: (eventData: EventData) => void
@@ -51,6 +53,7 @@ const createEventManager = () => {
     }
     listeners[eventName]?.push(callback);
   };
+
   const removeListener = (
     eventName: string,
     callback: (eventData: EventData) => void
@@ -61,14 +64,23 @@ const createEventManager = () => {
       );
     }
   };
+
+  const removeAllListeners = () => {
+    Object.keys(listeners).forEach((eventName) => {
+      listeners[eventName] = [];
+    });
+  };
+
   const emit = (eventName: string, data: EventData) => {
     if (listeners[eventName]) {
       listeners[eventName]?.forEach((listener) => listener(data));
     }
   };
+
   return {
     addListener,
     removeListener,
+    removeAllListeners,
     emit,
   };
 };
