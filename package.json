@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-react-native-proximity",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A RN library to get proximity flow based on ISO-18013",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
