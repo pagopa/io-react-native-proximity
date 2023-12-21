@@ -148,6 +148,10 @@ const ProximityManager = () => {
 
     const messageToSend = encode(responseData);
     await sendMdocResponseChunks(messageToSend);
+    eventManager.emit('onEvent', {
+      type: 'ON_DOCUMENT_PRESENTATION_COMPLETED',
+      message: 'Document presentation completed.',
+    });
   };
 
   const sendMdocResponseChunks = async (messageToSend: Buffer) => {
