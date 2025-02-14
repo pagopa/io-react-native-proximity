@@ -1,220 +1,132 @@
-import * as React from 'react';
-import {
-  ProximityManager,
-  type DocumentRequest,
-} from '@pagopa/io-react-native-proximity';
-import {
-  StyleSheet,
-  View,
-  Button,
-  Image,
-  Platform,
-  PermissionsAndroid,
-  Text,
-  Alert,
-} from 'react-native';
-import RNQRGenerator from 'rn-qr-generator';
-import { type EventData } from '@pagopa/io-react-native-proximity';
-import { mockedMocResponse } from './mock';
+import { useEffect, useState } from 'react';
+import { View, Text, Button, PermissionsAndroid, Platform } from 'react-native';
+import ProximityModule from '@pagopa/io-react-native-proximity';
+import { BleManager } from 'react-native-ble-plx';
+import QRCode from 'react-native-qrcode-svg';
+import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import CBOR from '@pagopa/io-react-native-cbor';
 
-export default function App() {
-  const [qrCodeUri, setQrCodeUri] = React.useState<string | undefined>();
-  const [isStarted, setIsStarted] = React.useState<boolean>(false);
-  const [debugLog, setDebugLog] = React.useState<string>('.. >');
+const bleManager = new BleManager();
 
-  React.useEffect(() => {
-    handleAndroidPermissions();
-  }, []);
+const requestPermissions = async () => {
+  if (Platform.OS === 'android') {
+    await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    ]);
+  }
+  const cameraPermission = await Camera.requestCameraPermission();
+  if (cameraPermission !== 'authorized') {
+    console.warn('Camera permission not granted');
+  }
+};
 
-  const onEvent = (event: EventData) => {
-    console.log('onEvent', event);
-    setDebugLog(event.message);
-    switch (event.type) {
-      case 'ON_BLE_START':
-        setIsStarted(true);
-        break;
-      case 'ON_BLE_STOP':
-        setIsStarted(false);
-        break;
-      case 'ON_DOCUMENT_PRESENTATION_COMPLETED':
-        stopProximityManager();
-        break;
-      default:
-        break;
+const ProximityExample = () => {
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [sessionActive, setSessionActive] = useState<boolean>(false);
+  const [publicKey, setPublicKey] = useState(null);
+  const [privateKey, setPrivateKey] = useState(null);
+  const devices = useCameraDevices();
+  const [selectedDevice, setSelectedDevice] = useState(null);
+
+  useEffect(() => {
+    requestPermissions();
+
+    ProximityModule.addListener('onDeviceRetrievalHelperReady', () => {
+      console.log('Device Retrieval Helper Ready');
+      setSessionActive(true);
+    });
+
+    ProximityModule.addListener('onDeviceDisconnected', () => {
+      console.log('Device Disconnected');
+      setSessionActive(false);
+    });
+
+    return () => {
+      ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+      ProximityModule.removeListeners('onDeviceDisconnected');
+    };
+  }, [devices]);
+
+  const startSlave = async () => {
+    await ProximityModule.initializeQrEngagement(true, true, false);
+    const qrString = await ProximityModule.getQrCodeString();
+    setQrCode(qrString);
+    console.log('Generated QR:', qrString);
+  };
+
+  const scanAndExtractDeviceEngagement = async (qrCodeString) => {
+    try {
+      const decoded = await CBOR.decode(qrCodeString);
+      console.log('Decoded Device Engagement:', decoded);
+      const eDevicePubKey = decoded[1][1][2];
+      setPublicKey(eDevicePubKey);
+      generateReaderKeys(eDevicePubKey);
+    } catch (error) {
+      console.error('Error decoding Device Engagement:', error);
     }
   };
 
-  const onSuccess = (event: EventData) => {
-    console.log('onSuccess', event);
-  };
+  const generateReaderKeys = async (eDevicePubKey) => {};
 
-  const onError = (event: EventData) => {
-    console.log('onError', event);
-  };
+  const establishSession = async (keyPair, eDevicePubKey) => {};
 
-  const onDocumentsRequestReceived = (documentsRequest: DocumentRequest[]) => {
-    console.log('documentRequest received:', documentsRequest);
-    setQrCodeUri(undefined);
-
-    Alert.alert(
-      'do you want to proceed with the presentation?',
-      JSON.stringify(documentsRequest),
-      [
-        {
-          text: 'Yes',
-          onPress: () => ProximityManager.dataPresentation(mockedMocResponse),
-        },
-        {
-          text: 'No',
-          onPress: () => {
-            stopProximityManager();
-          },
-          style: 'cancel',
-        },
-      ]
+  const startMaster = () => {
+    console.log('Scanning for BLE devices...');
+    bleManager.startDeviceScan(
+      null,
+      { allowDuplicates: false },
+      (error, device) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+        console.log('Discovered device:', device.name);
+      }
     );
   };
 
-  const startProximityManager = () => {
-    console.log('startProximityManager');
-    ProximityManager.start()
-      .then(() => {
-        console.log('ProximityManager started');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    ProximityManager.setListeners({
-      onEvent,
-      onSuccess,
-      onError,
-    });
-    //Set handler for document request
-    ProximityManager.setOnDocumentRequestHandler(onDocumentsRequestReceived);
-  };
-
-  const stopProximityManager = () => {
-    ProximityManager.stop().then(() => {
-      setQrCodeUri(undefined);
-      setIsStarted(false);
-      ProximityManager.removeListeners();
-    });
-  };
-
-  const generateQrCode = async () => {
-    const qrcode = await ProximityManager.generateQrCode();
-    RNQRGenerator.generate({
-      value: qrcode,
-      height: 300,
-      width: 300,
-      correctionLevel: 'H',
-    })
-      .then(async (response) => {
-        setQrCodeUri(response.uri);
-        await ProximityManager.startScan();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const handleAndroidPermissions = () => {
-    if (
-      Platform.OS === 'android' &&
-      Platform.Version >= 31 &&
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN &&
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT
-    ) {
-      PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-      ]).then((result) => {
-        if (result) {
-          console.debug(
-            '[handleAndroidPermissions] User accepts runtime permissions android 12+'
-          );
-        } else {
-          console.error(
-            '[handleAndroidPermissions] User refuses runtime permissions android 12+'
-          );
-        }
-      });
-    } else if (
-      Platform.OS === 'android' &&
-      Platform.Version >= 23 &&
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    ) {
-      PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      ).then((checkResult) => {
-        if (checkResult) {
-          console.debug(
-            '[handleAndroidPermissions] runtime permission Android <12 already OK'
-          );
-        } else {
-          if (PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION) {
-            PermissionsAndroid.request(
-              PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-            ).then((requestResult) => {
-              if (requestResult) {
-                console.debug(
-                  '[handleAndroidPermissions] User accepts runtime permission android <12'
-                );
-              } else {
-                console.error(
-                  '[handleAndroidPermissions] User refuses runtime permission android <12'
-                );
-              }
-            });
-          }
-        }
-      });
+  const sendMdocRequest = async () => {
+    if (!sessionActive) {
+      console.warn('Session is not active');
+      return;
     }
+    console.log('Sending mDoc request...');
+    await ProximityModule.generateResponse('{}', '{}')
+      .then((response) => console.log('Received response:', response))
+      .catch((error) => console.error('Error in response:', error));
+  };
+
+  const closeSession = async () => {
+    console.log('Closing session...');
+    await ProximityModule.closeQrEngagement()
+      .then(() => setSessionActive(false))
+      .catch((error) => console.error('Error closing session:', error));
   };
 
   return (
-    <View style={styles.container}>
-      {(isStarted && (
-        <>
-          <Button title="Generate QR 🏞️" onPress={() => generateQrCode()} />
-          <Button title="Stop 🛑" onPress={() => stopProximityManager()} />
-          {qrCodeUri && (
-            <Image
-              style={styles.box}
-              source={{
-                uri: qrCodeUri,
-              }}
-            />
-          )}
-        </>
-      )) || (
-        <>
-          <Button title="Start 🏁" onPress={() => startProximityManager()} />
-        </>
+    <View style={{ padding: 20, alignItems: 'center' }}>
+      <Text style={{ fontSize: 18, marginBottom: 10 }}>Proximity Example</Text>
+      <Button title="Start Slave (Generate QR)" onPress={startSlave} />
+      {qrCode && (
+        <View style={{ marginTop: 20, alignItems: 'center' }}>
+          <Text>Scan this QR Code:</Text>
+          <QRCode value={qrCode} size={200} />
+        </View>
       )}
-      <View style={styles.debug}>
-        <Text>{debugLog}</Text>
-      </View>
+      <Button
+        title="Start Master (Scan & Extract QR)"
+        onPress={() => scanAndExtractDeviceEngagement(qrCode)}
+      />
+      {sessionActive && (
+        <Button title="Send mDoc Request" onPress={sendMdocRequest} />
+      )}
+      {sessionActive && <Button title="Close Session" onPress={closeSession} />}
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 200,
-    height: 200,
-    marginVertical: 20,
-  },
-  debug: {
-    width: '100%',
-    height: 100,
-    position: 'absolute',
-    bottom: 0,
-    backgroundColor: '#eaeaea',
-  },
-});
+export default ProximityExample;

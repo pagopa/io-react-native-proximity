@@ -1,4 +1,8 @@
-rootProject.name = 'IoReactNativeProximityExample'
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'pagopa.ioreactnativeproximity.example'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
+include ':io-react-native-proximity'
+project(':io-react-native-proximity').projectDir = new File(rootProject.projectDir, '../../android')
