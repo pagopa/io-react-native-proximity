@@ -14,9 +14,7 @@ module.exports = {
         // Codegen script incorrectly fails without this
         // So we explicitly specify the platforms with empty object
         ios: {},
-        android: {
-          sourceDir: './android',
-        },
+        android: {},
       },
     },
   },

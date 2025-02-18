@@ -105,6 +105,12 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+  packaging {
+    resources {
+      excludes += ["META-INF/versions/9/OSGI-INF/MANIFEST.MF"]
+    }
+  }
 }
 
 dependencies {
@@ -116,6 +122,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-
-    implementation project(':io-react-native-proximity')
 }

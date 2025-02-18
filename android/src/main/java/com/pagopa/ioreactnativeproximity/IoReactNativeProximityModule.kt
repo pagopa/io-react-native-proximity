@@ -1,6 +1,9 @@
 package com.pagopa.ioreactnativeproximity
 
-import com.facebook.react.bridge.*
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Promise
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import it.pagopa.io.wallet.proximity.ProximityLogger
 import it.pagopa.io.wallet.proximity.bluetooth.BleRetrievalMethod
@@ -13,7 +16,7 @@ import org.json.JSONObject
 import android.util.Base64
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
-  NativeModule(reactContext) {
+  ReactContextBaseJavaModule(reactContext) {
 
   private var qrEngagement: QrEngagement? = null
   private var deviceRetrievalHelper: DeviceRetrievalHelperWrapper? = null
@@ -47,7 +50,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         promise.reject("ERROR", "QR Engagement not initialized or invalid")
         return
       }
-      val qrCodeString = qrEngagement?.deviceEngagementUriEncoded ?: ""
+      val qrCodeString = qrEngagement?.getQrCodeString()
       promise.resolve(qrCodeString)
     } catch (e: Exception) {
       promise.reject("QR_CODE_ERROR", e.message)
@@ -57,10 +60,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun closeQrEngagement(promise: Promise) {
     try {
-      qrEngagement?.let {
-        it.deviceRetrievalHelper?.disconnect()
-        it.close()
-      }
+      qrEngagement?.close()
       deviceRetrievalHelper?.disconnect()
       promise.resolve(true)
     } catch (e: Exception) {
