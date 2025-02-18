@@ -82,7 +82,7 @@ repositories {
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  compileOnly "com.facebook.react:react-android:+"
+  implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "it.pagopa.io.wallet.proximity:proximity:1.0.0"
 }

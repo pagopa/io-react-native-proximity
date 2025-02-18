@@ -4,7 +4,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
-import com.facebook.react.modules.core.DeviceEventManagerModule
 import it.pagopa.io.wallet.proximity.ProximityLogger
 import it.pagopa.io.wallet.proximity.bluetooth.BleRetrievalMethod
 import it.pagopa.io.wallet.proximity.qr_code.QrEngagement
@@ -18,15 +17,20 @@ import android.util.Base64
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  private var qrEngagement: QrEngagement? = null
-  private var deviceRetrievalHelper: DeviceRetrievalHelperWrapper? = null
-
   override fun getName(): String {
     return NAME
   }
 
+  private var qrEngagement: QrEngagement? = null
+  private var deviceRetrievalHelper: DeviceRetrievalHelperWrapper? = null
+
   @ReactMethod
-  fun initializeQrEngagement(peripheralMode: Boolean, centralClientMode: Boolean, clearBleCache: Boolean, promise: Promise) {
+  fun initializeQrEngagement(
+    peripheralMode: Boolean,
+    centralClientMode: Boolean,
+    clearBleCache: Boolean,
+    promise: Promise
+  ) {
     try {
       val retrievalMethod = BleRetrievalMethod(
         peripheralServerMode = peripheralMode,
@@ -93,6 +97,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     }
   }
 
+
   private fun parseJsonToDocs(json: String): Array<DocRequested> {
     return try {
       val jsonObject = JSONObject(json)
@@ -119,12 +124,12 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   private fun setQrEngagementListener() {
     qrEngagement?.withListener(object : QrEngagementListener {
       override fun onConnecting() {
-        sendEvent("onConnecting", null)
+        sendEvent("onConnecting", "")
       }
 
       override fun onDeviceRetrievalHelperReady(helper: DeviceRetrievalHelperWrapper) {
         deviceRetrievalHelper = helper
-        sendEvent("onDeviceRetrievalHelperReady", null)
+        sendEvent("onDeviceRetrievalHelperReady", "")
       }
 
       override fun onCommunicationError(msg: String) {
@@ -141,9 +146,10 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     })
   }
 
-  private fun sendEvent(eventName: String, data: String?) {
-    reactApplicationContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-      .emit(eventName, data)
+  private fun sendEvent(eventName: String, message: String) { // take a WritableMap
+    val params = HashMap<String, String>()
+    params["message"] = message
+    reactApplicationContext.emitDeviceEvent(eventName, params)
   }
 
   companion object {

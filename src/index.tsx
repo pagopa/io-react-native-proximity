@@ -1,5 +1,21 @@
-import { NativeEventEmitter } from 'react-native';
-import IoReactNativeProximity from '../';
+import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
+
+const LINKING_ERROR =
+  `The package '@pagopa/io-react-native-proximity' doesn't seem to be linked. Make sure: \n\n` +
+  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
+  '- You rebuilt the app after installing the package\n' +
+  '- You are not using Expo Go\n';
+
+const IoReactNativeProximity = NativeModules.IoReactNativeProximity
+  ? NativeModules.IoReactNativeProximity
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
 
 type QrEngagementEvents =
   | 'onConnecting'

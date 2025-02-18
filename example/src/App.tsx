@@ -1,7 +1,7 @@
 import { Button, Image, Text, View } from 'react-native';
-import ProximityModule from '../../src/proximity';
 import { useState } from 'react';
 import RNQRGenerator from 'rn-qr-generator';
+import ProximityModule from '@pagopa/io-react-native-proximity';
 
 const App = () => {
   const [qrCode, setQrCode] = useState<string>();
