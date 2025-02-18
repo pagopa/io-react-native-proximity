@@ -8,18 +8,6 @@ A RN library to get proximity flow based on ISO-18013
 npm install @pagopa/io-react-native-proximity
 ```
 
-## Usage
-
-
-```js
-import { multiply } from '@pagopa/io-react-native-proximity';
-
-// ...
-
-const result = await multiply(3, 7);
-```
-
-
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
