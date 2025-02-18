@@ -5,4 +5,4 @@ rootProject.name = 'pagopa.ioreactnativeproximity.example'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
 include ':io-react-native-proximity'
-project(':io-react-native-proximity').projectDir = new File(rootProject.projectDir, '../../android')
+project(':io-react-native-proximity').projectDir = new File(rootProject.projectDir, '../io-react-native-proximity/android')

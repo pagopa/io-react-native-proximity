@@ -60,6 +60,9 @@ android {
   }
 
   buildTypes {
+    debug {
+      minifyEnabled false
+    }
     release {
       minifyEnabled false
     }
@@ -78,16 +81,13 @@ android {
 repositories {
   mavenCentral()
   google()
-  flatDir {
-    dirs 'libs'
-  }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  implementation "com.facebook.react:react-android"
+  compileOnly "com.facebook.react:react-android:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation(name: 'proximity-release', ext: 'aar')
+  implementation "it.pagopa.io.wallet.proximity:proximity:1.0.0"
 }
 

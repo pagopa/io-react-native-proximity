@@ -2,13 +2,13 @@ package com.pagopa.ioreactnativeproximity
 
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import it.pagopa.proximity.ProximityLogger
-import it.pagopa.proximity.bluetooth.BleRetrievalMethod
-import it.pagopa.proximity.qr_code.QrEngagement
-import it.pagopa.proximity.qr_code.QrEngagementListener
-import it.pagopa.proximity.request.DocRequested
-import it.pagopa.proximity.response.ResponseGenerator
-import it.pagopa.proximity.wrapper.DeviceRetrievalHelperWrapper
+import it.pagopa.io.wallet.proximity.ProximityLogger
+import it.pagopa.io.wallet.proximity.bluetooth.BleRetrievalMethod
+import it.pagopa.io.wallet.proximity.qr_code.QrEngagement
+import it.pagopa.io.wallet.proximity.qr_code.QrEngagementListener
+import it.pagopa.io.wallet.proximity.request.DocRequested
+import it.pagopa.io.wallet.proximity.response.ResponseGenerator
+import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import org.json.JSONObject
 import android.util.Base64
 

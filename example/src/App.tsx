@@ -4,7 +4,6 @@ import ProximityModule from '@pagopa/io-react-native-proximity';
 import { BleManager } from 'react-native-ble-plx';
 import QRCode from 'react-native-qrcode-svg';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import CBOR from '@pagopa/io-react-native-cbor';
 
 const bleManager = new BleManager();
 
@@ -19,18 +18,15 @@ const requestPermissions = async () => {
     ]);
   }
   const cameraPermission = await Camera.requestCameraPermission();
-  if (cameraPermission !== 'authorized') {
+  if (cameraPermission !== 'granted') {
     console.warn('Camera permission not granted');
   }
 };
 
-const ProximityExample = () => {
+const App = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [sessionActive, setSessionActive] = useState<boolean>(false);
-  const [publicKey, setPublicKey] = useState(null);
-  const [privateKey, setPrivateKey] = useState(null);
   const devices = useCameraDevices();
-  const [selectedDevice, setSelectedDevice] = useState(null);
 
   useEffect(() => {
     requestPermissions();
@@ -58,22 +54,6 @@ const ProximityExample = () => {
     console.log('Generated QR:', qrString);
   };
 
-  const scanAndExtractDeviceEngagement = async (qrCodeString) => {
-    try {
-      const decoded = await CBOR.decode(qrCodeString);
-      console.log('Decoded Device Engagement:', decoded);
-      const eDevicePubKey = decoded[1][1][2];
-      setPublicKey(eDevicePubKey);
-      generateReaderKeys(eDevicePubKey);
-    } catch (error) {
-      console.error('Error decoding Device Engagement:', error);
-    }
-  };
-
-  const generateReaderKeys = async (eDevicePubKey) => {};
-
-  const establishSession = async (keyPair, eDevicePubKey) => {};
-
   const startMaster = () => {
     console.log('Scanning for BLE devices...');
     bleManager.startDeviceScan(
@@ -84,7 +64,7 @@ const ProximityExample = () => {
           console.error(error);
           return;
         }
-        console.log('Discovered device:', device.name);
+        console.log('Discovered device:', device?.name);
       }
     );
   };
@@ -119,7 +99,7 @@ const ProximityExample = () => {
       )}
       <Button
         title="Start Master (Scan & Extract QR)"
-        onPress={() => scanAndExtractDeviceEngagement(qrCode)}
+        onPress={() => console.log('test')}
       />
       {sessionActive && (
         <Button title="Send mDoc Request" onPress={sendMdocRequest} />
@@ -129,4 +109,4 @@ const ProximityExample = () => {
   );
 };
 
-export default ProximityExample;
+export default App;
