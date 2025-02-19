@@ -4,6 +4,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
 import it.pagopa.io.wallet.proximity.ProximityLogger
 import it.pagopa.io.wallet.proximity.bluetooth.BleRetrievalMethod
 import it.pagopa.io.wallet.proximity.qr_code.QrEngagement
@@ -109,7 +111,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         if (documentContent.isNotEmpty()) {
           val docRequested = DocRequested(
             content = documentContent,
-            alias = "SECURE_STORAGE_KEY_$docType"
+            alias = "SECURE_STORAGE_KEY_${qrEngagement?.context?.noBackupFilesDir}"
           )
           docRequestedList.add(docRequested)
         }
@@ -146,10 +148,13 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     })
   }
 
-  private fun sendEvent(eventName: String, message: String) { // take a WritableMap
-    val params = HashMap<String, String>()
-    params["message"] = message
-    reactApplicationContext.emitDeviceEvent(eventName, params)
+  private fun sendEvent(eventName: String, message: String) {
+    val params: WritableMap = Arguments.createMap()
+    params.putString("message", message)
+
+    reactApplicationContext
+      .getJSModule(com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+      .emit(eventName, params)
   }
 
   companion object {

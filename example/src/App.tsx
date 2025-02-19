@@ -1,58 +1,23 @@
-import { Button, Image, Text, View } from 'react-native';
-import { useState } from 'react';
-import RNQRGenerator from 'rn-qr-generator';
-import ProximityModule from '@pagopa/io-react-native-proximity';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { QrCodeScreen } from './screens/QrCodeScreen';
+import { QrScannerScreen } from './screens/QrScannerScreen';
+import { NavigationContainer } from '@react-navigation/native';
+
+const Tab = createBottomTabNavigator();
 
 const App = () => {
-  const [qrCode, setQrCode] = useState<string>();
-  const [qrCodeImgUri, setQrCodeImgUri] = useState<string>();
-
-  const startSlave = async () => {
-    const initialized = await ProximityModule.initializeQrEngagement(
-      true,
-      false,
-      false
-    );
-
-    if (initialized) {
-      const qrCodeString = await ProximityModule.getQrCodeString();
-      setQrCode(qrCodeString);
-      RNQRGenerator.generate({
-        value: qrCodeString,
-        height: 200,
-        width: 200,
-        correctionLevel: 'H',
-      })
-        .then((response) => {
-          const { uri } = response;
-          setQrCodeImgUri(uri);
-        })
-        .catch((error) => console.log('Cannot create QR code', error));
-    }
-  };
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-        alignItems: 'center',
-        backgroundColor: '#fff',
-      }}
-    >
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>Proximity Example</Text>
-      <Button title="Start Slave (Generate QR)" onPress={startSlave} />
-      {qrCodeImgUri && (
-        <Image
-          source={{ uri: qrCodeImgUri }}
-          style={{ width: 200, height: 200 }}
-        />
-      )}
-      {qrCode && <Text style={{ margin: 10 }}>{qrCode}</Text>}
-      <Button
-        title="Start Master (Scan & Extract QR)"
-        onPress={() => console.log('test')}
-      />
-    </View>
+    <NavigationContainer>
+      <Tab.Navigator
+        initialRouteName={'QrCodeScreen'}
+        screenOptions={{
+          lazy: true,
+        }}
+      >
+        <Tab.Screen name="QrCodeScreen" component={QrCodeScreen} />
+        <Tab.Screen name="QrScannerScreen" component={QrScannerScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 };
 
