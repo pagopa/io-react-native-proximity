@@ -1,22 +1,15 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QrCodeScreen } from './screens/QrCodeScreen';
-import { QrScannerScreen } from './screens/QrScannerScreen';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        initialRouteName={'QrCodeScreen'}
-        screenOptions={{
-          lazy: true,
-        }}
-      >
-        <Tab.Screen name="QrCodeScreen" component={QrCodeScreen} />
-        <Tab.Screen name="QrScannerScreen" component={QrScannerScreen} />
-      </Tab.Navigator>
+      <Stack.Navigator>
+        <Stack.Screen name="QrCodeScreen" component={QrCodeScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

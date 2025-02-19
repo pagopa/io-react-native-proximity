@@ -15,6 +15,14 @@ export const QrCodeScreen: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const handleDeviceReady = () => {
+    console.log('Device is ready for retrieval');
+  };
+
+  const handleError = (message: string) => {
+    console.error('QR Engagement Error:', message);
+  };
+
   useEffect(() => {
     const initialize = async () => {
       const hasPermission = await requestBlePermissions();
@@ -28,6 +36,14 @@ export const QrCodeScreen: React.FC = () => {
       }
       try {
         await ProximityModule.initializeQrEngagement(true, false, true); // Peripheral mode
+        ProximityModule.addListener(
+          'onDeviceRetrievalHelperReady',
+          handleDeviceReady
+        );
+        ProximityModule.addListener('onCommunicationError', handleError);
+        ProximityModule.addListener('onNewDeviceRequest', () => {
+          console.log('New device request received');
+        });
       } catch (error) {
         Alert.alert('Failed to initialize QR engagement');
       } finally {
@@ -38,30 +54,21 @@ export const QrCodeScreen: React.FC = () => {
     initialize();
 
     return () => {
-      ProximityModule.closeQrEngagement();
+      console.log('Returning from useEffect');
+      // ProximityModule.closeQrEngagement();
+      // ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+      // ProximityModule.removeListeners('onCommunicationError');
     };
   }, []);
 
-  useEffect(() => {
-    const handleDeviceReady = () => {
-      console.log('Device is ready for retrieval');
-    };
+  // useEffect(() => {
+  //   console.log('here');
 
-    const handleError = (message: string) => {
-      console.error('QR Engagement Error:', message);
-    };
-
-    ProximityModule.addListener(
-      'onDeviceRetrievalHelperReady',
-      handleDeviceReady
-    );
-    ProximityModule.addListener('onCommunicationError', handleError);
-
-    return () => {
-      ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
-      ProximityModule.removeListeners('onCommunicationError');
-    };
-  }, []);
+  //   return () => {
+  //     ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+  //     ProximityModule.removeListeners('onCommunicationError');
+  //   };
+  // }, []);
 
   const getQrCode = async () => {
     const qrString = await ProximityModule.getQrCodeString();

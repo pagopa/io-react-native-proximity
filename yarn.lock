@@ -2447,6 +2447,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/io-react-native-crypto@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@pagopa/io-react-native-crypto@npm:1.0.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: cda573a770f3cbbc27a084102b134c5ff26f1864834eacdbac677a6f695fd0c6a642ce2922619055966f556ff46f0db2d2ff74eaaab69a3747a55e2755294929
+  languageName: node
+  linkType: hard
+
 "@pagopa/io-react-native-proximity-example@workspace:example":
   version: 0.0.0-use.local
   resolution: "@pagopa/io-react-native-proximity-example@workspace:example"
@@ -2454,14 +2464,15 @@ __metadata:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
+    "@pagopa/io-react-native-crypto": ^1.0.1
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
     "@react-native-community/cli-platform-ios": 15.0.1
     "@react-native/babel-preset": 0.76.7
     "@react-native/metro-config": 0.76.7
     "@react-native/typescript-config": 0.76.7
-    "@react-navigation/bottom-tabs": ^7.2.0
     "@react-navigation/native": ^7.0.14
+    "@react-navigation/native-stack": ^7.2.0
     react: 18.3.1
     react-native: 0.76.7
     react-native-builder-bob: ^0.37.0
@@ -2470,7 +2481,6 @@ __metadata:
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.7.0
     react-native-svg: ^15.11.1
-    react-native-vision-camera: ^4.6.3
   languageName: unknown
   linkType: soft
 
@@ -2964,22 +2974,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/bottom-tabs@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "@react-navigation/bottom-tabs@npm:7.2.0"
-  dependencies:
-    "@react-navigation/elements": ^2.2.5
-    color: ^4.2.3
-  peerDependencies:
-    "@react-navigation/native": ^7.0.14
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-safe-area-context: ">= 4.0.0"
-    react-native-screens: ">= 4.0.0"
-  checksum: 30e091ab71398ac4733440641ae490a109e1eb2d3b6e6abe95908795609b007d29bb2368bbc8453338a048e8b7649f5ae07212d5cf9b97be9096e781cf44a954
-  languageName: node
-  linkType: hard
-
 "@react-navigation/core@npm:^7.3.1":
   version: 7.3.1
   resolution: "@react-navigation/core@npm:7.3.1"
@@ -3012,6 +3006,22 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: 226dbf0350eb65a45cd488421a39338f321dfd44fc15ba8b37385799707446ae7563ab417ec00f6bed6caf25e5348fed7485c2ad26e48b160fa6216ef1bc5d2e
+  languageName: node
+  linkType: hard
+
+"@react-navigation/native-stack@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@react-navigation/native-stack@npm:7.2.0"
+  dependencies:
+    "@react-navigation/elements": ^2.2.5
+    warn-once: ^0.1.1
+  peerDependencies:
+    "@react-navigation/native": ^7.0.14
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+    react-native-screens: ">= 4.0.0"
+  checksum: c8202080416307cf7e2502e82e92f3dc09a17b96051f26d1e103fa222ff12729d1dd049c6f747e45cf03698ff019ab27d70f48e2e505606e4be5ade692e1b9a9
   languageName: node
   linkType: hard
 
@@ -11016,26 +11026,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-vision-camera@npm:^4.6.3":
-  version: 4.6.3
-  resolution: "react-native-vision-camera@npm:4.6.3"
-  peerDependencies:
-    "@shopify/react-native-skia": "*"
-    react: "*"
-    react-native: "*"
-    react-native-reanimated: "*"
-    react-native-worklets-core: "*"
-  peerDependenciesMeta:
-    "@shopify/react-native-skia":
-      optional: true
-    react-native-reanimated:
-      optional: true
-    react-native-worklets-core:
-      optional: true
-  checksum: ea75d22d465caa054642d38b4953e92b7f88da1860ac0e1d3f8cdeab27ab8093dfcdbe1ac6dca2e2c9d38bd1eb07a361cde96438d29238c55662fb31fa6d6227
-  languageName: node
-  linkType: hard
-
 "react-native@npm:0.76.7":
   version: 0.76.7
   resolution: "react-native@npm:0.76.7"
@@ -13161,7 +13151,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"warn-once@npm:0.1.1, warn-once@npm:^0.1.0":
+"warn-once@npm:0.1.1, warn-once@npm:^0.1.0, warn-once@npm:^0.1.1":
   version: 0.1.1
   resolution: "warn-once@npm:0.1.1"
   checksum: e6a5a1f5a8dba7744399743d3cfb571db4c3947897875d4962a7c5b1bf2195ab4518c838cb4cea652e71729f21bba2e98dc75686f5fccde0fabbd894e2ed0c0d
