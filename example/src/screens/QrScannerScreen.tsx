@@ -41,6 +41,7 @@ export const QrScannerScreen: React.FC = () => {
     try {
       await ProximityModule.initializeQrEngagement(false, true, true); // Central mode
       console.log('BLE Connection Initiated');
+      await ProximityModule.connectToIssuer(qrData);
     } catch (error) {
       console.error('Connection Error:', error);
       Alert.alert('Error', 'Failed to connect using QR data.');

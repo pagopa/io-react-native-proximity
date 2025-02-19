@@ -75,6 +75,20 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun connectToIssuer(mDoc: String, promise: Promise) {
+    try {
+      qrEngagement?.let {
+          it.connect(mDoc)
+          promise.resolve(true)
+      } ?: run {
+        promise.reject("ERROR", "QR Engagement not initialized or invalid")
+      }
+    } catch (e: Exception) {
+      promise.reject("CONNECTION_ERROR", e.message)
+    }
+  }
+
+  @ReactMethod
   fun generateResponse(jsonDocuments: String, fieldRequestedAndAccepted: String, promise: Promise) {
     try {
       val documents: Array<DocRequested> = parseJsonToDocs(jsonDocuments)

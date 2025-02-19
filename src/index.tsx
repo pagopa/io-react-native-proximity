@@ -1,4 +1,4 @@
-import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package '@pagopa/io-react-native-proximity' doesn't seem to be linked. Make sure: \n\n` +
@@ -35,6 +35,8 @@ interface IoReactNativeProximity {
 
   closeQrEngagement(): Promise<boolean>;
 
+  connectToIssuer(mDoc: string): Promise<boolean>;
+
   generateResponse(
     jsonDocuments: string,
     fieldRequestedAndAccepted: string
@@ -62,6 +64,10 @@ const ProximityModule: IoReactNativeProximity = {
 
   closeQrEngagement() {
     return IoReactNativeProximity.closeQrEngagement();
+  },
+
+  connectToIssuer(mDoc) {
+    return IoReactNativeProximity.connectToIssuer(mDoc);
   },
 
   generateResponse(jsonDocuments, fieldRequestedAndAccepted) {
