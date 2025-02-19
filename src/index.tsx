@@ -35,11 +35,10 @@ interface IoReactNativeProximity {
 
   closeQrEngagement(): Promise<boolean>;
 
-  connectToIssuer(mDoc: string): Promise<boolean>;
-
   generateResponse(
     jsonDocuments: string,
-    fieldRequestedAndAccepted: string
+    fieldRequestedAndAccepted: string,
+    alias: string
   ): Promise<string>;
 
   addListener(event: QrEngagementEvents, callback: (data?: any) => void): void;
@@ -66,14 +65,11 @@ const ProximityModule: IoReactNativeProximity = {
     return IoReactNativeProximity.closeQrEngagement();
   },
 
-  connectToIssuer(mDoc) {
-    return IoReactNativeProximity.connectToIssuer(mDoc);
-  },
-
-  generateResponse(jsonDocuments, fieldRequestedAndAccepted) {
+  generateResponse(jsonDocuments, fieldRequestedAndAccepted, alias) {
     return IoReactNativeProximity.generateResponse(
       jsonDocuments,
-      fieldRequestedAndAccepted
+      fieldRequestedAndAccepted,
+      alias
     );
   },
 

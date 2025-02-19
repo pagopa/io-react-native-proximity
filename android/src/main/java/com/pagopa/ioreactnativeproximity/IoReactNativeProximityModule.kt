@@ -75,23 +75,9 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun connectToIssuer(mDoc: String, promise: Promise) {
+  fun generateResponse(jsonDocuments: String, fieldRequestedAndAccepted: String, alias: String, promise: Promise) {
     try {
-      qrEngagement?.let {
-          it.connect(mDoc)
-          promise.resolve(true)
-      } ?: run {
-        promise.reject("ERROR", "QR Engagement not initialized or invalid")
-      }
-    } catch (e: Exception) {
-      promise.reject("CONNECTION_ERROR", e.message)
-    }
-  }
-
-  @ReactMethod
-  fun generateResponse(jsonDocuments: String, fieldRequestedAndAccepted: String, promise: Promise) {
-    try {
-      val documents: Array<DocRequested> = parseJsonToDocs(jsonDocuments)
+      val documents: Array<DocRequested> = parseJsonToDocs(jsonDocuments, alias)
       val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
       val responseGenerator = ResponseGenerator(sessionTranscript)
 
@@ -114,7 +100,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   }
 
 
-  private fun parseJsonToDocs(json: String): Array<DocRequested> {
+  private fun parseJsonToDocs(json: String, alias: String): Array<DocRequested> {
     return try {
       val jsonObject = JSONObject(json)
       val docRequestedList = mutableListOf<DocRequested>()
@@ -125,7 +111,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         if (documentContent.isNotEmpty()) {
           val docRequested = DocRequested(
             content = documentContent,
-            alias = "SECURE_STORAGE_KEY_${qrEngagement?.context?.noBackupFilesDir}"
+            alias = alias
           )
           docRequestedList.add(docRequested)
         }
@@ -143,8 +129,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         sendEvent("onConnecting", "")
       }
 
-      override fun onDeviceRetrievalHelperReady(helper: DeviceRetrievalHelperWrapper) {
-        deviceRetrievalHelper = helper
+      override fun onDeviceRetrievalHelperReady(deviceRetrievalHelper: DeviceRetrievalHelperWrapper) {
+        this@IoReactNativeProximityModule.deviceRetrievalHelper = deviceRetrievalHelper
         sendEvent("onDeviceRetrievalHelperReady", "")
       }
 

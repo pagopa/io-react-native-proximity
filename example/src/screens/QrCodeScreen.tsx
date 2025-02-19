@@ -41,8 +41,8 @@ export const QrCodeScreen: React.FC = () => {
           handleDeviceReady
         );
         ProximityModule.addListener('onCommunicationError', handleError);
-        ProximityModule.addListener('onNewDeviceRequest', () => {
-          console.log('New device request received');
+        ProximityModule.addListener('onNewDeviceRequest', (request) => {
+          console.log('New device request received', request);
         });
       } catch (error) {
         Alert.alert('Failed to initialize QR engagement');
