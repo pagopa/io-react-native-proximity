@@ -130,6 +130,7 @@ export const QrCodeScreen: React.FC = () => {
         return;
       }
       try {
+        // Initialize the QR engagement as peripheral mode
         await ProximityModule.initializeQrEngagement(true, false, true); // Peripheral mode
         // Register listeners
         ProximityModule.addListener(
