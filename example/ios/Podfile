@@ -5,8 +5,26 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+# Use a helper function to require scripts
+def node_require(script)
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+# Require react-native-permissions setup
+node_require('react-native-permissions/scripts/setup.rb')
+
+platform :ios, 16.0
 prepare_react_native_project!
+
+setup_permissions([
+  'Bluetooth',
+  'LocationAlways',
+  'LocationWhenInUse',
+])
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil

@@ -1,9 +1,7 @@
 import { Platform } from 'react-native';
 import {
-  check,
   checkMultiple,
   PERMISSIONS,
-  request,
   requestMultiple,
   RESULTS,
 } from 'react-native-permissions';
@@ -48,17 +46,4 @@ export const requestBlePermissions = async (): Promise<boolean> => {
     console.error('Permission request error:', error);
     return false;
   }
-};
-
-export const requestCameraPermission = async () => {
-  const permission =
-    Platform.OS === 'android'
-      ? PERMISSIONS.ANDROID.CAMERA
-      : PERMISSIONS.IOS.CAMERA;
-  const result = await check(permission);
-  if (result !== RESULTS.GRANTED) {
-    const requestResult = await request(permission);
-    return requestResult === RESULTS.GRANTED;
-  }
-  return true;
 };

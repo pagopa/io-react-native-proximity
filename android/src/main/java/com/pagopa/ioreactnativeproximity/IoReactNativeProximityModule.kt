@@ -6,14 +6,12 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
-import it.pagopa.io.wallet.proximity.ProximityLogger
 import it.pagopa.io.wallet.proximity.bluetooth.BleRetrievalMethod
 import it.pagopa.io.wallet.proximity.qr_code.QrEngagement
 import it.pagopa.io.wallet.proximity.qr_code.QrEngagementListener
 import it.pagopa.io.wallet.proximity.request.DocRequested
 import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
-import org.json.JSONObject
 import android.util.Base64
 import android.util.Log
 
@@ -103,29 +101,6 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     }
   }
 
-
-  private fun parseJsonToDocs(json: String, alias: String): Array<DocRequested> {
-    return try {
-      val jsonObject = JSONObject(json)
-      val docRequestedList = mutableListOf<DocRequested>()
-
-      jsonObject.keys().forEach { docType ->
-        val documentContent = jsonObject.optString(docType, "")
-
-        if (documentContent.isNotEmpty()) {
-          val docRequested = DocRequested(
-            content = documentContent,
-            alias = alias
-          )
-          docRequestedList.add(docRequested)
-        }
-      }
-      docRequestedList.toTypedArray()
-    } catch (e: Exception) {
-      ProximityLogger.e("JSON Parsing Error", "Failed to parse documents: ${e.message}")
-      arrayOf()
-    }
-  }
 
   private fun setQrEngagementListener() {
     qrEngagement?.withListener(object : QrEngagementListener {

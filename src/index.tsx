@@ -55,7 +55,19 @@ interface IoReactNativeProximity {
 const eventEmitter = new NativeEventEmitter(IoReactNativeProximity);
 
 const ProximityModule: IoReactNativeProximity = {
+  /**
+   * Initializes the QR engagement
+   * @android This method should be called before any other method in this module.
+   * @ios This method is not needed for iOS since the getQrCodeString method is responsible for initializing the connection
+   * @param peripheralMode - Whether the device is in peripheral mode
+   * @param centralClientMode - Whether the device is in central client mode
+   * @param clearBleCache - Whether the BLE cache should be cleared
+   */
   initializeQrEngagement(peripheralMode, centralClientMode, clearBleCache) {
+    // This is not needed for iOS since the getQrCodeString method is responsible for initializing the connection
+    if (Platform.OS === 'ios') {
+      return Promise.resolve(true);
+    }
     return IoReactNativeProximity.initializeQrEngagement(
       peripheralMode,
       centralClientMode,
@@ -63,10 +75,18 @@ const ProximityModule: IoReactNativeProximity = {
     );
   },
 
+  /**
+   * Gets the QR code string
+   * @ios This method is responsible for initializing the connection and retrieving the QR code string
+   * @android Returns the QR code string
+   */
   getQrCodeString() {
     return IoReactNativeProximity.getQrCodeString();
   },
 
+  /**
+   * Closes the QR engagement
+   */
   closeQrEngagement() {
     return IoReactNativeProximity.closeQrEngagement();
   },
