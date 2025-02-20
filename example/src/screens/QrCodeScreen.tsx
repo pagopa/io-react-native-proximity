@@ -13,7 +13,7 @@ import ProximityModule, {
 } from '@pagopa/io-react-native-proximity';
 import { requestBlePermissions } from '../utils/permissions';
 import { parseVerifierRequest } from '../../../src/schema';
-import { mdlMockedCBOR } from '../mocks';
+import { mdlMockHex } from '../mocks';
 import {
   generate,
   deleteKey,
@@ -58,7 +58,7 @@ export const QrCodeScreen: React.FC = () => {
   const handleCommunicationError = (
     data: QrEngagementEventPayloads['onCommunicationError']
   ) => {
-    console.error('QR Engagement Error:', data?.error);
+    console.error('QR Engagement Error:', JSON.stringify(data));
   };
 
   /**
@@ -106,12 +106,12 @@ export const QrCodeScreen: React.FC = () => {
         await generateKeyIfNotExists(KEYTAG);
         // Generate the response using the mocked CBOR credential
         const result = await ProximityModule.generateResponse(
-          mdlMockedCBOR,
+          mdlMockHex,
           responsePayload,
           KEYTAG
         );
         console.log('Response generated:', result);
-        ProximityModule.closeQrEngagement();
+        //closeConnection();
       } catch (error) {
         console.error(
           'Error handling new device request:',
@@ -159,12 +159,7 @@ export const QrCodeScreen: React.FC = () => {
     initialize();
 
     return () => {
-      // Cleanup: remove all listeners and close the engagement
-      console.log('Cleaning up listeners and closing QR engagement');
-      ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
-      ProximityModule.removeListeners('onCommunicationError');
-      ProximityModule.removeListeners('onNewDeviceRequest');
-      ProximityModule.closeQrEngagement();
+      closeConnection();
     };
   }, [handleNewDeviceRequest]);
 
@@ -175,6 +170,14 @@ export const QrCodeScreen: React.FC = () => {
     } catch (error) {
       console.error('Error generating QR code:', error);
     }
+  };
+
+  const closeConnection = () => {
+    console.log('Cleaning up listeners and closing QR engagement');
+    ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+    ProximityModule.removeListeners('onCommunicationError');
+    ProximityModule.removeListeners('onNewDeviceRequest');
+    ProximityModule.closeQrEngagement();
   };
 
   return (

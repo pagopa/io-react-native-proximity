@@ -14,6 +14,8 @@ import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import android.util.Base64
 import android.util.Log
+import com.upokecenter.cbor.CBORObject
+import it.pagopa.io.wallet.cbor.impl.MDoc
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -74,25 +76,43 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun generateResponse(jsonDocuments: String, fieldRequestedAndAccepted: String, alias: String, promise: Promise) {
+  fun generateResponse(
+    jsonDocuments: String,
+    fieldRequestedAndAccepted: String,
+    alias: String,
+    promise: Promise
+  ) {
     try {
-      val documents: Array<DocRequested> = arrayOf(DocRequested(Base64.encodeToString(jsonDocuments.toByteArray(), Base64.DEFAULT), alias))
+      val bytes = jsonDocuments.chunked(2)
+        .map { it.toInt(16).toByte() }
+        .toByteArray()
+      val documents: ArrayList<DocRequested> = arrayListOf()
       val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
       val responseGenerator = ResponseGenerator(sessionTranscript)
-      Log.e("RES", documents.contentToString())
-      Log.e("RES", fieldRequestedAndAccepted)
-      responseGenerator.createResponse(
-        documents,
-        fieldRequestedAndAccepted,
-        object : ResponseGenerator.Response {
-          override fun onResponseGenerated(response: ByteArray) {
-            Log.e("RES", response.decodeToString())
-            promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
+      val encoded64 = Base64.encode(bytes, Base64.DEFAULT)
+      val mDoc = MDoc(encoded64)
+      mDoc.decodeMDoc(
+        onComplete = { model ->
+          model.documents?.forEach {
+            documents.add(DocRequested(Base64.encodeToString(it.rawValue, Base64.DEFAULT), alias))
           }
+          responseGenerator.createResponse(
+            documents.toTypedArray(),
+            fieldRequestedAndAccepted,
+            object : ResponseGenerator.Response {
+              override fun onResponseGenerated(response: ByteArray) {
+                qrEngagement?.sendResponse(response)
+                promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
+              }
 
-          override fun onError(message: String) {
-            promise.reject("RESPONSE_GENERATION_ERROR", message)
-          }
+              override fun onError(message: String) {
+                promise.reject("RESPONSE_GENERATION_ERROR", message)
+              }
+            }
+          )
+        },
+        onError = { ex ->
+          promise.resolve("not ok")
         }
       )
     } catch (e: Exception) {
@@ -138,5 +158,27 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
 
   companion object {
     const val NAME = "IoReactNativeProximity"
+  }
+}
+
+object Utils {
+  fun hexStringToByteArray(s: String): ByteArray {
+    return hexToByte(s)
+  }
+
+  private fun hexToByte(hexString: String): ByteArray {
+    val byteArray = ByteArray(hexString.length / 2)
+    var i = 0
+    while (i < hexString.length) {
+      byteArray[i / 2] = (hexToByte(hexString[i]) * 16 + hexToByte(hexString[i + 1])).toByte()
+      i += 2
+    }
+    return byteArray
+  }
+
+  private fun hexToByte(ch: Char): Int {
+    if (ch in '0'..'9') return ch.code - '0'.code
+    if (ch in 'A'..'F') return ch.code - 'A'.code + 10
+    return if (ch in 'a'..'f') ch.code - 'a'.code + 10 else -1
   }
 }
