@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -8,20 +8,115 @@ import {
   View,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import ProximityModule from '@pagopa/io-react-native-proximity';
+import ProximityModule, {
+  type QrEngagementEventPayloads,
+} from '@pagopa/io-react-native-proximity';
 import { requestBlePermissions } from '../utils/permissions';
+import { parseVerifierRequest } from '../../../src/schema';
+import { mdlMockedCBOR } from '../mocks';
+import { generate, getPublicKey } from '@pagopa/io-react-native-crypto';
+
+export const WELL_KNOWN_CREDENTIALS = {
+  mdl: 'org.iso.18013.5.1.mDL',
+} as const;
+
+const KEYTAG = 'TEST_PROXIMITY_KEYTAG';
 
 export const QrCodeScreen: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  /**
+   * Generates a key pair if it does not exist
+   * @param keyTag The key tag to use
+   */
+  const generateKeyIfNotExists = async (keyTag: string) => {
+    try {
+      await getPublicKey(keyTag);
+    } catch (error: any) {
+      await generate(keyTag);
+    }
+  };
+
+  // Event handlers
+
+  /**
+   * Handles the device ready event
+   */
   const handleDeviceReady = () => {
     console.log('Device is ready for retrieval');
   };
 
-  const handleError = (message: string) => {
-    console.error('QR Engagement Error:', message);
+  /**
+   * Handles communication errors
+   * @param data The error data
+   */
+  const handleCommunicationError = (
+    data: QrEngagementEventPayloads['onCommunicationError']
+  ) => {
+    console.error('QR Engagement Error:', data?.error);
   };
+
+  /**
+   * Handles new device requests
+   * @param request The request object
+   * @returns The response object
+   * @throws Error if the request is invalid
+   * @throws Error if the response generation fails
+   */
+  const handleNewDeviceRequest = useCallback(
+    async (data: QrEngagementEventPayloads['onNewDeviceRequest']) => {
+      console.log('New device request received', data);
+      if (!data || !data.message) {
+        console.warn('Request does not contain a message.');
+        return;
+      }
+      const message = data.message;
+
+      // Attempt to parse the JSON message
+      let parsedJson: unknown;
+      try {
+        parsedJson = JSON.parse(message);
+      } catch (error) {
+        console.error('Failed to parse JSON from message:', error);
+        return;
+      }
+
+      // Validate using Zod with parse
+      const parsedResponse = parseVerifierRequest(parsedJson);
+      console.log('Parsed response:', JSON.stringify(parsedResponse));
+
+      // Ensure that the request object has exactly one key and it matches the expected key
+      const requestKeys = Object.keys(parsedResponse.request);
+      if (
+        requestKeys.length !== 1 ||
+        requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl
+      ) {
+        console.warn(
+          'Unexpected request keys. Expected only key:',
+          WELL_KNOWN_CREDENTIALS.mdl,
+          'but got:',
+          requestKeys
+        );
+        return;
+      }
+
+      console.log('Document found. Sending document...');
+      // Generate the response payload
+      const responsePayload = JSON.stringify(parsedResponse.request);
+      // Generate the key pair if it does not exist
+      await generateKeyIfNotExists(KEYTAG);
+      // Generate the response using the mocked CBOR credential
+      const result = await ProximityModule.generateResponse(
+        mdlMockedCBOR,
+        responsePayload,
+        KEYTAG
+      );
+      console.log('Response generated:', result);
+      // ProximityModule.closeQrEngagement();
+    },
+    []
+  );
 
   useEffect(() => {
     const initialize = async () => {
@@ -36,14 +131,19 @@ export const QrCodeScreen: React.FC = () => {
       }
       try {
         await ProximityModule.initializeQrEngagement(true, false, true); // Peripheral mode
+        // Register listeners
         ProximityModule.addListener(
           'onDeviceRetrievalHelperReady',
           handleDeviceReady
         );
-        ProximityModule.addListener('onCommunicationError', handleError);
-        ProximityModule.addListener('onNewDeviceRequest', (request) => {
-          console.log('New device request received', request);
-        });
+        ProximityModule.addListener(
+          'onCommunicationError',
+          handleCommunicationError
+        );
+        ProximityModule.addListener(
+          'onNewDeviceRequest',
+          handleNewDeviceRequest
+        );
       } catch (error) {
         Alert.alert('Failed to initialize QR engagement');
       } finally {
@@ -54,25 +154,22 @@ export const QrCodeScreen: React.FC = () => {
     initialize();
 
     return () => {
-      console.log('Returning from useEffect');
-      // ProximityModule.closeQrEngagement();
-      // ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
-      // ProximityModule.removeListeners('onCommunicationError');
+      // Cleanup: remove all listeners and close the engagement
+      console.log('Cleaning up listeners and closing QR engagement');
+      ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+      ProximityModule.removeListeners('onCommunicationError');
+      ProximityModule.removeListeners('onNewDeviceRequest');
+      ProximityModule.closeQrEngagement();
     };
-  }, []);
-
-  // useEffect(() => {
-  //   console.log('here');
-
-  //   return () => {
-  //     ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
-  //     ProximityModule.removeListeners('onCommunicationError');
-  //   };
-  // }, []);
+  }, [handleNewDeviceRequest]);
 
   const getQrCode = async () => {
-    const qrString = await ProximityModule.getQrCodeString();
-    setQrCode(qrString);
+    try {
+      const qrString = await ProximityModule.getQrCodeString();
+      setQrCode(qrString);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
   };
 
   return (
@@ -83,7 +180,7 @@ export const QrCodeScreen: React.FC = () => {
       ) : qrCode ? (
         <QRCode value={qrCode} size={200} />
       ) : (
-        <Text>Click the button to generate a qr code</Text>
+        <Text>Click the button to generate a QR code</Text>
       )}
       <TouchableOpacity style={styles.button} onPress={getQrCode}>
         <Text style={styles.buttonText}>Generate QR Engagement</Text>

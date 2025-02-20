@@ -17,12 +17,15 @@ const IoReactNativeProximity = NativeModules.IoReactNativeProximity
       }
     );
 
-type QrEngagementEvents =
-  | 'onConnecting'
-  | 'onDeviceRetrievalHelperReady'
-  | 'onCommunicationError'
-  | 'onNewDeviceRequest'
-  | 'onDeviceDisconnected';
+export type QrEngagementEventPayloads = {
+  onConnecting: undefined;
+  onDeviceRetrievalHelperReady: undefined;
+  onCommunicationError: { error: string } | undefined;
+  onNewDeviceRequest: { message: string } | undefined;
+  onDeviceDisconnected: undefined;
+};
+
+export type QrEngagementEvents = keyof QrEngagementEventPayloads;
 
 interface IoReactNativeProximity {
   initializeQrEngagement(
@@ -41,7 +44,10 @@ interface IoReactNativeProximity {
     alias: string
   ): Promise<string>;
 
-  addListener(event: QrEngagementEvents, callback: (data?: any) => void): void;
+  addListener<E extends QrEngagementEvents>(
+    event: E,
+    callback: (data: QrEngagementEventPayloads[E]) => void
+  ): void;
 
   removeListeners(event: QrEngagementEvents): void;
 }
