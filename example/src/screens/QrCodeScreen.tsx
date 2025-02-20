@@ -14,7 +14,11 @@ import ProximityModule, {
 import { requestBlePermissions } from '../utils/permissions';
 import { parseVerifierRequest } from '../../../src/schema';
 import { mdlMockedCBOR } from '../mocks';
-import { generate, getPublicKey } from '@pagopa/io-react-native-crypto';
+import {
+  generate,
+  deleteKey,
+  type CryptoError,
+} from '@pagopa/io-react-native-crypto';
 
 export const WELL_KNOWN_CREDENTIALS = {
   mdl: 'org.iso.18013.5.1.mDL',
@@ -31,11 +35,11 @@ export const QrCodeScreen: React.FC = () => {
    * @param keyTag The key tag to use
    */
   const generateKeyIfNotExists = async (keyTag: string) => {
-    try {
-      await getPublicKey(keyTag);
-    } catch (error: any) {
-      await generate(keyTag);
-    }
+    await deleteKey(keyTag).catch((e) => {
+      const { message } = e as CryptoError;
+      if (message !== 'PUBLIC_KEY_NOT_FOUND') throw e;
+    });
+    await generate(keyTag);
   };
 
   // Event handlers
@@ -66,54 +70,54 @@ export const QrCodeScreen: React.FC = () => {
    */
   const handleNewDeviceRequest = useCallback(
     async (data: QrEngagementEventPayloads['onNewDeviceRequest']) => {
-      console.log('New device request received', data);
-      if (!data || !data.message) {
-        console.warn('Request does not contain a message.');
-        return;
-      }
-      const message = data.message;
-
-      // Attempt to parse the JSON message
-      let parsedJson: unknown;
       try {
-        parsedJson = JSON.parse(message);
-      } catch (error) {
-        console.error('Failed to parse JSON from message:', error);
-        return;
-      }
+        console.log('New device request received', data);
+        if (!data || !data.message) {
+          console.warn('Request does not contain a message.');
+          return;
+        }
+        const message = data.message;
 
-      // Validate using Zod with parse
-      const parsedResponse = parseVerifierRequest(parsedJson);
-      console.log('Parsed response:', JSON.stringify(parsedResponse));
+        const parsedJson = JSON.parse(message);
 
-      // Ensure that the request object has exactly one key and it matches the expected key
-      const requestKeys = Object.keys(parsedResponse.request);
-      if (
-        requestKeys.length !== 1 ||
-        requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl
-      ) {
-        console.warn(
-          'Unexpected request keys. Expected only key:',
-          WELL_KNOWN_CREDENTIALS.mdl,
-          'but got:',
-          requestKeys
+        // Validate using Zod with parse
+        const parsedResponse = parseVerifierRequest(parsedJson);
+        console.log('Parsed response:', JSON.stringify(parsedResponse));
+
+        // Ensure that the request object has exactly one key and it matches the expected key
+        const requestKeys = Object.keys(parsedResponse.request);
+        if (
+          requestKeys.length !== 1 ||
+          requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl
+        ) {
+          console.warn(
+            'Unexpected request keys. Expected only key:',
+            WELL_KNOWN_CREDENTIALS.mdl,
+            'but got:',
+            requestKeys
+          );
+          return;
+        }
+
+        console.log('Document found. Sending document...');
+        // Generate the response payload
+        const responsePayload = JSON.stringify(parsedResponse.request);
+        // Generate the key pair if it does not exist
+        await generateKeyIfNotExists(KEYTAG);
+        // Generate the response using the mocked CBOR credential
+        const result = await ProximityModule.generateResponse(
+          mdlMockedCBOR,
+          responsePayload,
+          KEYTAG
         );
-        return;
+        console.log('Response generated:', result);
+        ProximityModule.closeQrEngagement();
+      } catch (error) {
+        console.error(
+          'Error handling new device request:',
+          JSON.stringify(error)
+        );
       }
-
-      console.log('Document found. Sending document...');
-      // Generate the response payload
-      const responsePayload = JSON.stringify(parsedResponse.request);
-      // Generate the key pair if it does not exist
-      await generateKeyIfNotExists(KEYTAG);
-      // Generate the response using the mocked CBOR credential
-      const result = await ProximityModule.generateResponse(
-        mdlMockedCBOR,
-        responsePayload,
-        KEYTAG
-      );
-      console.log('Response generated:', result);
-      // ProximityModule.closeQrEngagement();
     },
     []
   );

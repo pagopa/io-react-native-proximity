@@ -15,6 +15,7 @@ import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import org.json.JSONObject
 import android.util.Base64
+import android.util.Log
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -77,15 +78,17 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun generateResponse(jsonDocuments: String, fieldRequestedAndAccepted: String, alias: String, promise: Promise) {
     try {
-      val documents: Array<DocRequested> = parseJsonToDocs(jsonDocuments, alias)
+      val documents: Array<DocRequested> = arrayOf(DocRequested(Base64.encodeToString(jsonDocuments.toByteArray(), Base64.DEFAULT), alias))
       val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
       val responseGenerator = ResponseGenerator(sessionTranscript)
-
+      Log.e("RES", documents.contentToString())
+      Log.e("RES", fieldRequestedAndAccepted)
       responseGenerator.createResponse(
         documents,
         fieldRequestedAndAccepted,
         object : ResponseGenerator.Response {
           override fun onResponseGenerated(response: ByteArray) {
+            Log.e("RES", response.decodeToString())
             promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
           }
 
@@ -95,6 +98,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         }
       )
     } catch (e: Exception) {
+      Log.e("RES", e.stackTraceToString())
       promise.reject("ERROR_GENERATING_RESPONSE", e.message, e)
     }
   }
