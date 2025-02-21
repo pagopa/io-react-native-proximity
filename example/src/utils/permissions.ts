@@ -24,7 +24,7 @@ export const requestBlePermissions = async (): Promise<boolean> => {
       permissionsToCheck = [PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION];
     }
   } else {
-    // iOS permissions remain unchanged.
+    // iOS permissions required are Bluetooth and location.
     permissionsToCheck = [
       PERMISSIONS.IOS.BLUETOOTH,
       PERMISSIONS.IOS.LOCATION_ALWAYS,
