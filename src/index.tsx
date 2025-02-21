@@ -38,6 +38,10 @@ interface IoReactNativeProximity {
 
   closeQrEngagement(): Promise<boolean>;
 
+  sendErrorResponse(): Promise<boolean>;
+
+  sendErrorResponseNoData(): Promise<boolean>;
+
   generateResponse(
     jsonDocuments: string,
     fieldRequestedAndAccepted: string,
@@ -91,9 +95,29 @@ const ProximityModule: IoReactNativeProximity = {
     return IoReactNativeProximity.closeQrEngagement();
   },
 
-  generateResponse(jsonDocuments, fieldRequestedAndAccepted, alias) {
+  /**
+   * Sends a generic error response to the verifier app
+   */
+  sendErrorResponse(): Promise<boolean> {
+    return IoReactNativeProximity.sendErrorResponse();
+  },
+
+  /**
+   * Sends an error response to the verifier app when the requested document is not found
+   */
+  sendErrorResponseNoData(): Promise<boolean> {
+    return IoReactNativeProximity.sendErrorResponseNoData();
+  },
+
+  /**
+   * Generates a response that will be sent to the verifier app containing the requested data
+   * @param documentCBOR - Base64 encoded string that represents the CBOR document
+   * @param fieldRequestedAndAccepted - JSON object containing the accepted fields
+   * @param alias - The key alias to use for signing the response
+   */
+  generateResponse(documentCBOR, fieldRequestedAndAccepted, alias) {
     return IoReactNativeProximity.generateResponse(
-      jsonDocuments,
+      documentCBOR,
       fieldRequestedAndAccepted,
       alias
     );

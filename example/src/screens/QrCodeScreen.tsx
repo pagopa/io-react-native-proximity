@@ -15,9 +15,9 @@ import { requestBlePermissions } from '../utils/permissions';
 import { parseVerifierRequest } from '../../../src/schema';
 import { mdlMockHexConvertedToBase64 } from '../mocks';
 import {
-  generate,
-  deleteKey,
   type CryptoError,
+  deleteKey,
+  generate,
 } from '@pagopa/io-react-native-crypto';
 
 export const WELL_KNOWN_CREDENTIALS = {
@@ -86,20 +86,27 @@ export const QrCodeScreen: React.FC = () => {
 
         // Ensure that the request object has exactly one key and it matches the expected key
         const requestKeys = Object.keys(parsedResponse.request);
-        if (
-          requestKeys.length !== 1 ||
-          requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl
-        ) {
+
+        if (requestKeys.length !== 1) {
+          console.warn(
+            'Unexpected request keys. Expected only one key but got:',
+            requestKeys
+          );
+          await ProximityModule.sendErrorResponseNoData();
+          return;
+        }
+        if (requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl) {
           console.warn(
             'Unexpected request keys. Expected only key:',
             WELL_KNOWN_CREDENTIALS.mdl,
             'but got:',
             requestKeys
           );
+          await ProximityModule.sendErrorResponseNoData();
           return;
         }
 
-        console.log('Document found. Sending document...');
+        console.log('MDL request found. Sending document...');
         // Generate the response payload
         const responsePayload = JSON.stringify(parsedResponse.request);
         // Generate the key pair if it does not exist
@@ -117,6 +124,7 @@ export const QrCodeScreen: React.FC = () => {
           'Error handling new device request:',
           JSON.stringify(error)
         );
+        await ProximityModule.sendErrorResponse();
       }
     },
     []
