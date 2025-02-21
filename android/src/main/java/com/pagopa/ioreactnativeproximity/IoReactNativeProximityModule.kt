@@ -55,7 +55,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       qrEngagement?.let {
         val qrCodeString = it.getQrCodeString()
         promise.resolve(qrCodeString)
-      } ?: {
+      } ?: run {
         ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
     } catch (e: Exception) {
@@ -80,7 +80,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       qrEngagement?.let {
         it.sendErrorResponse()
         promise.resolve(true)
-      } ?: {
+      } ?: run {
         ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
     } catch (e: Exception) {
@@ -94,7 +94,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       qrEngagement?.let {
         it.sendErrorResponseNoData()
         promise.resolve(true)
-      } ?: {
+      } ?: run {
         ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
     } catch (e: Exception) {
@@ -110,41 +110,43 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     try {
-      if (deviceRetrievalHelper == null) {
-        ModuleException.DRH_NOT_DEFINED.reject(promise)
-      }
-      if (qrEngagement == null) {
-        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
-      }
-      val documents: ArrayList<DocRequested> = arrayListOf()
-      val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
-      val responseGenerator = ResponseGenerator(sessionTranscript)
-      val mDoc = MDoc(documentCBOR)
-      mDoc.decodeMDoc(
-        onComplete = { model ->
-          model.documents?.forEach {
-            val encoded = Base64.encodeToString(it.rawValue, Base64.DEFAULT)
-            documents.add(DocRequested(encoded, alias))
-          }
-          responseGenerator.createResponse(
-            documents.toTypedArray(),
-            fieldRequestedAndAccepted,
-            object : ResponseGenerator.Response {
-              override fun onResponseGenerated(response: ByteArray) {
-                qrEngagement?.sendResponse(response)
-                promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
+      deviceRetrievalHelper?.let { devHelper ->
+        qrEngagement?.let { qrEng ->
+          val documents: ArrayList<DocRequested> = arrayListOf()
+          val sessionTranscript = devHelper.sessionTranscript()
+          val responseGenerator = ResponseGenerator(sessionTranscript)
+          val mDoc = MDoc(documentCBOR)
+          mDoc.decodeMDoc(
+            onComplete = { model ->
+              model.documents?.forEach {
+                val encoded = Base64.encodeToString(it.rawValue, Base64.DEFAULT)
+                documents.add(DocRequested(encoded, alias))
               }
-
-              override fun onError(message: String) {
-                ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(promise, Pair(ERROR_KEY, message))
-              }
+              responseGenerator.createResponse(
+                documents.toTypedArray(),
+                fieldRequestedAndAccepted,
+                object : ResponseGenerator.Response {
+                  override fun onResponseGenerated(response: ByteArray) {
+                    qrEng.sendResponse(response)
+                    promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
+                  }
+                  override fun onError(message: String) {
+                    ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(promise, Pair(ERROR_KEY, message))
+                  }
+                }
+              )
+            },
+            onError = { e: Exception ->
+              ModuleException.DECODE_MDOC_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
             }
           )
-        },
-        onError = { e: Exception ->
-          ModuleException.DECODE_MDOC_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
+        } ?: run {
+          ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
         }
-      )
+      } ?: run {
+        ModuleException.DRH_NOT_DEFINED.reject(promise)
+      }
+
     } catch (e: Exception) {
       ModuleException.GENERIC_GENERATE_RESPONSE_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
