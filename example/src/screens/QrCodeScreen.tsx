@@ -13,7 +13,7 @@ import ProximityModule, {
 } from '@pagopa/io-react-native-proximity';
 import { requestBlePermissions } from '../utils/permissions';
 import { parseVerifierRequest } from '../../../src/schema';
-import { mdlMockHexConvertedToBase64 } from '../mocks';
+import { mdlMockBase64WithMultipleDocs } from '../mocks';
 import {
   type CryptoError,
   deleteKey,
@@ -113,7 +113,7 @@ export const QrCodeScreen: React.FC = () => {
         await generateKeyIfNotExists(KEYTAG);
         // Generate the response using the mocked CBOR credential
         const result = await ProximityModule.generateResponse(
-          mdlMockHexConvertedToBase64,
+          mdlMockBase64WithMultipleDocs,
           responsePayload,
           KEYTAG
         );
@@ -180,12 +180,12 @@ export const QrCodeScreen: React.FC = () => {
     }
   };
 
-  const closeConnection = () => {
+  const closeConnection = async () => {
     console.log('Cleaning up listeners and closing QR engagement');
     ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
     ProximityModule.removeListeners('onCommunicationError');
     ProximityModule.removeListeners('onNewDeviceRequest');
-    ProximityModule.closeQrEngagement();
+    await ProximityModule.closeQrEngagement();
   };
 
   return (

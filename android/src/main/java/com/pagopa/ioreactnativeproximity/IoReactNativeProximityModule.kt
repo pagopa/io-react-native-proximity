@@ -98,7 +98,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
     } catch (e: Exception) {
-      ModuleException.ERROR_SENDING_ERROR_NODATA_RESPONSE.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
+      ModuleException.ERROR_SENDING_ERROR_NO_DATA_RESPONSE.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
   }
 
@@ -194,7 +194,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     GET_QR_CODE_ERROR(Exception("GET_QR_CODE_ERROR")),
     CLOSE_QR_ENGAGEMENT_ERROR(Exception("CLOSE_QR_ENGAGEMENT_ERROR")),
     ERROR_SENDING_ERROR_RESPONSE(Exception("ERROR_SENDING_ERROR_RESPONSE")),
-    ERROR_SENDING_ERROR_NODATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
+    ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
     RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
     DECODE_MDOC_ERROR(Exception("DECODE_MDOC_ERROR")),
     GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR"));
