@@ -13,9 +13,8 @@ import it.pagopa.io.wallet.proximity.request.DocRequested
 import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import android.util.Base64
-import android.util.Log
+import com.facebook.react.bridge.WritableNativeMap
 import it.pagopa.io.wallet.cbor.impl.MDoc
-import com.upokecenter.cbor.CBORObject
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -46,21 +45,21 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       setQrEngagementListener()
       promise.resolve(true)
     } catch (e: Exception) {
-      promise.reject("QR_ENGAGEMENT_ERROR", e.message)
+      ModuleException.QR_ENGAGEMENT_NOT_CONFIGURED_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
   }
 
   @ReactMethod
   fun getQrCodeString(promise: Promise) {
     try {
-      if (qrEngagement == null) {
-        promise.reject("ERROR", "QR Engagement not initialized or invalid")
-        return
+      qrEngagement?.let {
+        val qrCodeString = it.getQrCodeString()
+        promise.resolve(qrCodeString)
+      } ?: {
+        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
-      val qrCodeString = qrEngagement?.getQrCodeString()
-      promise.resolve(qrCodeString)
     } catch (e: Exception) {
-      promise.reject("QR_CODE_ERROR", e.message)
+      ModuleException.GET_QR_CODE_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
   }
 
@@ -71,23 +70,56 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       deviceRetrievalHelper?.disconnect()
       promise.resolve(true)
     } catch (e: Exception) {
-      promise.reject("CLOSE_ERROR", e.message)
+      ModuleException.CLOSE_QR_ENGAGEMENT_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
+    }
+  }
+
+  @ReactMethod
+  fun sendErrorResponse(promise: Promise) {
+    try {
+      qrEngagement?.let {
+        it.sendErrorResponse()
+        promise.resolve(true)
+      } ?: {
+        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+      }
+    } catch (e: Exception) {
+      ModuleException.ERROR_SENDING_ERROR_RESPONSE.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
+    }
+  }
+
+  @ReactMethod
+  fun sendErrorResponseNoData(promise: Promise) {
+    try {
+      qrEngagement?.let {
+        it.sendErrorResponseNoData()
+        promise.resolve(true)
+      } ?: {
+        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+      }
+    } catch (e: Exception) {
+      ModuleException.ERROR_SENDING_ERROR_NODATA_RESPONSE.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
   }
 
   @ReactMethod
   fun generateResponse(
-    jsonDocuments: String,
+    documentCBOR: String,
     fieldRequestedAndAccepted: String,
     alias: String,
     promise: Promise
   ) {
     try {
+      if (deviceRetrievalHelper == null) {
+        ModuleException.DRH_NOT_DEFINED.reject(promise)
+      }
+      if (qrEngagement == null) {
+        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+      }
       val documents: ArrayList<DocRequested> = arrayListOf()
       val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
       val responseGenerator = ResponseGenerator(sessionTranscript)
-//      val encoded64 = Base64.encode(jsonDocuments, Base64.DEFAULT)
-      val mDoc = MDoc(jsonDocuments)
+      val mDoc = MDoc(documentCBOR)
       mDoc.decodeMDoc(
         onComplete = { model ->
           model.documents?.forEach {
@@ -104,18 +136,17 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
               }
 
               override fun onError(message: String) {
-                promise.reject("RESPONSE_GENERATION_ERROR", message)
+                ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(promise, Pair(ERROR_KEY, message))
               }
             }
           )
         },
-        onError = { ex ->
-          promise.resolve("not ok")
+        onError = { e: Exception ->
+          ModuleException.DECODE_MDOC_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
         }
       )
     } catch (e: Exception) {
-      Log.e("RES", e.stackTraceToString())
-      promise.reject("ERROR_GENERATING_RESPONSE", e.message, e)
+      ModuleException.GENERIC_GENERATE_RESPONSE_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
     }
   }
 
@@ -154,29 +185,39 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       .emit(eventName, params)
   }
 
+  private enum class ModuleException(
+    val ex: Exception
+  ) {
+    DRH_NOT_DEFINED(Exception("DRH_NOT_DEFINED")),
+    QR_ENGAGEMENT_NOT_DEFINED_ERROR(Exception("QR_ENGAGEMENT_NOT_DEFINED_ERROR")),
+    QR_ENGAGEMENT_NOT_CONFIGURED_ERROR(Exception("QR_ENGAGEMENT_NOT_CONFIGURED_ERROR")),
+    GET_QR_CODE_ERROR(Exception("GET_QR_CODE_ERROR")),
+    CLOSE_QR_ENGAGEMENT_ERROR(Exception("CLOSE_QR_ENGAGEMENT_ERROR")),
+    ERROR_SENDING_ERROR_RESPONSE(Exception("ERROR_SENDING_ERROR_RESPONSE")),
+    ERROR_SENDING_ERROR_NODATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
+    RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
+    DECODE_MDOC_ERROR(Exception("DECODE_MDOC_ERROR")),
+    GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR"));
+
+    fun reject(
+      promise: Promise, vararg args: Pair<String, String>
+    ) {
+      exMap(*args).let {
+        promise.reject(it.first, ex.message, it.second)
+      }
+    }
+
+    private fun exMap(vararg args: Pair<String, String>): Pair<String, WritableMap> {
+      val writableMap = WritableNativeMap()
+      args.forEach { writableMap.putString(it.first, it.second) }
+      return Pair(this.ex.message ?: "UNKNOWN", writableMap)
+    }
+  }
+
+  private fun getExceptionMessageOrEmpty(e: Exception): String = e.message ?: ""
+
   companion object {
     const val NAME = "IoReactNativeProximity"
-  }
-}
-
-object Utils {
-  fun hexStringToByteArray(s: String): ByteArray {
-    return hexToByte(s)
-  }
-
-  private fun hexToByte(hexString: String): ByteArray {
-    val byteArray = ByteArray(hexString.length / 2)
-    var i = 0
-    while (i < hexString.length) {
-      byteArray[i / 2] = (hexToByte(hexString[i]) * 16 + hexToByte(hexString[i + 1])).toByte()
-      i += 2
-    }
-    return byteArray
-  }
-
-  private fun hexToByte(ch: Char): Int {
-    if (ch in '0'..'9') return ch.code - '0'.code
-    if (ch in 'A'..'F') return ch.code - 'A'.code + 10
-    return if (ch in 'a'..'f') ch.code - 'a'.code + 10 else -1
+    const val ERROR_KEY = "error"
   }
 }
