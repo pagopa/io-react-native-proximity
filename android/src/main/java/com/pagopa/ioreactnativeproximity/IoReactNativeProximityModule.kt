@@ -14,8 +14,8 @@ import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import android.util.Base64
 import android.util.Log
-import com.upokecenter.cbor.CBORObject
 import it.pagopa.io.wallet.cbor.impl.MDoc
+import com.upokecenter.cbor.CBORObject
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -83,18 +83,16 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     try {
-      val bytes = jsonDocuments.chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
       val documents: ArrayList<DocRequested> = arrayListOf()
       val sessionTranscript = deviceRetrievalHelper?.sessionTranscript() ?: ByteArray(0)
       val responseGenerator = ResponseGenerator(sessionTranscript)
-      val encoded64 = Base64.encode(bytes, Base64.DEFAULT)
-      val mDoc = MDoc(encoded64)
+//      val encoded64 = Base64.encode(jsonDocuments, Base64.DEFAULT)
+      val mDoc = MDoc(jsonDocuments)
       mDoc.decodeMDoc(
         onComplete = { model ->
           model.documents?.forEach {
-            documents.add(DocRequested(Base64.encodeToString(it.rawValue, Base64.DEFAULT), alias))
+            val encoded = Base64.encodeToString(it.rawValue, Base64.DEFAULT)
+            documents.add(DocRequested(encoded, alias))
           }
           responseGenerator.createResponse(
             documents.toTypedArray(),

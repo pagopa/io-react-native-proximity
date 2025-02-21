@@ -13,7 +13,7 @@ import ProximityModule, {
 } from '@pagopa/io-react-native-proximity';
 import { requestBlePermissions } from '../utils/permissions';
 import { parseVerifierRequest } from '../../../src/schema';
-import { mdlMockHex } from '../mocks';
+import { mdlMockHexConvertedToBase64 } from '../mocks';
 import {
   generate,
   deleteKey,
@@ -106,7 +106,7 @@ export const QrCodeScreen: React.FC = () => {
         await generateKeyIfNotExists(KEYTAG);
         // Generate the response using the mocked CBOR credential
         const result = await ProximityModule.generateResponse(
-          mdlMockHex,
+          mdlMockHexConvertedToBase64,
           responsePayload,
           KEYTAG
         );

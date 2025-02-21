@@ -86,5 +86,6 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "it.pagopa.io.wallet.proximity:proximity:1.0.0"
   implementation "it.pagopa.io.wallet.cbor:cbor:1.0.1"
+  implementation "com.upokecenter:cbor:4.5.6"
 }
 
