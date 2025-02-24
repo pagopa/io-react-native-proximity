@@ -1,4 +1,4 @@
-package com.ioreactnativeproximity
+package com.pagopa.ioreactnativeproximity
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
