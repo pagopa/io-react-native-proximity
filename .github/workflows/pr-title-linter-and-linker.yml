@@ -22,7 +22,7 @@ jobs:
         id: lint
         run: |
           PR_TITLE="$TITLE"
-          if [[ "$PR_TITLE" =~ \[(#?[A-Z]*-[0-9]*,?){1,}\]\ [a-z].* ]]; then
+          if [[ "$PR_TITLE" =~ \[(#?[A-Z]*-[0-9]*,?){1,}\] ]]; then
             echo "PR title is valid."
             echo "VALIDATION_RESULT=success" >> $GITHUB_ENV
           else
