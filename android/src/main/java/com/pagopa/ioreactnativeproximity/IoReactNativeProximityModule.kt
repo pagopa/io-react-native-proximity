@@ -152,6 +152,23 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun sendResponse(response: String, promise: Promise){
+    try {
+      qrEngagement?.let { qrEng ->
+        {
+          val responseBytes = Base64.decode(response, Base64.NO_WRAP)
+          qrEng.sendResponse(responseBytes)
+          promise.resolve(true)
+        }
+      } ?: run {
+        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+      }
+    } catch (e: Exception) {
+      ModuleException.SEND_RESPONSE_ERROR.reject(promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e)))
+    }
+  }
+
 
   private fun setQrEngagementListener() {
     qrEngagement?.withListener(object : QrEngagementListener {
@@ -199,7 +216,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
     RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
     DECODE_MDOC_ERROR(Exception("DECODE_MDOC_ERROR")),
-    GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR"));
+    GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR")),
+    SEND_RESPONSE_ERROR(Exception("SEND_RESPONSE_ERROR"));
 
     fun reject(
       promise: Promise, vararg args: Pair<String, String>

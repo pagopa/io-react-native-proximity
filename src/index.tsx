@@ -48,6 +48,10 @@ interface IoReactNativeProximity {
     alias: string
   ): Promise<string>;
 
+  sendResponse(
+    response: ReturnType<typeof IoReactNativeProximity.generateResponse>
+  ): Promise<boolean>;
+
   addListener<E extends QrEngagementEvents>(
     event: E,
     callback: (data: QrEngagementEventPayloads[E]) => void
@@ -121,6 +125,10 @@ const ProximityModule: IoReactNativeProximity = {
       fieldRequestedAndAccepted,
       alias
     );
+  },
+
+  sendResponse(response) {
+    return IoReactNativeProximity.sendResponse(response);
   },
 
   addListener(event, callback) {
