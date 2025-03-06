@@ -118,6 +118,8 @@ export const QrCodeScreen: React.FC = () => {
           KEYTAG
         );
         console.log('Response generated:', result);
+        await ProximityModule.sendResponse(result);
+        console.log('Response sent');
         //closeConnection();
       } catch (error) {
         console.error(
