@@ -139,6 +139,14 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     )
   }
 
+  /**
+   * Generates a response which can later be sent with {sendResponse} with the provided
+   * CBOR documents and the requested attributes.
+   * @param documents - A ReadableArray containing a map with alias, issuerSignedContent and docType as strings.
+   * @param fieldRequestedAndAccepted - The string containing the requested attributes. This is
+   * provided by the {onNewDeviceRequest} callback provided by {setQrEngagementListener} .
+   * @param promise - The promise which will be resolved in case of success or rejected in case of failure.
+   */
   @ReactMethod
   fun generateResponse(
     documents: ReadableArray,
@@ -253,7 +261,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
     RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
     GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR")),
-    WRONG_DOCUMENTS_FORMAT(Exception("WRONG_DOCUMENTS_FORMAT"));
+    WRONG_DOCUMENTS_FORMAT(Exception("WRONG_DOCUMENTS_FORMAT")),
+    SEND_RESPONSE_ERROR(Exception("SEND_RESPONSE_ERROR"));
 
     fun reject(
       promise: Promise, vararg args: Pair<String, String>
