@@ -27,6 +27,16 @@ export type QrEngagementEventPayloads = {
 
 export type QrEngagementEvents = keyof QrEngagementEventPayloads;
 
+/**
+ * Documents type to be used in the {@link generateResponse} method.
+ * It contains the issuer signed, the alias of the bound key and the document type.
+ */
+export type Document = {
+  issuerSignedContent: string;
+  alias: string;
+  docType: string;
+};
+
 interface IoReactNativeProximity {
   initializeQrEngagement(
     peripheralMode: boolean,
@@ -43,10 +53,13 @@ interface IoReactNativeProximity {
   sendErrorResponseNoData(): Promise<boolean>;
 
   generateResponse(
-    jsonDocuments: string,
-    fieldRequestedAndAccepted: string,
-    alias: string
+    documents: Array<Document>,
+    fieldRequestedAndAccepted: string
   ): Promise<string>;
+
+  sendResponse(
+    response: ReturnType<typeof IoReactNativeProximity.generateResponse>
+  ): Promise<boolean>;
 
   addListener<E extends QrEngagementEvents>(
     event: E,
@@ -111,16 +124,21 @@ const ProximityModule: IoReactNativeProximity = {
 
   /**
    * Generates a response that will be sent to the verifier app containing the requested data
-   * @param documentCBOR - Base64 encoded string that represents the CBOR document
+   * @param issuerSignedContent - Base64 encoded string that represents the CBOR document
+   * @param alias - The key alias to use for signing the response
+   * @param docType - The document type of issuerSignedContent
    * @param fieldRequestedAndAccepted - JSON object containing the accepted fields
    * @param alias - The key alias to use for signing the response
    */
-  generateResponse(documentCBOR, fieldRequestedAndAccepted, alias) {
+  generateResponse(documents, fieldRequestedAndAccepted) {
     return IoReactNativeProximity.generateResponse(
-      documentCBOR,
-      fieldRequestedAndAccepted,
-      alias
+      documents,
+      fieldRequestedAndAccepted
     );
+  },
+
+  sendResponse(response) {
+    return IoReactNativeProximity.sendResponse(response);
   },
 
   addListener(event, callback) {
