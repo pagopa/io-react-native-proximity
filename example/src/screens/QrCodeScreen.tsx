@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import ProximityModule, {
+  type Document,
   type QrEngagementEventPayloads,
 } from '@pagopa/io-react-native-proximity';
 import { requestBlePermissions } from '../utils/permissions';
@@ -112,10 +113,16 @@ export const QrCodeScreen: React.FC = () => {
         // Generate the key pair if it does not exist
         await generateKeyIfNotExists(KEYTAG);
         // Generate the response using the mocked CBOR credential
+        const documents: Array<Document> = [
+          {
+            alias: KEYTAG,
+            docType: WELL_KNOWN_CREDENTIALS.mdl,
+            issuerSignedContent: mdlMockBase64,
+          },
+        ];
         const result = await ProximityModule.generateResponse(
-          mdlMockBase64,
-          responsePayload,
-          KEYTAG
+          documents,
+          responsePayload
         );
         console.log('Response generated:', result);
         await ProximityModule.sendResponse(result);
