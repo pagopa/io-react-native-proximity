@@ -28,7 +28,10 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun initializeQrEngagement(
-    peripheralMode: Boolean, centralClientMode: Boolean, clearBleCache: Boolean, promise: Promise
+    peripheralMode: Boolean,
+    centralClientMode: Boolean,
+    clearBleCache: Boolean,
+    promise: Promise
   ) {
     try {
       val retrievalMethod = BleRetrievalMethod(
@@ -43,7 +46,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       promise.resolve(true)
     } catch (e: Exception) {
       ModuleException.QR_ENGAGEMENT_NOT_CONFIGURED_ERROR.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -59,7 +63,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       }
     } catch (e: Exception) {
       ModuleException.GET_QR_CODE_ERROR.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -72,7 +77,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       promise.resolve(true)
     } catch (e: Exception) {
       ModuleException.CLOSE_QR_ENGAGEMENT_ERROR.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -88,7 +94,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       }
     } catch (e: Exception) {
       ModuleException.ERROR_SENDING_ERROR_RESPONSE.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -104,7 +111,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       }
     } catch (e: Exception) {
       ModuleException.ERROR_SENDING_ERROR_NO_DATA_RESPONSE.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -142,7 +150,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         qrEngagement?.let { qrEng ->
           // Get the DocRequested list and if it's empty then reject the promise and return
           val docRequestedList = getDocRequestedArrayList(documents)
-          if(docRequestedList.isEmpty()){
+          if (docRequestedList.isEmpty()) {
             ModuleException.WRONG_DOCUMENTS_FORMAT.reject(promise)
             return
           }
@@ -159,7 +167,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
 
               override fun onError(message: String) {
                 ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(
-                  promise, Pair(ERROR_KEY, message)
+                  promise,
+                  Pair(ERROR_KEY, message)
                 )
               }
             })
@@ -172,7 +181,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
 
     } catch (e: Exception) {
       ModuleException.GENERIC_GENERATE_RESPONSE_ERROR.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -191,7 +201,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       }
     } catch (e: Exception) {
       ModuleException.SEND_RESPONSE_ERROR.reject(
-        promise, Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
+        promise,
+        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
   }
@@ -233,18 +244,16 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   private enum class ModuleException(
     val ex: Exception
   ) {
-    DRH_NOT_DEFINED(Exception("DRH_NOT_DEFINED")), QR_ENGAGEMENT_NOT_DEFINED_ERROR(Exception("QR_ENGAGEMENT_NOT_DEFINED_ERROR")), QR_ENGAGEMENT_NOT_CONFIGURED_ERROR(
-      Exception("QR_ENGAGEMENT_NOT_CONFIGURED_ERROR")
-    ),
-    GET_QR_CODE_ERROR(Exception("GET_QR_CODE_ERROR")), CLOSE_QR_ENGAGEMENT_ERROR(Exception("CLOSE_QR_ENGAGEMENT_ERROR")), ERROR_SENDING_ERROR_RESPONSE(
-      Exception("ERROR_SENDING_ERROR_RESPONSE")
-    ),
-    ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")), RESPONSE_GENERATION_ON_ERROR(
-      Exception("RESPONSE_GENERATION_ON_ERROR")
-    ),
-    GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR")), SEND_RESPONSE_ERROR(
-      Exception("SEND_RESPONSE_ERROR")
-    ), WRONG_DOCUMENTS_FORMAT(Exception("WRONG_DOCUMENTS_FORMAT"));
+    DRH_NOT_DEFINED(Exception("DRH_NOT_DEFINED")),
+    QR_ENGAGEMENT_NOT_DEFINED_ERROR(Exception("QR_ENGAGEMENT_NOT_DEFINED_ERROR")),
+    QR_ENGAGEMENT_NOT_CONFIGURED_ERROR(Exception("QR_ENGAGEMENT_NOT_CONFIGURED_ERROR")),
+    GET_QR_CODE_ERROR(Exception("GET_QR_CODE_ERROR")),
+    CLOSE_QR_ENGAGEMENT_ERROR(Exception("CLOSE_QR_ENGAGEMENT_ERROR")),
+    ERROR_SENDING_ERROR_RESPONSE(Exception("ERROR_SENDING_ERROR_RESPONSE")),
+    ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
+    RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
+    GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR")),
+    WRONG_DOCUMENTS_FORMAT(Exception("WRONG_DOCUMENTS_FORMAT"));
 
     fun reject(
       promise: Promise, vararg args: Pair<String, String>
