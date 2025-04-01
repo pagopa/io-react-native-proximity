@@ -179,7 +179,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
             }
           })
       } ?: run {
-        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+        ModuleException.DRH_NOT_DEFINED.reject(promise)
       }
     } catch (e: Exception) {
       ModuleException.GENERIC_GENERATE_RESPONSE_ERROR.reject(
