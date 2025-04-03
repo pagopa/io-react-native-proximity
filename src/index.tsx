@@ -57,9 +57,7 @@ interface IoReactNativeProximity {
     fieldRequestedAndAccepted: string
   ): Promise<string>;
 
-  sendResponse(
-    response: ReturnType<typeof IoReactNativeProximity.generateResponse>
-  ): Promise<boolean>;
+  sendResponse(response: string): Promise<boolean>;
 
   addListener<E extends QrEngagementEvents>(
     event: E,

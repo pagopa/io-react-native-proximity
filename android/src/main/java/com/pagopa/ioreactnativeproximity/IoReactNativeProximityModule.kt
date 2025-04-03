@@ -155,38 +155,32 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ) {
     try {
       deviceRetrievalHelper?.let { devHelper ->
-        qrEngagement?.let { qrEng ->
-          // Get the DocRequested list and if it's empty then reject the promise and return
-          val docRequestedList = getDocRequestedArrayList(documents)
-          if (docRequestedList.isEmpty()) {
-            ModuleException.WRONG_DOCUMENTS_FORMAT.reject(promise)
-            return
-          }
-
-          val sessionTranscript = devHelper.sessionTranscript()
-          val responseGenerator = ResponseGenerator(sessionTranscript)
-          responseGenerator.createResponse(docRequestedList.toTypedArray(),
-            fieldRequestedAndAccepted,
-            object : ResponseGenerator.Response {
-              override fun onResponseGenerated(response: ByteArray) {
-                qrEng.sendResponse(response)
-                promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
-              }
-
-              override fun onError(message: String) {
-                ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(
-                  promise,
-                  Pair(ERROR_KEY, message)
-                )
-              }
-            })
-        } ?: run {
-          ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+        // Get the DocRequested list and if it's empty then reject the promise and return
+        val docRequestedList = getDocRequestedArrayList(documents)
+        if (docRequestedList.isEmpty()) {
+          ModuleException.WRONG_DOCUMENTS_FORMAT.reject(promise)
+          return
         }
+
+        val sessionTranscript = devHelper.sessionTranscript()
+        val responseGenerator = ResponseGenerator(sessionTranscript)
+        responseGenerator.createResponse(docRequestedList.toTypedArray(),
+          fieldRequestedAndAccepted,
+          object : ResponseGenerator.Response {
+            override fun onResponseGenerated(response: ByteArray) {
+              promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
+            }
+
+            override fun onError(message: String) {
+              ModuleException.RESPONSE_GENERATION_ON_ERROR.reject(
+                promise,
+                Pair(ERROR_KEY, message)
+              )
+            }
+          })
       } ?: run {
         ModuleException.DRH_NOT_DEFINED.reject(promise)
       }
-
     } catch (e: Exception) {
       ModuleException.GENERIC_GENERATE_RESPONSE_ERROR.reject(
         promise,
@@ -199,14 +193,13 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   fun sendResponse(response: String, promise: Promise) {
     try {
       qrEngagement?.let { qrEng ->
-        {
-          val responseBytes = Base64.decode(response, Base64.NO_WRAP)
-          qrEng.sendResponse(responseBytes)
-          promise.resolve(true)
-        }
-      } ?: run {
-        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+        val responseBytes = Base64.decode(response, Base64.NO_WRAP)
+        qrEng.sendResponse(responseBytes)
+        promise.resolve(true)
       }
+        ?: run {
+          ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
+        }
     } catch (e: Exception) {
       ModuleException.SEND_RESPONSE_ERROR.reject(
         promise,
