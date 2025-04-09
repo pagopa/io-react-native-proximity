@@ -8,42 +8,20 @@ import {
   View,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import ProximityModule, {
-  type Document,
-  type QrEngagementEventPayloads,
-} from '@pagopa/io-react-native-proximity';
-import { requestBlePermissions } from '../utils/permissions';
+import * as ProximityModule from '@pagopa/io-react-native-proximity';
+import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from '../mocks';
+import type { QrEngagementEventPayloads } from '@pagopa/io-react-native-proximity';
 import { parseVerifierRequest } from '../../../src/schema';
-import { mdlMockBase64 } from '../mocks';
 import {
-  type CryptoError,
-  deleteKey,
-  generate,
-} from '@pagopa/io-react-native-crypto';
-
-export const WELL_KNOWN_CREDENTIALS = {
-  mdl: 'org.iso.18013.5.1.mDL',
-} as const;
-
-const KEYTAG = 'TEST_PROXIMITY_KEYTAG';
+  generateAcceptedFields,
+  generateKeyIfNotExists,
+  isRequestMdl,
+  requestBlePermissions,
+} from '../utils';
 
 export const QrCodeScreen: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  /**
-   * Generates a key pair if it does not exist
-   * @param keyTag The key tag to use
-   */
-  const generateKeyIfNotExists = async (keyTag: string) => {
-    await deleteKey(keyTag).catch((e) => {
-      const { message } = e as CryptoError;
-      if (message !== 'PUBLIC_KEY_NOT_FOUND') throw e;
-    });
-    await generate(keyTag);
-  };
-
-  // Event handlers
 
   /**
    * Handles the device ready event
@@ -72,72 +50,98 @@ export const QrCodeScreen: React.FC = () => {
   const handleNewDeviceRequest = useCallback(
     async (data: QrEngagementEventPayloads['onNewDeviceRequest']) => {
       try {
+        // A new request has been received
         console.log('New device request received', data);
         if (!data || !data.message) {
           console.warn('Request does not contain a message.');
           return;
         }
+
+        // Parse and verifie the received request with the exposed function
         const message = data.message;
-
         const parsedJson = JSON.parse(message);
-
-        // Validate using Zod with parse
         const parsedResponse = parseVerifierRequest(parsedJson);
         console.log('Parsed response:', JSON.stringify(parsedResponse));
 
-        // Ensure that the request object has exactly one key and it matches the expected key
-        const requestKeys = Object.keys(parsedResponse.request);
+        /*
+        Currently only supporting mDL requests thus we check if the requests consists of a single credential       
+        and if the credential is of type mDL.
+        */
+        isRequestMdl(Object.keys(parsedResponse.request));
 
-        if (requestKeys.length !== 1) {
-          console.warn(
-            'Unexpected request keys. Expected only one key but got:',
-            requestKeys
-          );
-          await ProximityModule.sendErrorResponseNoData();
-          return;
-        }
-        if (requestKeys[0] !== WELL_KNOWN_CREDENTIALS.mdl) {
-          console.warn(
-            'Unexpected request keys. Expected only key:',
-            WELL_KNOWN_CREDENTIALS.mdl,
-            'but got:',
-            requestKeys
-          );
-          await ProximityModule.sendErrorResponseNoData();
-          return;
-        }
-
+        /**
+         * Generate a crypto key pair which will be provided along with the response.
+         * This will make the signature check invalid because they generate key is not the same as the one used to sign the mock credential.
+         */
         console.log('MDL request found. Sending document...');
-        // Generate the response payload
-        const responsePayload = JSON.stringify(parsedResponse.request);
-        // Generate the key pair if it does not exist
         await generateKeyIfNotExists(KEYTAG);
-        // Generate the response using the mocked CBOR credential
-        const documents: Array<Document> = [
+        const documents: Array<ProximityModule.Document> = [
           {
             alias: KEYTAG,
             docType: WELL_KNOWN_CREDENTIALS.mdl,
-            issuerSignedContent: mdlMockBase64,
+            issuerSignedContent: mdlMock,
           },
         ];
+
+        /*
+         * Generate the response to be sent to the verifier app. Currently we bindly accept all the fields requested by the verifier app.
+         * In an actual implementation, the user would be prompted to accept or reject the requested fields and the `acceptedFields` object
+         * must be generated according to the user's choice, setting the value to true for the accepted fields and false for the rejected ones.
+         * See the `generateResponse` method for more details.
+         */
+        console.log('Generating response');
+        const acceptedFields = generateAcceptedFields(parsedResponse.request);
+        console.log('Accepted fields:', JSON.stringify(acceptedFields));
         const result = await ProximityModule.generateResponse(
           documents,
-          responsePayload
+          acceptedFields
         );
         console.log('Response generated:', result);
+
+        /**
+         * Send the response to the verifier app.
+         * Currently we don't know what the verifier app respondss with, thus we don't handle the response.
+         * We just wait for 2 seconds before closing the connection and resetting the QR code.
+         * In order to start a new flow a new QR code must be generated.
+         */
+        console.log('Sending response to verifier app');
         await ProximityModule.sendResponse(result);
-        console.log('Response sent');
-        //closeConnection();
+        console.log('Response sent, closing connection in 2 seconds');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await ProximityModule.closeQrEngagement();
+        setQrCode(null);
       } catch (error) {
-        console.error(
-          'Error handling new device request:',
-          JSON.stringify(error)
-        );
-        await ProximityModule.sendErrorResponse();
+        console.error('Error handling new device request:', error);
+        await ProximityModule.sendErrorResponseNoData();
       }
     },
     []
   );
+
+  /**
+   * Getter for the QR code string.
+   */
+  const getQrCode = async () => {
+    try {
+      console.log('Generating QR code');
+      const qrString = await ProximityModule.getQrCodeString();
+      console.log(`Generated QR code: ${qrString}`);
+      setQrCode(qrString);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
+
+  /**
+   * Closes the QR engagement and cleans up listeners.
+   */
+  const closeConnection = async () => {
+    console.log('Cleaning up listeners and closing QR engagement');
+    ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
+    ProximityModule.removeListeners('onCommunicationError');
+    ProximityModule.removeListeners('onNewDeviceRequest');
+    await ProximityModule.closeQrEngagement();
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -180,23 +184,6 @@ export const QrCodeScreen: React.FC = () => {
     };
   }, [handleNewDeviceRequest]);
 
-  const getQrCode = async () => {
-    try {
-      const qrString = await ProximityModule.getQrCodeString();
-      setQrCode(qrString);
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-    }
-  };
-
-  const closeConnection = async () => {
-    console.log('Cleaning up listeners and closing QR engagement');
-    ProximityModule.removeListeners('onDeviceRetrievalHelperReady');
-    ProximityModule.removeListeners('onCommunicationError');
-    ProximityModule.removeListeners('onNewDeviceRequest');
-    await ProximityModule.closeQrEngagement();
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>QR Code Engagement</Text>
@@ -210,7 +197,6 @@ export const QrCodeScreen: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={getQrCode}>
         <Text style={styles.buttonText}>Generate QR Engagement</Text>
       </TouchableOpacity>
-      <Text style={styles.text}>{qrCode}</Text>
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
