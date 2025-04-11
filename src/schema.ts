@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 const VerifierRequest = z.object({
   isAuthenticated: z.boolean(),
-  request: z.record(z.string(), z.record(z.string(),z.record(z.string(), z.boolean()))),
+  request: z.record(
+    z.string(),
+    z.record(z.string(), z.record(z.string(), z.boolean()))
+  ),
 });
 
 /**
