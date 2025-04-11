@@ -57,7 +57,7 @@ export const QrCodeScreen: React.FC = () => {
           return;
         }
 
-        // Parse and verifie the received request with the exposed function
+        // Parse and verify the received request with the exposed function
         const message = data.message;
         const parsedJson = JSON.parse(message);
         const parsedResponse = parseVerifierRequest(parsedJson);
