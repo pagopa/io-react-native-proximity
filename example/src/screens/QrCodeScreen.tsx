@@ -100,7 +100,7 @@ export const QrCodeScreen: React.FC = () => {
 
         /**
          * Send the response to the verifier app.
-         * Currently we don't know what the verifier app respondss with, thus we don't handle the response.
+         * Currently we don't know what the verifier app responds with, thus we don't handle the response.
          * We just wait for 2 seconds before closing the connection and resetting the QR code.
          * In order to start a new flow a new QR code must be generated.
          */
