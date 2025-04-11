@@ -84,7 +84,7 @@ export const QrCodeScreen: React.FC = () => {
         ];
 
         /*
-         * Generate the response to be sent to the verifier app. Currently we bindly accept all the fields requested by the verifier app.
+         * Generate the response to be sent to the verifier app. Currently we blindly accept all the fields requested by the verifier app.
          * In an actual implementation, the user would be prompted to accept or reject the requested fields and the `acceptedFields` object
          * must be generated according to the user's choice, setting the value to true for the accepted fields and false for the rejected ones.
          * See the `generateResponse` method for more details.
