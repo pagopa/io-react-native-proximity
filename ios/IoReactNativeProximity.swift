@@ -269,7 +269,7 @@ class IoReactNativeProximity: RCTEventEmitter {
   }
   
   /**
-   Sets the proximity handler along with the possible dispatched events and their callsbacks.
+   Sets the proximity handler along with the possible dispatched events and their callbacks.
    The events are then sent to React Native via `RCTEventEmitter`.
    */
   private func setupProximityHandler() {
