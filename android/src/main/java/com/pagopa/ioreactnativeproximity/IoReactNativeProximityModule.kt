@@ -13,7 +13,9 @@ import it.pagopa.io.wallet.proximity.request.DocRequested
 import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import android.util.Base64
+import android.util.Log
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableNativeMap
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
@@ -126,6 +128,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       (0 until documents.size())
         .mapNotNull { i ->
           val doc = documents.getMap(i)
+          Log.i("TEST", doc.toString())
           val alias = doc.getString("alias")
           val issuerSignedContent = doc.getString("issuerSignedContent")
           val docType = doc.getString("docType")
@@ -150,10 +153,11 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun generateResponse(
     documents: ReadableArray,
-    fieldRequestedAndAccepted: String,
+    fieldRequestedAndAccepted: ReadableMap,
     promise: Promise
   ) {
     try {
+      Log.i("TEST", fieldRequestedAndAccepted.toString())
       deviceRetrievalHelper?.let { devHelper ->
         // Get the DocRequested list and if it's empty then reject the promise and return
         val docRequestedList = getDocRequestedArrayList(documents)
@@ -165,7 +169,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         val sessionTranscript = devHelper.sessionTranscript()
         val responseGenerator = ResponseGenerator(sessionTranscript)
         responseGenerator.createResponse(docRequestedList.toTypedArray(),
-          fieldRequestedAndAccepted,
+          fieldRequestedAndAccepted.toString(),
           object : ResponseGenerator.Response {
             override fun onResponseGenerated(response: ByteArray) {
               promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))

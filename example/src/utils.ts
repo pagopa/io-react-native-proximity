@@ -12,7 +12,7 @@ import {
   RESULTS,
 } from 'react-native-permissions';
 import { WELL_KNOWN_CREDENTIALS } from './mocks';
-import type { VerifierRequest } from '../../src/schema';
+import type { AcceptedFields, VerifierRequest } from '../../src/schema';
 
 /**
  * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
@@ -20,19 +20,49 @@ import type { VerifierRequest } from '../../src/schema';
  * @returns A new object with the same structure as the request, but with all values set to true
  */
 export const generateAcceptedFields = (
-  request: VerifierRequest['request']
-): VerifierRequest['request'] => {
-  const result: VerifierRequest['request'] = {};
-  for (const key1 in request) {
-    result[key1] = {};
-    for (const key2 in request[key1]) {
-      result[key1][key2] = {};
-      for (const key3 in request[key1][key2]) {
-        result[key1][key2][key3] = true;
-      }
-    }
-  }
-  return result;
+  _: VerifierRequest['request']
+): AcceptedFields => {
+  //TODO implement a more generic solution to generate the accepted fields
+  const acceptedFields: AcceptedFields = {
+    'org.iso.18013.5.1.mDL': {
+      'org.iso.18013.5.1': {
+        height: true,
+        weight: true,
+        portrait: true,
+        birth_date: true,
+        eye_colour: true,
+        given_name: true,
+        issue_date: true,
+        age_over_18: true,
+        age_over_21: true,
+        birth_place: true,
+        expiry_date: true,
+        family_name: true,
+        hair_colour: true,
+        nationality: true,
+        age_in_years: true,
+        resident_city: true,
+        age_birth_year: true,
+        resident_state: true,
+        document_number: true,
+        issuing_country: true,
+        resident_address: true,
+        resident_country: true,
+        issuing_authority: true,
+        driving_privileges: true,
+        issuing_jurisdiction: true,
+        resident_postal_code: true,
+        signature_usual_mark: true,
+        administrative_number: true,
+        portrait_capture_date: true,
+        un_distinguishing_sign: true,
+        given_name_national_character: true,
+        family_name_national_character: true,
+      },
+    },
+  };
+
+  return acceptedFields;
 };
 
 /**
