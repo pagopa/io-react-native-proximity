@@ -128,7 +128,6 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       (0 until documents.size())
         .mapNotNull { i ->
           val doc = documents.getMap(i)
-          Log.i("TEST", doc.toString())
           val alias = doc.getString("alias")
           val issuerSignedContent = doc.getString("issuerSignedContent")
           val docType = doc.getString("docType")
@@ -157,7 +156,6 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     try {
-      Log.i("TEST", fieldRequestedAndAccepted.toString())
       deviceRetrievalHelper?.let { devHelper ->
         // Get the DocRequested list and if it's empty then reject the promise and return
         val docRequestedList = getDocRequestedArrayList(documents)
