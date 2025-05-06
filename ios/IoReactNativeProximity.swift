@@ -43,10 +43,11 @@ class IoReactNativeProximity: RCTEventEmitter {
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
-    if let qrCodeString = Proximity.shared.start() {
+    do{
+      let qrCodeString = try Proximity.shared.start()
       resolve(qrCodeString)
-    } else {
-      ME.qrCodeError.reject(reject: reject, ("error", "Error generating QR code"))
+    } catch let error {
+      ME.qrCodeError.reject(reject: reject, ("error", error.localizedDescription))
     }
   }
   
@@ -166,13 +167,9 @@ class IoReactNativeProximity: RCTEventEmitter {
     do {
       let parsedDocuments = try parseDocuments(documents: documents)
       let items = try parseAcceptedFields(acceptedFields: acceptedFields)
-      let deviceResponse = Proximity.shared.generateDeviceResponse(allowed: true, items: items, documents: parsedDocuments, sessionTranscript: nil)
-      if let unwrapDeviceResponse = deviceResponse {
-        let strDeviceResponse = Data(unwrapDeviceResponse).base64EncodedString()
-        resolve(strDeviceResponse)
-      }else{
-        ME.generateDeviceResponseError.reject(reject: reject, ("error", "Error generating device response"))
-      }
+      let deviceResponse = try Proximity.shared.generateDeviceResponse(allowed: true, items: items, documents: parsedDocuments, sessionTranscript: nil)
+      let strDeviceResponse = Data(deviceResponse).base64EncodedString()
+      resolve(strDeviceResponse)
     }catch{
       ME.generateDeviceResponseError.reject(reject: reject, ("error", error.localizedDescription))
     }
@@ -194,12 +191,14 @@ class IoReactNativeProximity: RCTEventEmitter {
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ){
-    if let responseData = Data(base64Encoded: response) {
-      let decodedResponse = [UInt8](responseData)
-      Proximity.shared.dataPresentation(allowed: true, decodedResponse)
-      resolve(true)
-    } else {
-      ME.sendResponseError.reject(reject: reject, ("error", "An error occurred while decoding the response"))
+    do{
+      if let responseData = Data(base64Encoded: response) {
+        let decodedResponse = [UInt8](responseData)
+        try Proximity.shared.dataPresentation(allowed: true, decodedResponse)
+        resolve(true)
+      }
+    }catch let error {
+      ME.sendResponseError.reject(reject: reject, ("error", error.localizedDescription))
     }
   }
   
@@ -212,8 +211,13 @@ class IoReactNativeProximity: RCTEventEmitter {
   @objc(sendErrorResponseNoData:withRejecter:)
   func sendErrorResponseNoData(_ resolve: @escaping RCTPromiseResolveBlock,
                                reject: @escaping RCTPromiseRejectBlock){
-    Proximity.shared.dataPresentation(allowed: false, [])
-    resolve(true)
+    do{
+      try Proximity.shared.dataPresentation(allowed: false, [])
+      resolve(true)
+    }catch let error{
+      ME.sendResponseError.reject(reject: reject, ("error", error.localizedDescription))
+    }
+   
   }
   
   
@@ -243,29 +247,31 @@ class IoReactNativeProximity: RCTEventEmitter {
    
    - Returns: A JSON string representing the device request or nil if an error occurs
   */
-  private func deviceRequestToJson(request: (request: [(docType: String, nameSpaces: [String: [String: Bool]])]?, isAuthenticated: Bool)?) -> String? {
-    var jsonRequest : [String: [String: [String: Bool]]] = [:]
-    request?.request?.forEach({
-      item in
-      var subReq: [String: [String: Bool]] = [:]
-      item.nameSpaces.keys.forEach({
-        nameSpace in
-        subReq[nameSpace] = item.nameSpaces[nameSpace]
+  private func deviceRequestToJson(request: [(docType: String, nameSpaces: [String: [String: Bool]], isAuthenticated: Bool)]?) -> String? {
+      var jsonRequest : [String: AnyHashable] = [:]
+      request?.forEach({
+          item in
+          var subReq: [String: AnyHashable] = [:]
+          item.nameSpaces.keys.forEach({
+              nameSpace in
+              subReq[nameSpace] = item.nameSpaces[nameSpace]
+          })
+          
+          subReq["isAuthenticated"] = item.isAuthenticated
+          
+          jsonRequest[item.docType] = subReq
       })
-      jsonRequest[item.docType] = subReq
-    })
-    
-    let json: [String: AnyHashable] = [
-      "isAuthenticated": request?.isAuthenticated ?? false,
-      "request": jsonRequest
-    ]
-    
-    if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
-       let jsonString = String(data: jsonData, encoding: .utf8) {
-      return jsonString
-    } else {
-      return nil
-    }
+      
+      let json: [String: AnyHashable] = [
+          "request": jsonRequest
+      ]
+      
+      if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
+         let jsonString = String(data: jsonData, encoding: .utf8) {
+          return jsonString
+      } else {
+          return nil
+      }
   }
   
   /**
