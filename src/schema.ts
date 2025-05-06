@@ -1,11 +1,16 @@
 import { z } from 'zod';
 
+// Inner data: a record of booleans with the attributes and the intent to retain flag
+const booleanFieldGroup = z.record(z.boolean());
+
+const credentialEntrySchema = z
+  .object({
+    isAuthenticated: z.boolean(),
+  })
+  .catchall(booleanFieldGroup);
+
 const VerifierRequest = z.object({
-  isAuthenticated: z.boolean(),
-  request: z.record(
-    z.string(),
-    z.record(z.string(), z.record(z.string(), z.boolean()))
-  ),
+  request: z.record(credentialEntrySchema),
 });
 
 /**
@@ -36,4 +41,10 @@ export type VerifierRequest = z.infer<typeof VerifierRequest>;
  */
 export const parseVerifierRequest = (input: unknown): VerifierRequest => {
   return VerifierRequest.parse(input);
+};
+
+export type AcceptedFields = {
+  [key: string]: {
+    [key: string]: { [key: string]: boolean };
+  };
 };

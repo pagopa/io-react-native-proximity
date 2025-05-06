@@ -1,5 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { VerifierRequest } from './schema';
+import type { AcceptedFields } from './schema';
 
 const LINKING_ERROR =
   `The package '@pagopa/io-react-native-proximity' doesn't seem to be linked. Make sure: \n\n` +
@@ -116,7 +116,7 @@ export function sendErrorResponseNoData(): Promise<boolean> {
  */
 export function generateResponse(
   documents: Array<Document>,
-  acceptedFields: VerifierRequest['request']
+  acceptedFields: AcceptedFields
 ): Promise<string> {
   return IoReactNativeProximity.generateResponse(documents, acceptedFields);
 }

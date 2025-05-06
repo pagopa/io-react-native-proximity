@@ -14,6 +14,7 @@ import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 import android.util.Base64
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableNativeMap
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
@@ -150,7 +151,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun generateResponse(
     documents: ReadableArray,
-    fieldRequestedAndAccepted: String,
+    fieldRequestedAndAccepted: ReadableMap,
     promise: Promise
   ) {
     try {
@@ -165,7 +166,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         val sessionTranscript = devHelper.sessionTranscript()
         val responseGenerator = ResponseGenerator(sessionTranscript)
         responseGenerator.createResponse(docRequestedList.toTypedArray(),
-          fieldRequestedAndAccepted,
+          fieldRequestedAndAccepted.toString(),
           object : ResponseGenerator.Response {
             override fun onResponseGenerated(response: ByteArray) {
               promise.resolve(Base64.encodeToString(response, Base64.NO_WRAP))
