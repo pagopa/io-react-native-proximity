@@ -19,27 +19,31 @@ import type {
 
 /**
  * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
- * It copies the content of the request object, removes the `isAuthenticated` field and sets all other fields to true.
+ * It copies the content of the request object, removes the `isAuthenticated` field and sets all other fields to true
+ * simulating the full acceptance of the request.
  * @param request - The request object containing the requested fields
  * @returns A new object representing the accepted fields, with each requested field set to true
  */
 export const generateAcceptedFields = (
   request: VerifierRequest['request']
 ): AcceptedFields => {
+  // Cycle through the requested credentials
   const result: AcceptedFields = {};
-
   for (const credentialKey in request) {
     const credential = request[credentialKey];
     if (!credential) {
       continue;
     }
 
+    // Cycle through the requested namespaces and the isAuthenticated field
     const namespaces: AcceptedFields['credential'] = {};
     for (const namespaceKey in credential) {
+      // Skip the isAuthenticated field
       if (!credential[namespaceKey] || namespaceKey === 'isAuthenticated') {
         continue;
       }
 
+      // Cycle through the requested fields and set them to true
       const fields: AcceptedFields['credential']['namespace'] = {};
       for (const fieldKey in credential[namespaceKey]!) {
         fields[fieldKey] = true;

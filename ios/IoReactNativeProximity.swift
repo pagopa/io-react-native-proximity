@@ -292,6 +292,20 @@ class IoReactNativeProximity: RCTEventEmitter {
       case .onDocumentRequestReceived(let request):
         eventName = "onNewDeviceRequest"
         if let request = request {
+          /**
+           The outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields with a boolean value. Example:
+           {
+              "org.iso.18013.5.1.mDL": {
+                "isAuthenticated": true,
+                "org.iso.18013.5.1": {
+                  "hair_colour": true,
+                  "given_name_national_character": true,
+                  "family_name_national_character": true,
+                  "given_name": true,
+                }
+              }
+            }
+           */
           let jsonString = deviceRequestToJson(request: request)
           // Here we either send the request or an empty string which signals that something went wrong.
           eventBody = ["message": jsonString ?? ""]
