@@ -14,12 +14,13 @@ const VerifierRequest = z.object({
 });
 
 /**
- * VerifierRequest type returned by the `onNewDeviceRequest` event in `QrEngagementEvents`. The outermost key represents the credential doctype.
- * - isAuthenticated: A boolean value indicating whether the verifier app is verified or not
- * - request: The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value,
- * which indicates whether the verfier app wants to retain the claim or not. Example:
+ * VerifierRequest type returned by the `onNewDeviceRequest` event in `QrEngagementEvents`.
+ * The outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields with a boolean value
+ * indicating whether the user wants to retain the field or not. The isAuthenticated field is present for each requested credentials and indicates wether or not the verifier is authenticated.
+ * Example:
  *  `{
  *    "org.iso.18013.5.1.mDL": {
+ *      "isAuthenticated": true,
  *      "org.iso.18013.5.1": {
  *        "hair_colour": true,
  *        "given_name_national_character": true,
@@ -43,8 +44,13 @@ export const parseVerifierRequest = (input: unknown): VerifierRequest => {
   return VerifierRequest.parse(input);
 };
 
+/**
+ * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
+ * It contains of a nested object structure, where the outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields
+ * with a boolean value indicating whether the user wants to present the field or not.
+ */
 export type AcceptedFields = {
-  [key: string]: {
-    [key: string]: { [key: string]: boolean };
+  [credential: string]: {
+    [namespace: string]: { [field: string]: boolean };
   };
 };

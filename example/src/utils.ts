@@ -12,58 +12,87 @@ import {
   RESULTS,
 } from 'react-native-permissions';
 import { WELL_KNOWN_CREDENTIALS } from './mocks';
-import type { AcceptedFields, VerifierRequest } from '../../src/schema';
+import type {
+  AcceptedFields,
+  VerifierRequest,
+} from '@pagopa/io-react-native-proximity';
 
 /**
  * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
+ * It copies the content of the request object, removes the `isAuthenticated` field and sets all other fields to true.
  * @param request - The request object containing the requested fields
- * @returns A new object with the same structure as the request, but with all values set to true
+ * @returns A new object representing the accepted fields, with each requested field set to true
  */
 export const generateAcceptedFields = (
-  _: VerifierRequest['request']
+  request: VerifierRequest['request']
 ): AcceptedFields => {
-  //TODO implement a more generic solution to generate the accepted fields
-  const acceptedFields: AcceptedFields = {
-    'org.iso.18013.5.1.mDL': {
-      'org.iso.18013.5.1': {
-        height: true,
-        weight: true,
-        portrait: true,
-        birth_date: true,
-        eye_colour: true,
-        given_name: true,
-        issue_date: true,
-        age_over_18: true,
-        age_over_21: true,
-        birth_place: true,
-        expiry_date: true,
-        family_name: true,
-        hair_colour: true,
-        nationality: true,
-        age_in_years: true,
-        resident_city: true,
-        age_birth_year: true,
-        resident_state: true,
-        document_number: true,
-        issuing_country: true,
-        resident_address: true,
-        resident_country: true,
-        issuing_authority: true,
-        driving_privileges: true,
-        issuing_jurisdiction: true,
-        resident_postal_code: true,
-        signature_usual_mark: true,
-        administrative_number: true,
-        portrait_capture_date: true,
-        un_distinguishing_sign: true,
-        given_name_national_character: true,
-        family_name_national_character: true,
-      },
-    },
-  };
+  const result: AcceptedFields = {};
 
-  return acceptedFields;
+  for (const credentialKey in request) {
+    const credential = request[credentialKey];
+    if (!credential) {
+      continue;
+    }
+
+    const namespaces: AcceptedFields['credential'] = {};
+    for (const namespaceKey in credential) {
+      if (!credential[namespaceKey] || namespaceKey === 'isAuthenticated') {
+        continue;
+      }
+
+      const fields: AcceptedFields['credential']['namespace'] = {};
+      for (const fieldKey in credential[namespaceKey]!) {
+        fields[fieldKey] = true;
+      }
+      namespaces[namespaceKey] = fields;
+    }
+    result[credentialKey] = namespaces;
+  }
+
+  return result;
 };
+// }//TODO implement a more generic solution to generate the accepted fields
+//   const acceptedFields: AcceptedFields = {
+//     'org.iso.18013.5.1.mDL': {
+//       'org.iso.18013.5.1': {
+//         height: true,
+//         weight: true,
+//         portrait: true,
+//         birth_date: true,
+//         eye_colour: true,
+//         given_name: true,
+//         issue_date: true,
+//         age_over_18: true,
+//         age_over_21: true,
+//         birth_place: true,
+//         expiry_date: true,
+//         family_name: true,
+//         hair_colour: true,
+//         nationality: true,
+//         age_in_years: true,
+//         resident_city: true,
+//         age_birth_year: true,
+//         resident_state: true,
+//         document_number: true,
+//         issuing_country: true,
+//         resident_address: true,
+//         resident_country: true,
+//         issuing_authority: true,
+//         driving_privileges: true,
+//         issuing_jurisdiction: true,
+//         resident_postal_code: true,
+//         signature_usual_mark: true,
+//         administrative_number: true,
+//         portrait_capture_date: true,
+//         un_distinguishing_sign: true,
+//         given_name_national_character: true,
+//         family_name_national_character: true,
+//       },
+//     },
+//   };
+
+//   return acceptedFields;
+// };
 
 /**
  * Generates a key pair if it does not exist
