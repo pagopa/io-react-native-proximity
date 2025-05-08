@@ -51,48 +51,6 @@ export const generateAcceptedFields = (
 
   return result;
 };
-// }//TODO implement a more generic solution to generate the accepted fields
-//   const acceptedFields: AcceptedFields = {
-//     'org.iso.18013.5.1.mDL': {
-//       'org.iso.18013.5.1': {
-//         height: true,
-//         weight: true,
-//         portrait: true,
-//         birth_date: true,
-//         eye_colour: true,
-//         given_name: true,
-//         issue_date: true,
-//         age_over_18: true,
-//         age_over_21: true,
-//         birth_place: true,
-//         expiry_date: true,
-//         family_name: true,
-//         hair_colour: true,
-//         nationality: true,
-//         age_in_years: true,
-//         resident_city: true,
-//         age_birth_year: true,
-//         resident_state: true,
-//         document_number: true,
-//         issuing_country: true,
-//         resident_address: true,
-//         resident_country: true,
-//         issuing_authority: true,
-//         driving_privileges: true,
-//         issuing_jurisdiction: true,
-//         resident_postal_code: true,
-//         signature_usual_mark: true,
-//         administrative_number: true,
-//         portrait_capture_date: true,
-//         un_distinguishing_sign: true,
-//         given_name_national_character: true,
-//         family_name_national_character: true,
-//       },
-//     },
-//   };
-
-//   return acceptedFields;
-// };
 
 /**
  * Generates a key pair if it does not exist
@@ -143,10 +101,7 @@ export const requestBlePermissions = async (): Promise<boolean> => {
     }
   } else {
     // iOS permissions required are Bluetooth and location.
-    permissionsToCheck = [
-      PERMISSIONS.IOS.BLUETOOTH,
-      PERMISSIONS.IOS.LOCATION_ALWAYS,
-    ];
+    permissionsToCheck = [PERMISSIONS.IOS.BLUETOOTH];
   }
 
   try {
