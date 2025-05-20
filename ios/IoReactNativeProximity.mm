@@ -3,10 +3,13 @@
 
 @interface RCT_EXTERN_MODULE(IoReactNativeProximity, RCTEventEmitter)
 
+RCT_EXTERN_METHOD(start:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(getQrCodeString:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(closeQrEngagement:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(close:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(generateResponse:(NSArray *)documents

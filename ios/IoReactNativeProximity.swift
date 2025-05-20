@@ -17,8 +17,16 @@ class IoReactNativeProximity: RCTEventEmitter {
     setupProximityHandler()
   }
   
+  /**
+   Specifies supported events which will be emitted.
+   - `onDeviceConnecting`: Emitted when the device is connecting to the verifier app.
+   - `onDeviceConnected`: Emitted when the device is connected to the verifier app.
+   - `onDocumentRequestReceived`: Emitted when a document request is received from the verifier app. Carries a payload containing the request data.
+   - `onDeviceDisconnected`: Emitted when the device is disconnected from the verifier app.
+   - `onError`: Emitted when an error occurs. Carries a payload containing the error data.
+   */
   override func supportedEvents() -> [String]! {
-    return ["onConnecting", "onDeviceRetrievalHelperReady", "onCommunicationError", "onNewDeviceRequest", "onDeviceDisconnected"]
+    return ["onDeviceConnected", "onDeviceConnecting", "onDeviceDisconnected", "onDocumentRequestReceived", "onError", "unknown"]
   }
   
   /**
@@ -30,21 +38,41 @@ class IoReactNativeProximity: RCTEventEmitter {
   typealias AcceptedFieldsDict = [String: [String: [String: Bool]]]
   
   /**
-   Creates a QR code to be scanned in order to initialize the presentation.
-   
+   Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
+   Resolves to true or rejects if an error occurs.
+    
    - Parameters:
-     - resolve: The promise to be resolved
-     - reject: The promise to be rejected
-   
-   - Returns: A new string representing the QR code
-   */
+      - resolve: The promise to be resolved
+      - reject: The promise to be rejected
+  */
+  @objc(start:withRejecter:)
+  func start(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ){
+    do {
+      try Proximity.shared.start()
+      resolve(true)
+    } catch let error {
+      ME.startError.reject(reject: reject, ("error", error.localizedDescription))
+    }
+  }
+  
+  /**
+   Creates a QR code to be scanned in order to initialize the presentation.
+   Resolves with the QR code strings.
+
+   - Parameters:
+      - resolve: The promise to be resolved
+      - reject: The promise to be rejected
+  */
   @objc(getQrCodeString:withRejecter:)
   func getQrCodeString(
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
     do{
-      let qrCodeString = try Proximity.shared.start()
+      let qrCodeString = try Proximity.shared.getQrCode()
       resolve(qrCodeString)
     } catch let error {
       ME.qrCodeError.reject(reject: reject, ("error", error.localizedDescription))
@@ -57,11 +85,11 @@ class IoReactNativeProximity: RCTEventEmitter {
    The result can be fed to ``IOWalletProximity.generateResponse``.
    
    - Parameters:
-     - documents: An array of any elements. In order to be added to the result array each element must be a dictionary with `issuerSignedContent`, `alias` and `docType` as keys and strings as values.
+      - documents: An array of any elements. In order to be added to the result array each element must be a dictionary with `issuerSignedContent`, `alias` and `docType` as keys and strings as values.
    
    - Throws: `NSError` if result array is empty
    
-   - Returns: A new string representing the QR code
+   - Returns: An array of `ProximityDocument` containg the documents to be presented
    */
   private func parseDocuments(documents: [Any]) throws -> [ProximityDocument] {
     var parsedDocuments: [ProximityDocument] = []
@@ -104,12 +132,12 @@ class IoReactNativeProximity: RCTEventEmitter {
    The result can be fed to ``IOWalletProximity.generateResponse``.
    
    - Parameters:
-     - acceptedFields: A dictionary of any elements. In order to be added to the result dictionary each element must be shaped as ``AcceptedFieldsDict`` thus as [String: [String: [String: Bool]]]
+      - acceptedFields: A dictionary of any elements. In order to be added to the result dictionary each element must be shaped as ``AcceptedFieldsDict`` thus as [String: [String: [String: Bool]]]
    
    - Throws: `NSError` if a value doesn't has the ``AcceptedFieldsDict`` shape or the result dictionary is empty
    
    - Returns: An ``AcceptedFieldsDict`` containg the accepted fields to be presented
-  
+   
    */
   private func parseAcceptedFields(acceptedFields: [AnyHashable: Any]) throws -> AcceptedFieldsDict {
     var result: AcceptedFieldsDict = [:]
@@ -132,31 +160,31 @@ class IoReactNativeProximity: RCTEventEmitter {
   }
   
   /**
-   Generates a response containing the documents and the fields which the user decided to present.
-   It parses the untyped ``documents`` and ``acceptedFields`` parameters and feds them to the ``IOWalletProximity.generateDeviceResponse`` function.
-   It resolves the promise with the response as a base64 encoded string.
-   It rejects the promise if an error occurs during the parameters parsing or while generating the device response.
-   
-   - Parameters:
-     - documents: An array of documents which should contain a dictionary with `issuerSignedContent`, `alias` and `docType` as keys and strings as values
-     - acceptedFields: A dictionary of elements, where each element must adhere to the structure of AcceptedFieldsDict—specifically, a [String: [String: [String: Bool]]]. The outermost key represents the credentia doctypel. The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value, which indicates whether the user is willing to present the corresponding claim. Example:
-      
-       
-           {
-              "org.iso.18013.5.1.mDL": {
-                "org.iso.18013.5.1": {
-                  "hair_colour": true,
-                  "given_name_national_character": true,
-                  "family_name_national_character": true,
-                  "given_name": true,
+     Generates a response containing the documents and the fields which the user decided to present.
+     It parses the untyped ``documents`` and ``acceptedFields`` parameters and feds them to the ``IOWalletProximity.generateDeviceResponse`` function.
+     It resolves the promise with the response as a base64 encoded string.
+     It rejects the promise if an error occurs during the parameters parsing or while generating the device response.
+     
+     - Parameters:
+       - documents: An array of documents which should contain a dictionary with `issuerSignedContent`, `alias` and `docType` as keys and strings as values
+       - acceptedFields: A dictionary of elements, where each element must adhere to the structure of AcceptedFieldsDict—specifically, a [String: [String: [String: Bool]]]. The outermost key represents the credentia doctypel. The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value, which indicates whether the user is willing to present the corresponding claim. Example:
+        
+         
+             {
+                "org.iso.18013.5.1.mDL": {
+                  "org.iso.18013.5.1": {
+                    "hair_colour": true,
+                    "given_name_national_character": true,
+                    "family_name_national_character": true,
+                    "given_name": true,
+                  }
                 }
-              }
-           }
-  
-     - resolve: The promise to be resolved
-     - reject: The promise to be rejected
-   
-   */
+             }
+    
+       - resolve: The promise to be resolved
+       - reject: The promise to be rejected
+     
+     */
   @objc(generateResponse:withAcceptedFields:withResolver:withRejecter:)
   func generateResponse(
     documents: Array<Any>,
@@ -181,7 +209,7 @@ class IoReactNativeProximity: RCTEventEmitter {
    Currently there's not evidence of the verifier app responding to this request, thus we don't handle the response.
    
    - Parameters:
-     - response: A base64 encoded string containg the response generated by ``generateResponse``
+     - response: A base64 encoded string containing the response generated by ``generateResponse``
      - resolve: The promise to be resolved
      - reject: The promise to be rejected
    */
@@ -217,12 +245,11 @@ class IoReactNativeProximity: RCTEventEmitter {
     }catch let error{
       ME.sendResponseError.reject(reject: reject, ("error", error.localizedDescription))
     }
-   
   }
   
   
   /**
-   Closes the QR engagement connection.
+   Closes the bluetooth connection and clears any resource.
    It resolves to true after closing the connection.
    
    - Parameters:
@@ -231,7 +258,7 @@ class IoReactNativeProximity: RCTEventEmitter {
    
    */
   @objc(closeQrEngagement:withRejecter:)
-  func closeQrEngagement(
+  func close(
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
@@ -240,38 +267,38 @@ class IoReactNativeProximity: RCTEventEmitter {
   }
   
   /**
-   Converts a device requested from the `onDocumentRequestReceived` callback into a serializable JSON.
-   
-   - Parameters:
-      - request: The request returned from `onDocumentRequestReceived` which contains an array of tuples consists of a doctype, namespaces and the requested claims with a boolean value indicating wether or not the device which is making the request has an intent to retain the dataß
-   
-   - Returns: A JSON string representing the device request or nil if an error occurs
-  */
+     Converts a device requested from the `onDocumentRequestReceived` callback into a serializable JSON.
+     
+     - Parameters:
+        - request: The request returned from `onDocumentRequestReceived` which contains an array of tuples consists of a doctype, namespaces and the requested claims with a boolean value indicating wether or not the device which is making the request has an intent to retain the dataß
+     
+     - Returns: A JSON string representing the device request or nil if an error occurs
+    */
   private func deviceRequestToJson(request: [(docType: String, nameSpaces: [String: [String: Bool]], isAuthenticated: Bool)]?) -> String? {
-      var jsonRequest : [String: AnyHashable] = [:]
-      request?.forEach({
-          item in
-          var subReq: [String: AnyHashable] = [:]
-          item.nameSpaces.keys.forEach({
-              nameSpace in
-              subReq[nameSpace] = item.nameSpaces[nameSpace]
-          })
-          
-          subReq["isAuthenticated"] = item.isAuthenticated
-          
-          jsonRequest[item.docType] = subReq
+    var jsonRequest : [String: AnyHashable] = [:]
+    request?.forEach({
+      item in
+      var subReq: [String: AnyHashable] = [:]
+      item.nameSpaces.keys.forEach({
+        nameSpace in
+        subReq[nameSpace] = item.nameSpaces[nameSpace]
       })
       
-      let json: [String: AnyHashable] = [
-          "request": jsonRequest
-      ]
+      subReq["isAuthenticated"] = item.isAuthenticated
       
-      if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
-         let jsonString = String(data: jsonData, encoding: .utf8) {
-          return jsonString
-      } else {
-          return nil
-      }
+      jsonRequest[item.docType] = subReq
+    })
+    
+    let json: [String: AnyHashable] = [
+      "request": jsonRequest
+    ]
+    
+    if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
+       let jsonString = String(data: jsonData, encoding: .utf8) {
+      return jsonString
+    } else {
+      return nil
+    }
   }
   
   /**
@@ -285,39 +312,37 @@ class IoReactNativeProximity: RCTEventEmitter {
       var eventBody: [String: Any] = [:]
       
       switch event {
-      case .onBleStart:
-        eventName = "onConnecting"
-      case .onBleStop:
-        eventName = "onDeviceDisconnected"
+      case .onDeviceConnecting:
+        eventName = "onDeviceConnecting"
+      case .onDeviceConnected:
+        eventName = "onDeviceConnected"
       case .onDocumentRequestReceived(let request):
-        eventName = "onNewDeviceRequest"
+        eventName = "onDocumentRequestReceived"
         if let request = request {
           /**
            The outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields with a boolean value. Example:
            {
-              "org.iso.18013.5.1.mDL": {
-                "isAuthenticated": true,
-                "org.iso.18013.5.1": {
-                  "hair_colour": true,
-                  "given_name_national_character": true,
-                  "family_name_national_character": true,
-                  "given_name": true,
-                }
-              }
-            }
+           "org.iso.18013.5.1.mDL": {
+           "isAuthenticated": true,
+           "org.iso.18013.5.1": {
+           "hair_colour": true,
+           "given_name_national_character": true,
+           "family_name_national_character": true,
+           "given_name": true,
+           }
+           }
+           }
            */
           let jsonString = deviceRequestToJson(request: request)
           // Here we either send the request or an empty string which signals that something went wrong.
-          eventBody = ["message": jsonString ?? ""]
+          eventBody = ["data": jsonString ?? ""]
         }
-      case .onDocumentPresentationCompleted:
-        eventName = "onDeviceRetrievalHelperReady"
+      case .onDeviceDisconnected:
+        eventName = "onDeviceDisconnected"
       case .onError(let error):
-        eventName = "onCommunicationError"
+        eventName = "onError"
         eventBody = ["error": error.localizedDescription]
-      case .onLoading:
-        eventName = "onConnecting"
-      @unknown default:
+      default:
         eventName = "unknown"
         eventBody = ["error": "Received an unknown event"]
       }
@@ -331,6 +356,7 @@ class IoReactNativeProximity: RCTEventEmitter {
    Add a new case in order to extend the possible errors.
    */
   private enum ModuleException: String, CaseIterable {
+    case startError = "START_ERROR"
     case qrCodeError = "QR_CODE_ERROR"
     case generateDeviceResponseError = "GENERATE_DEVICE_RESPONSE_ERROR"
     case sendResponseError = "SEND_RESPONSE_ERROR"
@@ -339,6 +365,8 @@ class IoReactNativeProximity: RCTEventEmitter {
       userInfo: [String : Any]? = nil
     ) -> NSError {
       switch self {
+      case .startError:
+        return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       case .qrCodeError:
         return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       case .generateDeviceResponseError:
@@ -348,9 +376,14 @@ class IoReactNativeProximity: RCTEventEmitter {
       }
     }
     
-    /// Rejects the provided promise with the appropriate error message and additional data.
-    /// - Parameter reject  the promise to be rejected.
-    /// - Parameter moreUserInfo additional key-value pairs of data to be passed along with the error.
+     /**
+      Rejects the provided promise with the appropriate error message and additional data.
+      
+      - Parameters:
+        - reject:  the promise to be rejected.
+        - moreUserInfo: additional key-value pairs of data to be passed along with the error.
+      
+      */
     func reject(
       reject: RCTPromiseRejectBlock,
       _ moreUserInfo: (String, Any)...
