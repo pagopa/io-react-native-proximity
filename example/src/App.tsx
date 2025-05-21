@@ -24,35 +24,40 @@ const App = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  /**
+   * Callback function to handle device connection.
+   * Currently does nothing but can be used to update the UI
+   */
   const handleOnDeviceConnecting = () => {
     console.log('onDeviceConnecting');
   };
 
+  /**
+   * Callback function to handle device connection.
+   * Currently does nothing but can be used to update the UI
+   */
   const handleOnDeviceConnected = () => {
     console.log('onDeviceConnected');
   };
 
   /**
-   * Handles communication errors
+   * Callback function to handle errors.
    * @param data The error data
    */
-  const handleOnError = useCallback(
-    (data: Proximity.EventsPayload['onError']) => {
-      const error = JSON.stringify(data);
-      console.error(`onError: ${error}`);
-      closeConnection();
-    },
-    []
-  );
+  const onError = useCallback((data: Proximity.EventsPayload['onError']) => {
+    const error = JSON.stringify(data);
+    console.error(`onError: ${error}`);
+    close();
+  }, []);
 
   /**
-   * Handles new device requests
+   * Callback function to handle a new request received from the verifier app.
    * @param request The request object
    * @returns The response object
    * @throws Error if the request is invalid
    * @throws Error if the response generation fails
    */
-  const handleOnDocumentRequestReceived = useCallback(
+  const onDocumentRequestReceived = useCallback(
     async (payload: Proximity.EventsPayload['onDocumentRequestReceived']) => {
       try {
         // A new request has been received
@@ -121,27 +126,33 @@ const App = () => {
     []
   );
 
+  /**
+   * Callback function to handle device disconnection.
+   */
   const onDeviceDisconnected = useCallback(async () => {
     console.log('onDeviceDisconnected');
     Alert.alert('Device disconnected', 'Check the verifier app for the result');
-    await closeConnection();
-    setQrCode(null);
+    await close();
   }, []);
 
   /**
-   * Getter for the QR code string.
+   * Close utility function to close the proximity flow.
    */
-  const generateQrCode = async () => {
-    try {
-      console.log('Generating QR code');
-      const qrString = await Proximity.getQrCodeString();
-      console.log(`Generated QR code: ${qrString}`);
-      setQrCode(qrString);
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-    }
+  const close = async () => {
+    console.log('Cleaning up listeners and closing QR engagement');
+    Proximity.removeListener('onDeviceConnected');
+    Proximity.removeListener('onDeviceConnecting');
+    Proximity.removeListener('onDeviceDisconnected');
+    Proximity.removeListener('onDocumentRequestReceived');
+    Proximity.removeListener('onError');
+    await Proximity.close();
+    setQrCode(null);
+    Alert.alert('QR Engagement Closed');
   };
 
+  /**
+   * Start utility function to start the proximity flow.
+   */
   const start = useCallback(async () => {
     const hasPermission = await requestBlePermissions();
     if (!hasPermission) {
@@ -159,38 +170,31 @@ const App = () => {
       Proximity.addListener('onDeviceConnected', handleOnDeviceConnected);
       Proximity.addListener(
         'onDocumentRequestReceived',
-        handleOnDocumentRequestReceived
+        onDocumentRequestReceived
       );
       Proximity.addListener('onDeviceDisconnected', onDeviceDisconnected);
-      Proximity.addListener('onError', handleOnError);
+      Proximity.addListener('onError', onError);
 
-      await generateQrCode();
+      // Generate the QR code string
+      console.log('Generating QR code');
+      const qrString = await Proximity.getQrCodeString();
+      console.log(`Generated QR code: ${qrString}`);
+      setQrCode(qrString);
     } catch (error) {
       Alert.alert('Failed to initialize QR engagement');
     } finally {
       setLoading(false);
     }
-  }, [handleOnDocumentRequestReceived, onDeviceDisconnected, handleOnError]);
+  }, [onDocumentRequestReceived, onDeviceDisconnected, onError]);
 
   /**
-   * Closes the QR engagement and cleans up listeners.
+   * Starts the proximity flow and stops it on unmount.
    */
-  const closeConnection = async () => {
-    console.log('Cleaning up listeners and closing QR engagement');
-    Proximity.removeListener('onDeviceConnected');
-    Proximity.removeListener('onDeviceConnecting');
-    Proximity.removeListener('onDeviceDisconnected');
-    Proximity.removeListener('onDocumentRequestReceived');
-    Proximity.removeListener('onError');
-    await Proximity.close();
-    setQrCode(null);
-  };
-
   useEffect(() => {
     start();
 
     return () => {
-      closeConnection();
+      close();
     };
   }, [start]);
 
@@ -207,13 +211,7 @@ const App = () => {
       <TouchableOpacity style={styles.button} onPress={start}>
         <Text style={styles.buttonText}>Generate QR Engagement</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={async () => {
-          await closeConnection();
-          Alert.alert('QR Engagement Closed');
-        }}
-      >
+      <TouchableOpacity style={styles.button} onPress={close}>
         <Text style={styles.buttonText}>Close QR Engagement</Text>
       </TouchableOpacity>
     </SafeAreaView>
