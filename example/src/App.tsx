@@ -147,7 +147,6 @@ const App = () => {
       Proximity.removeListener('onDocumentRequestReceived');
       Proximity.removeListener('onError');
       await Proximity.close();
-      console.log('ok');
       setQrCode(null);
     } catch (e) {
       console.log('Error closing the proximity flow', e);
@@ -185,6 +184,7 @@ const App = () => {
       console.log(`Generated QR code: ${qrString}`);
       setQrCode(qrString);
     } catch (error) {
+      console.log('Error starting the proximity flow', error);
       Alert.alert('Failed to initialize QR engagement');
     } finally {
       setLoading(false);
