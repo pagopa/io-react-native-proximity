@@ -257,7 +257,7 @@ class IoReactNativeProximity: RCTEventEmitter {
      - reject:  The promise to be rejected
    
    */
-  @objc(closeQrEngagement:withRejecter:)
+  @objc(close:withRejecter:)
   func close(
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock

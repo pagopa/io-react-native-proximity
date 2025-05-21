@@ -47,7 +47,7 @@ const App = () => {
   const onError = useCallback((data: Proximity.EventsPayload['onError']) => {
     const error = JSON.stringify(data);
     console.error(`onError: ${error}`);
-    close();
+    closeFlow();
   }, []);
 
   /**
@@ -132,28 +132,32 @@ const App = () => {
   const onDeviceDisconnected = useCallback(async () => {
     console.log('onDeviceDisconnected');
     Alert.alert('Device disconnected', 'Check the verifier app for the result');
-    await close();
+    await closeFlow();
   }, []);
 
   /**
    * Close utility function to close the proximity flow.
    */
-  const close = async () => {
-    console.log('Cleaning up listeners and closing QR engagement');
-    Proximity.removeListener('onDeviceConnected');
-    Proximity.removeListener('onDeviceConnecting');
-    Proximity.removeListener('onDeviceDisconnected');
-    Proximity.removeListener('onDocumentRequestReceived');
-    Proximity.removeListener('onError');
-    await Proximity.close();
-    setQrCode(null);
-    Alert.alert('QR Engagement Closed');
+  const closeFlow = async () => {
+    try {
+      console.log('Cleaning up listeners and closing QR engagement');
+      Proximity.removeListener('onDeviceConnected');
+      Proximity.removeListener('onDeviceConnecting');
+      Proximity.removeListener('onDeviceDisconnected');
+      Proximity.removeListener('onDocumentRequestReceived');
+      Proximity.removeListener('onError');
+      await Proximity.close();
+      console.log('ok');
+      setQrCode(null);
+    } catch (e) {
+      console.log('Error closing the proximity flow', e);
+    }
   };
 
   /**
    * Start utility function to start the proximity flow.
    */
-  const start = useCallback(async () => {
+  const startFlow = useCallback(async () => {
     const hasPermission = await requestBlePermissions();
     if (!hasPermission) {
       Alert.alert(
@@ -191,12 +195,12 @@ const App = () => {
    * Starts the proximity flow and stops it on unmount.
    */
   useEffect(() => {
-    start();
+    startFlow();
 
     return () => {
-      close();
+      closeFlow();
     };
-  }, [start]);
+  }, [startFlow]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -208,10 +212,10 @@ const App = () => {
       ) : (
         <Text>Click the button to generate a QR code</Text>
       )}
-      <TouchableOpacity style={styles.button} onPress={start}>
+      <TouchableOpacity style={styles.button} onPress={startFlow}>
         <Text style={styles.buttonText}>Generate QR Engagement</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={close}>
+      <TouchableOpacity style={styles.button} onPress={closeFlow}>
         <Text style={styles.buttonText}>Close QR Engagement</Text>
       </TouchableOpacity>
     </SafeAreaView>
