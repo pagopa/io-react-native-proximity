@@ -20,16 +20,27 @@ const IoReactNativeProximity = NativeModules.IoReactNativeProximity
 
 const eventEmitter = new NativeEventEmitter(IoReactNativeProximity);
 
-export type QrEngagementEventPayloads = {
-  onConnecting: undefined;
-  onDeviceRetrievalHelperReady: undefined;
-  onCommunicationError: { error: string } | undefined;
+/**
+ * Events emitted by the native module:
+ * - `onDeviceConnecting`: Emitted when the device is connecting to the verifier app.
+ * - `onDeviceConnected`: Emitted when the device is connected to the verifier app.
+ * - `onDocumentRequestReceived`: Emitted when a document request is received from the verifier app. Carries a payload containing the request data.
+ * - `onDeviceDisconnected`: Emitted when the device is disconnected from the verifier app.
+ * - `onError`: Emitted when an error occurs. Carries a payload containing the error data.
+ */
+export type EventsPayload = {
+  onDeviceConnecting: undefined;
+  onDeviceConnected: undefined;
   // The message payload is a JSON string that must be parsed into a `VerifierRequest` structure via `parseVerifierRequest`.
-  onNewDeviceRequest: { message: string } | undefined;
+  onDocumentRequestReceived: { data: string } | undefined;
   onDeviceDisconnected: undefined;
+  onError: { error: string } | undefined;
 };
 
-export type QrEngagementEvents = keyof QrEngagementEventPayloads;
+/**
+ * Events emitted by the native module.
+ */
+export type Events = keyof EventsPayload;
 
 /**
  * Documents type to be used in the {@link generateResponse} method.
@@ -44,25 +55,24 @@ export type Document = {
 /**
  * Initializes the QR engagement
  * @android This method should be called before any other method in this module.
- * @ios This method is not needed for iOS since the getQrCodeString method is responsible for initializing the connection
- * @param peripheralMode - Whether the device is in peripheral mode
- * @param centralClientMode - Whether the device is in central client mode
- * @param clearBleCache - Whether the BLE cache should be cleared
+ * @param peripheralMode (Android only) - Whether the device is in peripheral mode. Defaults to true
+ * @param centralClientMode (Android only) - Whether the device is in central client mode. Defaults to false
+ * @param clearBleCache (Android only) - Whether the BLE cache should be cleared. Defaults to true
  */
-export function initializeQrEngagement(
-  peripheralMode: boolean,
-  centralClientMode: boolean,
-  clearBleCache: boolean
+export function start(
+  peripheralMode?: boolean,
+  centralClientMode?: boolean,
+  clearBleCache?: boolean
 ): Promise<boolean> {
-  // This is not needed for iOS since the getQrCodeString method is responsible for initializing the connection
   if (Platform.OS === 'ios') {
-    return Promise.resolve(true);
+    return IoReactNativeProximity.start();
+  } else {
+    return IoReactNativeProximity.start(
+      peripheralMode ? peripheralMode : true,
+      centralClientMode ? centralClientMode : false,
+      clearBleCache ? clearBleCache : true
+    );
   }
-  return IoReactNativeProximity.initializeQrEngagement(
-    peripheralMode,
-    centralClientMode,
-    clearBleCache
-  );
 }
 
 /**
@@ -75,8 +85,8 @@ export function getQrCodeString(): Promise<string> {
 /**
  * Closes the QR engagement
  */
-export function closeQrEngagement(): Promise<boolean> {
-  return IoReactNativeProximity.closeQrEngagement();
+export function close(): Promise<boolean> {
+  return IoReactNativeProximity.close();
 }
 
 /**
@@ -136,9 +146,9 @@ export function sendResponse(response: string): Promise<boolean> {
  * @param event - The event to listen for. The available events are defined in the `QrEngagementEvents` type.
  * @param callback - The callback to be called when the event is emitted. The callback will receive the event payload as an argument.
  */
-export function addListener<E extends QrEngagementEvents>(
+export function addListener<E extends Events>(
   event: E,
-  callback: (data: QrEngagementEventPayloads[E]) => void
+  callback: (data: EventsPayload[E]) => void
 ) {
   eventEmitter.addListener(event, callback);
 }
@@ -147,6 +157,6 @@ export function addListener<E extends QrEngagementEvents>(
  * Removes a listener for a `QrEngagementEvents` event.
  * @param event - The event to remove the listener for. The available events are defined in the `QrEngagementEvents` type.
  */
-export function removeListeners(event: QrEngagementEvents) {
+export function removeListener(event: Events) {
   eventEmitter.removeAllListeners(event);
 }
