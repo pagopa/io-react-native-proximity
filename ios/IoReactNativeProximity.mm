@@ -22,7 +22,8 @@ RCT_EXTERN_METHOD(sendResponse:(NSString)response
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(sendErrorResponseNoData:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(sendErrorResponse:(NSInteger)status
+                  withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 + (BOOL)requiresMainQueueSetup

@@ -11,7 +11,7 @@ PODS:
     - DoubleConversion
     - glog
     - hermes-engine
-    - IOWalletProximity (~> 1.1.0)
+    - IOWalletProximity (~> 1.2.0)
     - RCT-Folly (= 2024.01.01.00)
     - RCTRequired
     - RCTTypeSafety
@@ -29,7 +29,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - IOWalletProximity (1.1.0)
+  - IOWalletProximity (1.2.0)
   - pagopa-io-react-native-crypto (1.0.1):
     - DoubleConversion
     - glog
@@ -1286,7 +1286,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context (5.2.0):
+  - react-native-safe-area-context (5.4.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1299,8 +1299,8 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-safe-area-context/common (= 5.2.0)
-    - react-native-safe-area-context/fabric (= 5.2.0)
+    - react-native-safe-area-context/common (= 5.4.1)
+    - react-native-safe-area-context/fabric (= 5.4.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1309,7 +1309,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.2.0):
+  - react-native-safe-area-context/common (5.4.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1330,7 +1330,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.2.0):
+  - react-native-safe-area-context/fabric (5.4.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1640,7 +1640,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.7.0):
+  - RNScreens (4.10.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1661,9 +1661,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.7.0)
+    - RNScreens/common (= 4.10.0)
     - Yoga
-  - RNScreens/common (4.7.0):
+  - RNScreens/common (4.10.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1957,8 +1957,8 @@ SPEC CHECKSUMS:
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: eb4a80f6bf578536c58a44198ec93a30f6e69218
-  IoReactNativeProximity: 089025c40a0dbc851935988dc9bb30312c1a5f5c
-  IOWalletProximity: 38d606f31d5615addaf691a79a9d84cb9724813a
+  IoReactNativeProximity: be285c1a53d341cee77e81a516f93b28940bb3d5
+  IOWalletProximity: 87bc6ffee05db4f005c3c8da16d30af2be009d89
   pagopa-io-react-native-crypto: 2324061a98caccc342b0edc6cf434a731575f620
   RCT-Folly: bf5c0376ffe4dd2cf438dcf86db385df9fdce648
   RCTDeprecation: 7691283dd69fed46f6653d376de6fa83aaad774c
@@ -1989,7 +1989,7 @@ SPEC CHECKSUMS:
   React-logger: f9d104eace4ce03d7d5ab96802069d9905082225
   React-Mapbuffer: 23ffe602d0f5ca53b861ef8534cb8c63c4479671
   React-microtasksnativemodule: 73fdf0c53b6d50d55de2d5bd9abfb8c006b043a4
-  react-native-safe-area-context: a95e75ab816db4438a319aa4b43dfe6def22026f
+  react-native-safe-area-context: 1c226bb0230d9a33cc9d10bc5cf9fa6155455c23
   React-nativeconfig: 67fa7a63ea288cb5b1d0dd2deaf240405fec164f
   React-NativeModulesApple: cbf1a34443e1f67b56344547f4b0af69e1c685ba
   React-perflogger: f02ee21d98773121d77993b3c1a8be445840fae3
@@ -2018,7 +2018,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 9a99ced51aab02909c7ab5056f33dff7054305bb
   ReactCommon: 04292c6f596181ebf755e7929d96d2148542b0e8
   RNPermissions: 3cb7616debc44870a30fd514f3ad4a7ef95b8fca
-  RNScreens: 48ef264c16545cbf2e575f0e23dfb23ff6396702
+  RNScreens: 34770a3bf9e25f54c8e4683c2b20a20ab2b0c3a4
   RNSVG: ea3e35f0375ac20449384fa89ce056ee0e0690ee
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 88e46d0f2096eb9762a82c2c45ab23b0880de97d
