@@ -129,6 +129,15 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Sends an error response during the presentation according to the SessionData status codes defined in table 20 of the ISO18013-5 standard.
+   * @param code - The status error to be sent is a long type but the bridge only maps double values. It is converted to a long.
+   * The accepted values are defined in ``SessionDataStatus`` as follows:
+   *  10 -> Error: session encryption
+   *  11 -> Error: CBOR decoding
+   *  20 -> Session termination
+   * @param promise - The promise which will be resolved in case of success or rejected in case of failure.
+   */
   @ReactMethod
   fun sendErrorResponse(code:Double, promise: Promise) {
     try {

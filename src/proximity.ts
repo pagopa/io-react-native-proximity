@@ -52,6 +52,11 @@ export type Document = {
   docType: string;
 };
 
+/**
+ * Error codes that can be used with the `sendErrorResponse` method.
+ * These are defined based on the SessionData status code defined in the table 20 of the ISO 18013-5 standard
+ * and mirror codes defined in the native module.
+ */
 export enum ErrorCode {
   SESSION_ENCRYPTION = 10,
   CBOR_DECODING = 11,
@@ -102,7 +107,9 @@ export function close(): Promise<boolean> {
 }
 
 /**
- * Sends a generic error response to the verifier app
+ * Sends an error response to the verifier app.
+ * The error code must be one of the `ErrorCode` enum values.
+ * @param code - The error code to be sent to the verifier app.
  */
 export function sendErrorResponse(code: ErrorCode): Promise<boolean> {
   return IoReactNativeProximity.sendErrorResponse(code);

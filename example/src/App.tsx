@@ -16,6 +16,13 @@ import {
 } from './utils';
 import { ErrorCode } from '../../src/proximity';
 
+/**
+ * Proximity status enum to track the current state of the flow.
+ * - STARTING: The flow is starting, permissions are being requested if necessary.
+ * - STARTED: The flow has started, the QR code is being displayed.
+ * - PRESENTING: The verifier app has requested a document, the user must decide whether to send it or not.
+ * - STOPPED: The flow has been stopped, either by the user or due to an error.
+ */
 enum PROXIMITY_STATUS {
   STARTING = 'STARTING',
   STARTED = 'STARTED',
@@ -130,6 +137,10 @@ const App: React.FC = () => {
     [closeFlow]
   );
 
+  /**
+   * Sends an error response to the verifier app during the presentation.
+   * @param errorCode The error code to be sent
+   */
   const sendError = useCallback(async (errorCode: Proximity.ErrorCode) => {
     try {
       console.log('Sending error response to verifier app');
