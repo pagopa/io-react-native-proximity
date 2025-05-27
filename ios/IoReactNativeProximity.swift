@@ -405,6 +405,8 @@ class IoReactNativeProximity: RCTEventEmitter {
         return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       case .sendResponseError:
         return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
+      case .sendErrorResponse:
+        return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       }
     }
     
