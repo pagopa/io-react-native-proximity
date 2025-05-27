@@ -391,6 +391,7 @@ class IoReactNativeProximity: RCTEventEmitter {
     case qrCodeError = "QR_CODE_ERROR"
     case generateDeviceResponseError = "GENERATE_DEVICE_RESPONSE_ERROR"
     case sendResponseError = "SEND_RESPONSE_ERROR"
+    case sendErrorResponse = "SEND_ERROR_RESPONSE_ERROR"
     
     func error(
       userInfo: [String : Any]? = nil

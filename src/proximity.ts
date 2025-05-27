@@ -52,6 +52,12 @@ export type Document = {
   docType: string;
 };
 
+export enum ErrorCode {
+  SESSION_ENCRYPTION = 10,
+  CBOR_DECODING = 11,
+  SESSION_TERMINATED = 20,
+}
+
 /**
  * Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
  * @param config.peripheralMode (Android only) - Whether the device is in peripheral mode. Defaults to true
@@ -98,19 +104,8 @@ export function close(): Promise<boolean> {
 /**
  * Sends a generic error response to the verifier app
  */
-export function sendErrorResponse(): Promise<boolean> {
-  if (Platform.OS === 'ios') {
-    // Currently not implemented for iOS
-    return Promise.resolve(true);
-  }
-  return IoReactNativeProximity.sendErrorResponse();
-}
-
-/**
- * Sends an error response to the verifier app when the requested document is not found.
- */
-export function sendErrorResponseNoData(): Promise<boolean> {
-  return IoReactNativeProximity.sendErrorResponseNoData();
+export function sendErrorResponse(code: ErrorCode): Promise<boolean> {
+  return IoReactNativeProximity.sendErrorResponse(code);
 }
 
 /**

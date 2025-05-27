@@ -15,6 +15,7 @@ import it.pagopa.io.wallet.proximity.qr_code.QrEngagement
 import it.pagopa.io.wallet.proximity.qr_code.QrEngagementListener
 import it.pagopa.io.wallet.proximity.request.DocRequested
 import it.pagopa.io.wallet.proximity.response.ResponseGenerator
+import it.pagopa.io.wallet.proximity.session_data.SessionDataStatus
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
 
 
@@ -129,37 +130,24 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun sendErrorResponse(promise: Promise) {
+  fun sendErrorResponse(code:Double, promise: Promise) {
     try {
-      qrEngagement?.let {
-        it.sendErrorResponse()
-        promise.resolve(true)
+      qrEngagement?.let { it ->
+        val sessionDataStatus = SessionDataStatus.entries.find { it.value == code.toLong() }
+        if(sessionDataStatus != null){
+          it.sendErrorResponse(sessionDataStatus)
+          promise.resolve(true)
+        }else {
+          ModuleException.SEND_ERROR_RESPONSE_ERROR.reject(
+            promise,
+            Pair(ERROR_KEY, "Invalid status code")
+          )
+        }
       } ?: run {
         ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
       }
     } catch (e: Exception) {
-      ModuleException.ERROR_SENDING_ERROR_RESPONSE.reject(
-        promise,
-        Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
-      )
-    }
-  }
-
-  /**
-   * Sends a no data response when the user declines the presentation request.
-   * @param promise - The promise which will be resolved in case of success or rejected in case of failure.
-   */
-  @ReactMethod
-  fun sendErrorResponseNoData(promise: Promise) {
-    try {
-      qrEngagement?.let {
-        it.sendErrorResponseNoData()
-        promise.resolve(true)
-      } ?: run {
-        ModuleException.QR_ENGAGEMENT_NOT_DEFINED_ERROR.reject(promise)
-      }
-    } catch (e: Exception) {
-      ModuleException.ERROR_SENDING_ERROR_NO_DATA_RESPONSE.reject(
+      ModuleException.SEND_ERROR_RESPONSE_ERROR.reject(
         promise,
         Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
@@ -336,8 +324,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     START_ERROR(Exception("START_ERROR")),
     GET_QR_CODE_ERROR(Exception("GET_QR_CODE_ERROR")),
     CLOSE_QR_ENGAGEMENT_ERROR(Exception("CLOSE_QR_ENGAGEMENT_ERROR")),
-    ERROR_SENDING_ERROR_RESPONSE(Exception("ERROR_SENDING_ERROR_RESPONSE")),
-    ERROR_SENDING_ERROR_NO_DATA_RESPONSE(Exception("ERROR_SENDING_ERROR_NODATA_RESPONSE")),
+    SEND_ERROR_RESPONSE_ERROR(Exception("SEND_ERROR_RESPONSE_ERROR")),
     RESPONSE_GENERATION_ON_ERROR(Exception("RESPONSE_GENERATION_ON_ERROR")),
     GENERIC_GENERATE_RESPONSE_ERROR(Exception("GENERIC_GENERATE_RESPONSE_ERROR")),
     WRONG_DOCUMENTS_FORMAT(Exception("WRONG_DOCUMENTS_FORMAT")),
