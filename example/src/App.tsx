@@ -129,10 +129,10 @@ const App: React.FC = () => {
    * @param data The error data
    */
   const onError = useCallback(
-    (data: Proximity.EventsPayload['onError']) => {
+    async (data: Proximity.EventsPayload['onError']) => {
       const error = JSON.stringify(data);
       console.error(`onError: ${error}`);
-      closeFlow();
+      await closeFlow();
     },
     [closeFlow]
   );
