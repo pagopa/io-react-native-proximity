@@ -1935,7 +1935,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: 2771b98fb813fdc6f92edd7c9c0035ecabf9fee7
-  IoReactNativeProximity: 3ed925404dfb38f1a499e17bd2943963fdbf60c4
+  IoReactNativeProximity: 3be447d918ad23c2bc26ac34e604d4cbe51f5e53
   IOWalletProximity: 66db020e9570b5b14483090336a7cdc3b0418e7c
   pagopa-io-react-native-crypto: b34250ee64b80d058320ee88233177df8d8d03b0
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82

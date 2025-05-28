@@ -2,7 +2,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-     <!-- Required for ble -->
+    <!-- Required for ble -->
     <uses-permission android:name="android.permission.BLUETOOTH" tools:remove="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" tools:remove="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
