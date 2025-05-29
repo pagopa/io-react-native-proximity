@@ -29,11 +29,12 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   private var deviceRetrievalHelper: DeviceRetrievalHelperWrapper? = null
 
   /**
-    Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
-    Resolves to true or rejects if an error occurs.
+   * Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
+   * Resolves to true or rejects if an error occurs.
    * @param peripheralMode - Whether the device is in peripheral mode. Defaults to true
    * @param centralClientMode - Whether the device is in central client mode. Defaults to false
    * @param clearBleCache - Whether the BLE cache should be cleared. Defaults to true
+   * @param certificates - Array of base64 representing DER encoded X.509 certificate which are used to authenticate the verifier app
    * @param promise - The promise which will be resolved in case of success or rejected in case of failure.
    */
   @ReactMethod
@@ -41,6 +42,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     peripheralMode: Boolean,
     centralClientMode: Boolean,
     clearBleCache: Boolean,
+    certificates: ReadableArray,
     promise: Promise
   ) {
     try {
@@ -50,7 +52,12 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         clearBleCache = clearBleCache
       )
 
-      qrEngagement = QrEngagement.build(reactApplicationContext, listOf(retrievalMethod))
+      val certificatesList = parseCertificates(certificates)
+      qrEngagement = QrEngagement.build(reactApplicationContext, listOf(retrievalMethod)).apply {
+        if (certificatesList.isNotEmpty()) {
+          withReaderTrustStore(certificatesList)
+        }
+      }
       qrEngagement?.configure()
       setupProximityHandler()
       promise.resolve(true)
@@ -60,6 +67,24 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
         Pair(ERROR_KEY, getExceptionMessageOrEmpty(e))
       )
     }
+  }
+
+  /**
+   * Utility function to parse an array coming from the React Native Bridge into an ArrayList
+   * of ByteArray representing DER encoded X.509 certificates.
+   * @param certificates - Array of base64 strings representing DER encoded X.509 certificate
+   * @returns An ArrayList of ByteArray representing DER encoded X.509 certificates.
+   * @throws ClassCastException if the element in the array is not a string
+   */
+  private fun parseCertificates(certificates: ReadableArray): ArrayList<ByteArray> {
+    return ArrayList(
+      (0 until certificates.size())
+        .mapNotNull { i ->
+          certificates.getString(i).let { cert ->
+            Base64.decode(cert, Base64.DEFAULT)
+          }
+        }
+    )
   }
 
   /**

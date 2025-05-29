@@ -42,19 +42,40 @@ class IoReactNativeProximity: RCTEventEmitter {
    Resolves to true or rejects if an error occurs.
     
    - Parameters:
+      - certificates: Array of base64 representing DER encoded X.509 certificate which are used to authenticate the verifier app
       - resolve: The promise to be resolved
       - reject: The promise to be rejected
   */
-  @objc(start:withRejecter:)
+  @objc(start:withResolver:withRejecter:)
   func start(
+    certificates: Array<Any>,
     _ resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ){
     do {
-      try Proximity.shared.start()
+      let certsData = parseCertificates(certificates)
+      try Proximity.shared.start(certsData.isEmpty ? nil : certsData)
       resolve(true)
     } catch let error {
       ME.startError.reject(reject: reject, ("error", error.localizedDescription))
+    }
+  }
+  
+  /**
+   Utility function to parse an array coming from the React Native Bridge into an array of Data representing DER encoded X.509 certificates.
+   
+   - Parameters:
+      - certificates:Array of base64 strings representing DER encoded X.509 certificate
+   
+    - Returns: An array of Data containing DER ecnoded X.509 certificates.
+  */
+  private func parseCertificates(_ certificates: [Any]) -> [Data] {
+    return certificates.compactMap { item in
+      guard let certString = item as? String,
+            let data = Data(base64Encoded: certString) else {
+        return nil
+      }
+      return data
     }
   }
   

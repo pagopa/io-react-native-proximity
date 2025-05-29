@@ -53,24 +53,30 @@ export type Document = {
 };
 
 /**
- * Initializes the QR engagement
- * @android This method should be called before any other method in this module.
- * @param peripheralMode (Android only) - Whether the device is in peripheral mode. Defaults to true
- * @param centralClientMode (Android only) - Whether the device is in central client mode. Defaults to false
- * @param clearBleCache (Android only) - Whether the BLE cache should be cleared. Defaults to true
+ * Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
+ * @param config.peripheralMode (Android only) - Whether the device is in peripheral mode. Defaults to true
+ * @param config.centralClientMode (Android only) - Whether the device is in central client mode. Defaults to false
+ * @param config.clearBleCache (Android only) - Whether the BLE cache should be cleared. Defaults to true
+ * @param config.certificates - Array of base64 representing DER encoded X.509 certificate which are used to authenticate the verifier app
  */
 export function start(
-  peripheralMode?: boolean,
-  centralClientMode?: boolean,
-  clearBleCache?: boolean
+  config: {
+    peripheralMode?: boolean;
+    centralClientMode?: boolean;
+    clearBleCache?: boolean;
+    certificates?: string[];
+  } = {}
 ): Promise<boolean> {
+  const { peripheralMode, centralClientMode, clearBleCache, certificates } =
+    config;
   if (Platform.OS === 'ios') {
-    return IoReactNativeProximity.start();
+    return IoReactNativeProximity.start(certificates ? certificates : []);
   } else {
     return IoReactNativeProximity.start(
       peripheralMode ? peripheralMode : true,
       centralClientMode ? centralClientMode : false,
-      clearBleCache ? clearBleCache : true
+      clearBleCache ? clearBleCache : true,
+      certificates ? certificates : []
     );
   }
 }
