@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
-import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from './mocks';
+import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from '../mocks';
 import {
   Proximity,
   parseVerifierRequest,
@@ -13,8 +13,8 @@ import {
   generateKeyIfNotExists,
   isRequestMdl,
   requestBlePermissions,
-} from './utils';
-import { ErrorCode } from '../../src/proximity';
+} from '../utils';
+import { ErrorCode } from '../../../src/proximity';
 
 /**
  * Proximity status enum to track the current state of the flow.
@@ -30,7 +30,7 @@ enum PROXIMITY_STATUS {
   STOPPED = 'STOPPED',
 }
 
-const App: React.FC = () => {
+export const QrCodeScreen: React.FC = () => {
   const [status, setStatus] = useState<PROXIMITY_STATUS>(
     PROXIMITY_STATUS.STARTING
   );
@@ -314,5 +314,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default App;

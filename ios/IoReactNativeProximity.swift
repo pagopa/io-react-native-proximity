@@ -54,7 +54,7 @@ class IoReactNativeProximity: RCTEventEmitter {
   ){
     do {
       let certsData = parseCertificates(certificates)
-      try Proximity.shared.start([].isEmpty ? nil : [])
+      try Proximity.shared.start(certsData.isEmpty ? nil : certsData)
       resolve(true)
     } catch let error {
       ME.startError.reject(reject: reject, ("error", error.localizedDescription))
@@ -182,7 +182,7 @@ class IoReactNativeProximity: RCTEventEmitter {
   
   /**
      Generates a response containing the documents and the fields which the user decided to present.
-     It parses the untyped ``documents`` and ``acceptedFields`` parameters and feds them to the ``IOWalletProximity.generateDeviceResponse`` function.
+     It parses the untyped ``documents`` and ``acceptedFields`` parameters and feeds them to the ``IOWalletProximity.generateDeviceResponse`` function.
      It resolves the promise with the response as a base64 encoded string.
      It rejects the promise if an error occurs during the parameters parsing or while generating the device response.
      
