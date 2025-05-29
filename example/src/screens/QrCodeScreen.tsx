@@ -55,6 +55,10 @@ export const QrCodeScreen: React.FC = () => {
     console.log('onDeviceConnected');
   };
 
+  /**
+   * Sends the required document to the verifier app.
+   * @param verifierRequest - The request object received from the verifier app
+   */
   const sendDocument = async (verifierRequest: VerifierRequest['request']) => {
     await generateKeyIfNotExists(KEYTAG);
     const documents: Array<Proximity.Document> = [
