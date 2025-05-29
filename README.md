@@ -110,6 +110,39 @@ import { Proximity } from '@pagopa/io-react-native-proximity';
 await Proximity.close();
 ```
 
+## Proximity Flow Schema 
+```mermaid
+sequenceDiagram
+    participant user as User
+    participant app as Consumer App
+    participant proximity as io-react-native-proximity
+    participant verifier as Verifier App
+
+    Note over proximity, verifier: If an error occurs during the flow, the onError callback is triggered
+    user->>+app: Initiate the credential presentation
+    app->>+proximity: Calls start()
+    app->>+proximity: Calls getQrCode()
+    proximity-->>+app: QR code string
+    app->>+app: Renders the QR code string
+    verifier->>+app: Scans the QR code
+    proximity->>+app: Triggers the onDeviceConnecting callback 
+    verifier->>+app: Connects to the verifier app
+    proximity->>+app: Triggers the onDeviceConnected callback
+    verifier->>+app: Requests the credential(s)
+    proximity->>+app: Triggers the onDocumentRequestReceived() callback
+    app->>+proximity: Parses the request by calling parseVerifierRequest()
+    proximity-->>+app: Returns a VerifierRequest
+    app->>+user: Shows the requested data and asks for user consent 
+    user->>+app: Accepts
+    app->>+proximity: Calls generateResponse() 
+    proximity-->>+app: Returns the response
+    app->>+proximity: Calls sendResponse()
+    proximity->>+verifier: Sends the response
+    verifier->>+app: Closes the connection
+    proximity->>+app: Calls the onDeviceDisconnected callback
+    app->>+user: Terminates the credential presentation
+```
+
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
