@@ -54,7 +54,7 @@ class IoReactNativeProximity: RCTEventEmitter {
   ){
     do {
       let certsData = parseCertificates(certificates)
-      try Proximity.shared.start([].isEmpty ? nil : [])
+      try Proximity.shared.start(certsData.isEmpty ? nil : certsData)
       resolve(true)
     } catch let error {
       ME.startError.reject(reject: reject, ("error", error.localizedDescription))
