@@ -109,12 +109,7 @@ export const QrCodeScreen: React.FC = () => {
         );
         console.log('Response generated:', result);
 
-        /**
-         * Send the response to the verifier app.
-         * Currently we don't know what the verifier app responds with, thus we don't handle the response.
-         * We just wait for 2 seconds before closing the connection and resetting the QR code.
-         * In order to start a new flow a new QR code must be generated.
-         */
+        // Send the response to the verifier app
         console.log('Sending response to verifier app');
         await Proximity.sendResponse(result);
         console.log('Response sent');

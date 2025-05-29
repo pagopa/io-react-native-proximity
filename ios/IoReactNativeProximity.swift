@@ -182,7 +182,7 @@ class IoReactNativeProximity: RCTEventEmitter {
   
   /**
      Generates a response containing the documents and the fields which the user decided to present.
-     It parses the untyped ``documents`` and ``acceptedFields`` parameters and feds them to the ``IOWalletProximity.generateDeviceResponse`` function.
+     It parses the untyped ``documents`` and ``acceptedFields`` parameters and feeds them to the ``IOWalletProximity.generateDeviceResponse`` function.
      It resolves the promise with the response as a base64 encoded string.
      It rejects the promise if an error occurs during the parameters parsing or while generating the device response.
      

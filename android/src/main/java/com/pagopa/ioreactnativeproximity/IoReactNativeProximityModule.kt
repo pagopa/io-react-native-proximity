@@ -289,7 +289,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
 
       override fun onError(error: Throwable) {
         val data = error.message ?: ""
-        sendEvent("onDeviceConnected", data)
+        sendEvent("onError", data)
       }
 
       override fun onDocumentRequestReceived(request: String?, sessionsTranscript: ByteArray){
