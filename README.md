@@ -16,13 +16,13 @@ npm install @pagopa/io-react-native-proximity
 This library emits the following events:
 | Event | Payload | Description |
 |---------------------------|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| onDeviceConnecting | undefined | Event dispatched when the verifier app is connecting |
-| onDeviceConnected | undefined | Event dispatched when the verifier app is connected |
-| onDocumentRequestReceived | { data: string } \| undefined | Event dispatched when the consumer app receives a new request, contained in the data payload. It can be parsed via the `parseVerifierRequest` provided [here](src/schema.ts). |
-| onDeviceDisconnected | undefined | Event dispatched when the verifier app disconnects. |
-| onError | { error: string } \| undefined | Event dispatched when an error occurs which is contained in the error payload |
+| onDeviceConnecting | `undefined` | Event dispatched when the verifier app is connecting |
+| onDeviceConnected | `undefined` | Event dispatched when the verifier app is connected. |
+| onDocumentRequestReceived | `{ data: string } \| undefined` | Event dispatched when the consumer app receives a new request, contained in the data payload. It can be parsed via the `parseVerifierRequest` provided [here](src/schema.ts). |
+| onDeviceDisconnected | `undefined` | Event dispatched when the verifier app disconnects. |
+| onError | `{ error: string } \| undefined` | Event dispatched when an error occurs which is contained in the error payload. |
 
-Listeners can be added using the `addListener` method and removed using the `removeListener` method:
+Listeners can be added using the `addListener` method and removed using the `removeListener` method.
 
 ```typescript
 import { Proximity } from '@pagopa/io-react-native-proximity';
@@ -111,6 +111,8 @@ await Proximity.close();
 ```
 
 ## Proximity Flow Schema
+
+This section describes a high level overview of the interactions between an app implementing the `io-react-native-proximity` library and a verifier app.
 
 ```mermaid
 sequenceDiagram
