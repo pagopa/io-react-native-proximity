@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from '../mocks';
 import {
@@ -25,42 +25,50 @@ export const QrCodeScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   /**
-   * Handles the device ready event
+   * Callback function to handle device connection.
+   * Currently does nothing but can be used to update the UI
    */
-  const handleDeviceReady = () => {
-    console.log('Device is ready for retrieval');
+  const handleOnDeviceConnecting = () => {
+    console.log('onDeviceConnecting');
   };
 
   /**
-   * Handles communication errors
+   * Callback function to handle device connection.
+   * Currently does nothing but can be used to update the UI
+   */
+  const handleOnDeviceConnected = () => {
+    console.log('onDeviceConnected');
+  };
+
+  /**
+   * Callback function to handle errors.
    * @param data The error data
    */
-  const handleCommunicationError = (
-    data: Proximity.QrEngagementEventPayloads['onCommunicationError']
-  ) => {
-    console.error('QR Engagement Error:', JSON.stringify(data));
-  };
+  const onError = useCallback((data: Proximity.EventsPayload['onError']) => {
+    const error = JSON.stringify(data);
+    console.error(`onError: ${error}`);
+    closeFlow();
+  }, []);
 
   /**
-   * Handles new device requests
+   * Callback function to handle a new request received from the verifier app.
    * @param request The request object
    * @returns The response object
    * @throws Error if the request is invalid
    * @throws Error if the response generation fails
    */
-  const handleNewDeviceRequest = useCallback(
-    async (data: Proximity.QrEngagementEventPayloads['onNewDeviceRequest']) => {
+  const onDocumentRequestReceived = useCallback(
+    async (payload: Proximity.EventsPayload['onDocumentRequestReceived']) => {
       try {
         // A new request has been received
-        console.log('New device request received', data);
-        if (!data || !data.message) {
+        console.log('onDocumentRequestReceived', payload);
+        if (!payload || !payload.data) {
           console.warn('Request does not contain a message.');
           return;
         }
 
         // Parse and verify the received request with the exposed function
-        const message = data.message;
-        const parsedJson = JSON.parse(message);
+        const parsedJson = JSON.parse(payload.data);
         console.log('Parsed JSON:', parsedJson);
         const parsedResponse = parseVerifierRequest(parsedJson);
         console.log('Parsed response:', JSON.stringify(parsedResponse));
@@ -101,18 +109,10 @@ export const QrCodeScreen: React.FC = () => {
         );
         console.log('Response generated:', result);
 
-        /**
-         * Send the response to the verifier app.
-         * Currently we don't know what the verifier app responds with, thus we don't handle the response.
-         * We just wait for 2 seconds before closing the connection and resetting the QR code.
-         * In order to start a new flow a new QR code must be generated.
-         */
+        // Send the response to the verifier app
         console.log('Sending response to verifier app');
         await Proximity.sendResponse(result);
-        console.log('Response sent, closing connection in 2 seconds');
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        await Proximity.closeQrEngagement();
-        setQrCode(null);
+        console.log('Response sent');
       } catch (error) {
         console.error('Error handling new device request:', error);
         await Proximity.sendErrorResponseNoData();
@@ -122,67 +122,83 @@ export const QrCodeScreen: React.FC = () => {
   );
 
   /**
-   * Getter for the QR code string.
+   * Callback function to handle device disconnection.
    */
-  const getQrCode = async () => {
+  const onDeviceDisconnected = useCallback(async () => {
+    console.log('onDeviceDisconnected');
+    Alert.alert('Device disconnected', 'Check the verifier app for the result');
+    await closeFlow();
+  }, []);
+
+  /**
+   * Close utility function to close the proximity flow.
+   */
+  const closeFlow = async () => {
     try {
+      console.log('Cleaning up listeners and closing QR engagement');
+      Proximity.removeListener('onDeviceConnected');
+      Proximity.removeListener('onDeviceConnecting');
+      Proximity.removeListener('onDeviceDisconnected');
+      Proximity.removeListener('onDocumentRequestReceived');
+      Proximity.removeListener('onError');
+      await Proximity.close();
+      setQrCode(null);
+    } catch (e) {
+      console.log('Error closing the proximity flow', e);
+    }
+  };
+
+  /**
+   * Start utility function to start the proximity flow.
+   */
+  const startFlow = useCallback(async () => {
+    const hasPermission = await requestBlePermissions();
+    if (!hasPermission) {
+      Alert.alert(
+        'Permission Required',
+        'BLE permissions are needed to proceed.'
+      );
+      setLoading(false);
+      return;
+    }
+    try {
+      await Proximity.start(); // Peripheral mode
+      // Register listeners
+      Proximity.addListener('onDeviceConnecting', handleOnDeviceConnecting);
+      Proximity.addListener('onDeviceConnected', handleOnDeviceConnected);
+      Proximity.addListener(
+        'onDocumentRequestReceived',
+        onDocumentRequestReceived
+      );
+      Proximity.addListener('onDeviceDisconnected', onDeviceDisconnected);
+      Proximity.addListener('onError', onError);
+
+      // Generate the QR code string
       console.log('Generating QR code');
       const qrString = await Proximity.getQrCodeString();
       console.log(`Generated QR code: ${qrString}`);
       setQrCode(qrString);
     } catch (error) {
-      console.error('Error generating QR code:', error);
+      console.log('Error starting the proximity flow', error);
+      Alert.alert('Failed to initialize QR engagement');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [onDocumentRequestReceived, onDeviceDisconnected, onError]);
 
   /**
-   * Closes the QR engagement and cleans up listeners.
+   * Starts the proximity flow and stops it on unmount.
    */
-  const closeConnection = async () => {
-    console.log('Cleaning up listeners and closing QR engagement');
-    Proximity.removeListeners('onDeviceRetrievalHelperReady');
-    Proximity.removeListeners('onCommunicationError');
-    Proximity.removeListeners('onNewDeviceRequest');
-    await Proximity.closeQrEngagement();
-  };
-
   useEffect(() => {
-    const initialize = async () => {
-      const hasPermission = await requestBlePermissions();
-      if (!hasPermission) {
-        Alert.alert(
-          'Permission Required',
-          'BLE permissions are needed to proceed.'
-        );
-        setLoading(false);
-        return;
-      }
-      try {
-        // Initialize the QR engagement as peripheral mode
-        await Proximity.initializeQrEngagement(true, false, true); // Peripheral mode
-        // Register listeners
-        Proximity.addListener(
-          'onDeviceRetrievalHelperReady',
-          handleDeviceReady
-        );
-        Proximity.addListener('onCommunicationError', handleCommunicationError);
-        Proximity.addListener('onNewDeviceRequest', handleNewDeviceRequest);
-      } catch (error) {
-        Alert.alert('Failed to initialize QR engagement');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initialize();
+    startFlow();
 
     return () => {
-      closeConnection();
+      closeFlow();
     };
-  }, [handleNewDeviceRequest]);
+  }, [startFlow]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>QR Code Engagement</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#000" />
@@ -191,20 +207,13 @@ export const QrCodeScreen: React.FC = () => {
       ) : (
         <Text>Click the button to generate a QR code</Text>
       )}
-      <TouchableOpacity style={styles.button} onPress={getQrCode}>
+      <TouchableOpacity style={styles.button} onPress={startFlow}>
         <Text style={styles.buttonText}>Generate QR Engagement</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          Proximity.closeQrEngagement();
-          Alert.alert('QR Engagement Closed');
-          setQrCode(null);
-        }}
-      >
+      <TouchableOpacity style={styles.button} onPress={closeFlow}>
         <Text style={styles.buttonText}>Close QR Engagement</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
