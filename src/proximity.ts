@@ -93,14 +93,16 @@ export function start(
 }
 
 /**
- * Gets the QR code string this method is responsible for initializing the connection and retrieving the QR code string
+ * Gets the QR code string which contains a base64url encoded CBOR object which encodes the bluetooth engagement data.
  */
 export function getQrCodeString(): Promise<string> {
   return IoReactNativeProximity.getQrCodeString();
 }
 
 /**
- * Closes the QR engagement
+ * Closes the QR engagement by releasing the resources allocated during the `start` method.
+ * Before starting a new flow, it is necessary to call this method to ensure that the previous flow is properly closed.
+ * The listeners can be removed using the `removeListener` method.
  */
 export function close(): Promise<boolean> {
   return IoReactNativeProximity.close();
@@ -116,7 +118,7 @@ export function sendErrorResponse(code: ErrorCode): Promise<boolean> {
 }
 
 /**
- * Generates a response that will be sent to the verifier app containing the requested data
+ * Generates a response that will be sent to the verifier app containing the requested documents.
  * @param documents - An array of `Document` which contains the requested data received from the `onNewDeviceRequest` event
  * @param acceptedFields - The accepted fields which will be presented to the verifier app. This is the same as the `request` field in the `VerifierRequest` object.
  * The outermost key represents the credential doctype. The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value, which indicates whether the user is willing to present the corresponding claim. Example:
