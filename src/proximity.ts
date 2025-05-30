@@ -53,6 +53,17 @@ export type Document = {
 };
 
 /**
+ * Error codes that can be used with the `sendErrorResponse` method.
+ * These are defined based on the SessionData status code defined in the table 20 of the ISO 18013-5 standard
+ * and mirror codes defined in the native module.
+ */
+export enum ErrorCode {
+  SESSION_ENCRYPTION = 10,
+  CBOR_DECODING = 11,
+  SESSION_TERMINATED = 20,
+}
+
+/**
  * Starts the proximity flow by allocating the necessary resources and initializing the Bluetooth stack.
  * @param config.peripheralMode (Android only) - Whether the device is in peripheral mode. Defaults to true
  * @param config.centralClientMode (Android only) - Whether the device is in central client mode. Defaults to false
@@ -96,21 +107,12 @@ export function close(): Promise<boolean> {
 }
 
 /**
- * Sends a generic error response to the verifier app
+ * Sends an error response to the verifier app.
+ * The error code must be one of the `ErrorCode` enum values.
+ * @param code - The error code to be sent to the verifier app.
  */
-export function sendErrorResponse(): Promise<boolean> {
-  if (Platform.OS === 'ios') {
-    // Currently not implemented for iOS
-    return Promise.resolve(true);
-  }
-  return IoReactNativeProximity.sendErrorResponse();
-}
-
-/**
- * Sends an error response to the verifier app when the requested document is not found.
- */
-export function sendErrorResponseNoData(): Promise<boolean> {
-  return IoReactNativeProximity.sendErrorResponseNoData();
+export function sendErrorResponse(code: ErrorCode): Promise<boolean> {
+  return IoReactNativeProximity.sendErrorResponse(code);
 }
 
 /**

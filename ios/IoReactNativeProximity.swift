@@ -216,7 +216,7 @@ class IoReactNativeProximity: RCTEventEmitter {
     do {
       let parsedDocuments = try parseDocuments(documents: documents)
       let items = try parseAcceptedFields(acceptedFields: acceptedFields)
-      let deviceResponse = try Proximity.shared.generateDeviceResponse(allowed: true, items: items, documents: parsedDocuments, sessionTranscript: nil)
+      let deviceResponse = try Proximity.shared.generateDeviceResponse(items: items, documents: parsedDocuments, sessionTranscript: nil)
       let strDeviceResponse = Data(deviceResponse).base64EncodedString()
       resolve(strDeviceResponse)
     }catch{
@@ -243,7 +243,7 @@ class IoReactNativeProximity: RCTEventEmitter {
     do{
       if let responseData = Data(base64Encoded: response) {
         let decodedResponse = [UInt8](responseData)
-        try Proximity.shared.dataPresentation(allowed: true, decodedResponse)
+        try Proximity.shared.dataPresentation(decodedResponse)
         resolve(true)
       }
     }catch let error {
@@ -252,16 +252,26 @@ class IoReactNativeProximity: RCTEventEmitter {
   }
   
   /**
-   Sends a no data response when the user declines the presentation request.
+   Sends an error response during the presentation according to the SessionData status codes defined in table 20 of the ISO18013-5 standard.
    - Parameters:
+     - status: The status error to be sent is an integer of type ``SessionDataStatus``:
+       ```
+         10 -> Error: session encryption
+         11 -> Error: CBOR decoding
+         20 -> Session termination
+       ```
      - resolve: The promise to be resolved
      - reject: The promise to be rejected
    */
-  @objc(sendErrorResponseNoData:withRejecter:)
-  func sendErrorResponseNoData(_ resolve: @escaping RCTPromiseResolveBlock,
+  @objc(sendErrorResponse:withResolver:withRejecter:)
+  func sendErrorResponse(status: UInt64, _ resolve: @escaping RCTPromiseResolveBlock,
                                reject: @escaping RCTPromiseRejectBlock){
     do{
-      try Proximity.shared.dataPresentation(allowed: false, [])
+      if let statusEnum = SessionDataStatus(rawValue: status) {
+        try Proximity.shared.errorPresentation(statusEnum)
+      } else {
+        ME.sendResponseError.reject(reject: reject, ("error", "Invalid status code"))
+      }
       resolve(true)
     }catch let error{
       ME.sendResponseError.reject(reject: reject, ("error", error.localizedDescription))
@@ -381,6 +391,7 @@ class IoReactNativeProximity: RCTEventEmitter {
     case qrCodeError = "QR_CODE_ERROR"
     case generateDeviceResponseError = "GENERATE_DEVICE_RESPONSE_ERROR"
     case sendResponseError = "SEND_RESPONSE_ERROR"
+    case sendErrorResponse = "SEND_ERROR_RESPONSE_ERROR"
     
     func error(
       userInfo: [String : Any]? = nil
@@ -393,6 +404,8 @@ class IoReactNativeProximity: RCTEventEmitter {
       case .generateDeviceResponseError:
         return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       case .sendResponseError:
+        return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
+      case .sendErrorResponse:
         return NSError(domain: self.rawValue, code: -1, userInfo: userInfo)
       }
     }
