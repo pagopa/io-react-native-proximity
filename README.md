@@ -1,6 +1,6 @@
 # @pagopa/io-react-native-proximity
 
-This library provides a React Native module based on [https://github.com/pagopa/iso18013-android](iso18013-android) and [https://github.com/pagopa/iso18013-ios](iso18013-ios) which allows mDL proximity presentation according to the
+This library provides a React Native module based on [iso18013-android](https://github.com/pagopa/iso18013-android) and [iso18013-ios](https://github.com/pagopa/iso18013-ios) which allows mDL proximity presentation according to the
 ISO 18013-5 standard and remote presentation according to the ISO 18013-7 standard.
 
 ## Installation
