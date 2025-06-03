@@ -96,7 +96,6 @@ export const requestBlePermissions = async (): Promise<boolean> => {
       permissionsToCheck = [
         PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
         PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
-        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
         PERMISSIONS.ANDROID.BLUETOOTH_ADVERTISE,
       ];
     } else {
