@@ -191,8 +191,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
    * Generates a response which can later be sent with {sendResponse} with the provided
    * CBOR documents and the requested attributes.
    * @param documents - A ReadableArray containing a map with alias, issuerSignedContent and docType as strings.
-   * @param fieldRequestedAndAccepted - The string containing the requested attributes. This is
-   * provided by the {onNewDeviceRequest} callback provided by {setupProximityHandler} .
+   * @param fieldRequestedAndAccepted - The string containing the requested attributes. This is based on the request
+   * provided by the {onDocumentRequestReceived} callback.
    * @param promise - The promise which will be resolved in case of success or rejected in case of failure.
    */
   @ReactMethod

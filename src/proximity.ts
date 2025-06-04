@@ -31,7 +31,7 @@ const eventEmitter = new NativeEventEmitter(IoReactNativeProximity);
 export type EventsPayload = {
   onDeviceConnecting: undefined;
   onDeviceConnected: undefined;
-  // The message payload is a JSON string that must be parsed into a `VerifierRequest` structure via `parseVerifierRequest`.
+  // The message payload is a JSON string that can be parsed into a `VerifierRequest` structure via `parseVerifierRequest`.
   onDocumentRequestReceived: { data?: string } | undefined;
   onDeviceDisconnected: undefined;
   onError: { error?: string } | undefined;
@@ -117,19 +117,8 @@ export function sendErrorResponse(code: ErrorCode): Promise<boolean> {
 
 /**
  * Generates a response that will be sent to the verifier app containing the requested data
- * @param documents - An array of `Document` which contains the requested data received from the `onNewDeviceRequest` event
- * @param acceptedFields - The accepted fields which will be presented to the verifier app. This is the same as the `request` field in the `VerifierRequest` object.
- * The outermost key represents the credential doctype. The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value, which indicates whether the user is willing to present the corresponding claim. Example:
- * `{
- *    "org.iso.18013.5.1.mDL": {
- *      "org.iso.18013.5.1": {
- *        "hair_colour": true,
- *        "given_name_national_character": true,
- *        "family_name_national_character": true,
- *        "given_name": true,
- *     }
- *    }
- *  }`
+ * @param documents - An array of `Document` which contains the requested data received from the `onDocumentRequestReceived` event
+ * @param acceptedFields - The accepted fields which will be presented to the verifier app. See the type definition for more details.
  * @returns A base64 encoded response to be sent to the verifier app via `sendResponse`
  */
 export function generateResponse(
