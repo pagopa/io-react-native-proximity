@@ -32,9 +32,9 @@ export type EventsPayload = {
   onDeviceConnecting: undefined;
   onDeviceConnected: undefined;
   // The message payload is a JSON string that must be parsed into a `VerifierRequest` structure via `parseVerifierRequest`.
-  onDocumentRequestReceived: { data: string } | undefined;
+  onDocumentRequestReceived: { data?: string } | undefined;
   onDeviceDisconnected: undefined;
-  onError: { error: string } | undefined;
+  onError: { error?: string } | undefined;
 };
 
 /**
