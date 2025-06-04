@@ -27,11 +27,86 @@ Listeners can be added using the `addListener` method and removed using the `rem
 ```typescript
 import { Proximity } from '@pagopa/io-react-native-proximity';
 
-Proximity.addListener('onDeviceConnecting', () =>
-  console.log('Device is connecting')
-);
+Proximity.addListener('event', () => console.log('event occurred'));
 
-Proximity.removeListener('onDeviceConnecting');
+Proximity.removeListener('event');
+```
+
+#### `onDeviceConnecting`
+
+```typescript
+import { Proximity } from '@pagopa/io-react-native-proximity';
+
+Proximity.addListener('onDeviceConnecting', () => {
+  console.log('Device is connecting');
+});
+```
+
+#### `onDeviceConnected`
+
+```typescript
+import { Proximity } from '@pagopa/io-react-native-proximity';
+
+Proximity.addListener('onDeviceConnected', () => {
+  console.log('Device is connected');
+});
+```
+
+#### `onDocumentRequestReceived`
+
+```typescript
+import { Proximity } from '@pagopa/io-react-native-proximity';
+
+Proximity.addListener(
+  'onDocumentRequestReceived',
+  (payload: Proximity.EventsPayload['onDocumentRequestReceived']) => {
+    console.log('onDocumentRequestReceived', payload);
+    if (!payload || !payload.data) {
+      console.warn('Request does not contain a message.');
+      return;
+    }
+
+    // Parse and verify the received request with the exposed function
+    const parsedJson = JSON.parse(payload.data);
+    console.log('Parsed JSON:', parsedJson);
+    const parsedResponse = parseVerifierRequest(parsedJson);
+    console.log('Parsed response:', JSON.stringify(parsedResponse));
+  }
+);
+```
+
+#### `onDeviceDisconnected`
+
+```typescript
+import { Proximity } from '@pagopa/io-react-native-proximity';
+
+Proximity.addListener('onDeviceDisconnected', () => {
+  console.log('Device is disconnected');
+});
+```
+
+#### `onError`
+
+```typescript
+import { Proximity } from '@pagopa/io-react-native-proximity';
+
+Proximity.addListener(
+  'onError',
+  async (data: Proximity.EventsPayload['onError']) => {
+    try {
+      if (!data || !data.error) {
+        throw new Error('No error data received');
+      }
+      const parsedError = parseError(data.error);
+      console.error(`onError: ${parsedError}`);
+    } catch (e) {
+      console.error('Error parsing onError data:', e);
+    } finally {
+      // Close the flow on error
+      await closeFlow();
+    }
+  }
+);
 ```
 
 ### `start`
@@ -160,3 +235,7 @@ MIT
 ---
 
 Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+
+```
+
+```
