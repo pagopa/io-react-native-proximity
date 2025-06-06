@@ -45,6 +45,26 @@ export const parseVerifierRequest = (input: unknown): VerifierRequest => {
 };
 
 /**
+ * Zod schema for the type returned by the `onError` event in Proximity `Events`.
+ */
+const Error = z.string().catch('Unknown error');
+
+/**
+ * Error type returned by the `onError` event in Proximity `Events`.
+ */
+export type Error = z.infer<typeof Error>;
+
+/**
+ * Parses the input to an Error object.
+ * This function is used to parse the error received from the verifier app via the `onError` event.
+ * @param input - The input to be parsed
+ * @returns The parsed Error object or a default error message if parsing fails
+ */
+export const parseError = (input: unknown): Error => {
+  return Error.parse(input);
+};
+
+/**
  * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
  * It contains of a nested object structure, where the outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields
  * with a boolean value indicating whether the user wants to present the field or not.

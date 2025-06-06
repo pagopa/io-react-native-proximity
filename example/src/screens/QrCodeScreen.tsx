@@ -5,6 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from '../mocks';
 import {
   Proximity,
+  parseError,
   parseVerifierRequest,
   type VerifierRequest,
 } from '@pagopa/io-react-native-proximity';
@@ -14,8 +15,6 @@ import {
   isRequestMdl,
   requestBlePermissions,
 } from '../utils';
-import { ErrorCode } from '../../../src/proximity';
-
 /**
  * Proximity status enum to track the current state of the flow.
  * - STARTING: The flow is starting, permissions are being requested if necessary.
@@ -133,10 +132,19 @@ export const QrCodeScreen: React.FC = () => {
    * @param data The error data
    */
   const onError = useCallback(
-    (data: Proximity.EventsPayload['onError']) => {
-      const error = JSON.stringify(data);
-      console.error(`onError: ${error}`);
-      closeFlow();
+    async (data: Proximity.EventsPayload['onError']) => {
+      try {
+        if (!data || !data.error) {
+          throw new Error('No error data received');
+        }
+        const parsedError = parseError(data.error);
+        console.error(`onError: ${parsedError}`);
+      } catch (e) {
+        console.error('Error parsing onError data:', e);
+      } finally {
+        // Close the flow on error
+        await closeFlow();
+      }
     },
     [closeFlow]
   );
@@ -153,7 +161,6 @@ export const QrCodeScreen: React.FC = () => {
       console.log('Error response sent');
     } catch (error) {
       console.error('Error sending error response:', error);
-      Alert.alert('Failed to send error response');
     }
   }, []);
 
@@ -225,7 +232,6 @@ export const QrCodeScreen: React.FC = () => {
       setStatus(PROXIMITY_STATUS.STARTED);
     } catch (error) {
       console.log('Error starting the proximity flow', error);
-      Alert.alert('Failed to initialize QR engagement');
       setStatus(PROXIMITY_STATUS.STOPPED);
     }
   }, [onDeviceDisconnected, onDocumentRequestReceived, onError]);
@@ -253,15 +259,15 @@ export const QrCodeScreen: React.FC = () => {
         <>
           <Button title="Send document" onPress={() => sendDocument(request)} />
           <Button
-            title={`Send error ${ErrorCode.CBOR_DECODING} (${ErrorCode[ErrorCode.CBOR_DECODING]})`}
+            title={`Send error ${Proximity.ErrorCode.CBOR_DECODING} (${Proximity.ErrorCode[Proximity.ErrorCode.CBOR_DECODING]})`}
             onPress={() => sendError(10)}
           />
           <Button
-            title={`Send error ${ErrorCode.SESSION_ENCRYPTION} (${ErrorCode[ErrorCode.SESSION_ENCRYPTION]})`}
+            title={`Send error ${Proximity.ErrorCode.SESSION_ENCRYPTION} (${Proximity.ErrorCode[Proximity.ErrorCode.SESSION_ENCRYPTION]})`}
             onPress={() => sendError(11)}
           />
           <Button
-            title={`Send error ${ErrorCode.SESSION_TERMINATED} (${ErrorCode[ErrorCode.SESSION_TERMINATED]})`}
+            title={`Send error ${Proximity.ErrorCode.SESSION_TERMINATED} (${Proximity.ErrorCode[Proximity.ErrorCode.SESSION_TERMINATED]})`}
             onPress={() => sendError(20)}
           />
         </>
