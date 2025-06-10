@@ -174,9 +174,9 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       (0 until documents.size())
         .mapNotNull { i ->
           val doc = documents.getMap(i)
-          val alias = doc.getString("alias")
-          val issuerSignedContent = doc.getString("issuerSignedContent")
-          val docType = doc.getString("docType")
+          val alias = doc?.getString("alias")
+          val issuerSignedContent = doc?.getString("issuerSignedContent")
+          val docType = doc?.getString("docType")
 
           if (alias != null && issuerSignedContent != null && docType != null) {
             DocRequested(issuerSignedContent, alias, docType)
