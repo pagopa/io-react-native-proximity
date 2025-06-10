@@ -30,7 +30,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - IOWalletProximity (1.2.1)
+  - IOWalletProximity (1.2.2)
   - pagopa-io-react-native-crypto (1.0.1):
     - DoubleConversion
     - glog
@@ -1936,7 +1936,7 @@ SPEC CHECKSUMS:
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: 2771b98fb813fdc6f92edd7c9c0035ecabf9fee7
   IoReactNativeProximity: 4aa2befab152fb8ed8403f79300ecf4d340f73a7
-  IOWalletProximity: 66db020e9570b5b14483090336a7cdc3b0418e7c
+  IOWalletProximity: 55d5527de91a971dbcdbdda1838860c9860683ac
   pagopa-io-react-native-crypto: b34250ee64b80d058320ee88233177df8d8d03b0
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: be794de7dc6ed8f9f7fbf525f86e7651b8b68746
