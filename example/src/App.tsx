@@ -254,15 +254,15 @@ const App: React.FC = () => {
           <Button title="Send document" onPress={() => sendDocument(request)} />
           <Button
             title={`Send error ${ErrorCode.CBOR_DECODING} (${ErrorCode[ErrorCode.CBOR_DECODING]})`}
-            onPress={() => sendError(10)}
+            onPress={() => sendError(ErrorCode.CBOR_DECODING)}
           />
           <Button
             title={`Send error ${ErrorCode.SESSION_ENCRYPTION} (${ErrorCode[ErrorCode.SESSION_ENCRYPTION]})`}
-            onPress={() => sendError(11)}
+            onPress={() => sendError(ErrorCode.SESSION_ENCRYPTION)}
           />
           <Button
             title={`Send error ${ErrorCode.SESSION_TERMINATED} (${ErrorCode[ErrorCode.SESSION_TERMINATED]})`}
-            onPress={() => sendError(20)}
+            onPress={() => sendError(ErrorCode.SESSION_TERMINATED)}
           />
         </>
       )}
