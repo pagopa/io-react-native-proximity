@@ -14,9 +14,9 @@ const VerifierRequest = z.object({
 });
 
 /**
- * VerifierRequest type returned by the `onNewDeviceRequest` event in `QrEngagementEvents`.
+ * VerifierRequest type returned by the `onDocumentRequestReceived` event in `Events`.
  * The outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields with a boolean value
- * indicating whether the user wants to retain the field or not. The isAuthenticated field is present for each requested credentials and indicates wether or not the verifier is authenticated.
+ * indicating whether the verifier app wants to retain the field or not. The isAuthenticated field is present for each requested credentials and indicates wether or not the verifier is authenticated.
  * Example:
  *  `{
  *    "org.iso.18013.5.1.mDL": {
@@ -65,10 +65,21 @@ export const parseError = (input: unknown): Error => {
 };
 
 /**
- * This function generates the accepted fields for the VerifierRequest and sets each requested field to true.
- * It contains of a nested object structure, where the outermost key represents the credential doctype, the inner key represents the namespace and the innermost key represents the requested fields
- * with a boolean value indicating whether the user wants to present the field or not.
- */
+ * This is the type definition for the accepted fields that will be presented to the verifier app.
+ * It contains of a nested object structure, where the outermost key represents the credential doctype.
+ * The inner dictionary contains namespaces, and for each namespace, there is another dictionary mapping requested claims to a boolean value,
+ * which indicates whether the user is willing to present the corresponding claim. Example:
+ * `{
+ *    "org.iso.18013.5.1.mDL": {
+ *      "org.iso.18013.5.1": {
+ *        "hair_colour": true, // Indicates the user is willing to present this claim
+ *        "given_name_national_character": true,
+ *        "family_name_national_character": true,
+ *        "given_name": true,
+ *     }
+ *    }
+ *  }`
+ **/
 export type AcceptedFields = {
   [credential: string]: {
     [namespace: string]: { [field: string]: boolean };
