@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.78.2):
     - hermes-engine/Pre-built (= 0.78.2)
   - hermes-engine/Pre-built (0.78.2)
-  - IoReactNativeProximity (0.5.0):
+  - IoReactNativeProximity (0.6.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1935,7 +1935,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: 2771b98fb813fdc6f92edd7c9c0035ecabf9fee7
-  IoReactNativeProximity: 6280b1337ac8e7ab93efcfc02c86a4e48649fff2
+  IoReactNativeProximity: 5d68f5add61477a0e034154eb089455f4c879156
   IOWalletProximity: 55d5527de91a971dbcdbdda1838860c9860683ac
   pagopa-io-react-native-crypto: b34250ee64b80d058320ee88233177df8d8d03b0
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
