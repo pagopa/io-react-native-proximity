@@ -5,6 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from './mocks';
 import {
   Proximity,
+  parseError,
   parseVerifierRequest,
   type VerifierRequest,
 } from '@pagopa/io-react-native-proximity';
@@ -14,7 +15,6 @@ import {
   isRequestMdl,
   requestBlePermissions,
 } from './utils';
-import { ErrorCode } from '../../src/proximity';
 
 /**
  * Proximity status enum to track the current state of the flow.
@@ -133,10 +133,19 @@ const App: React.FC = () => {
    * @param data The error data
    */
   const onError = useCallback(
-    (data: Proximity.EventsPayload['onError']) => {
-      const error = JSON.stringify(data);
-      console.error(`onError: ${error}`);
-      closeFlow();
+    async (data: Proximity.EventsPayload['onError']) => {
+      try {
+        if (!data || !data.error) {
+          throw new Error('No error data received');
+        }
+        const parsedError = parseError(data.error);
+        console.error(`onError: ${parsedError}`);
+      } catch (e) {
+        console.error('Error parsing onError data:', e);
+      } finally {
+        // Close the flow on error
+        await closeFlow();
+      }
     },
     [closeFlow]
   );
@@ -253,16 +262,16 @@ const App: React.FC = () => {
         <>
           <Button title="Send document" onPress={() => sendDocument(request)} />
           <Button
-            title={`Send error ${ErrorCode.CBOR_DECODING} (${ErrorCode[ErrorCode.CBOR_DECODING]})`}
-            onPress={() => sendError(ErrorCode.CBOR_DECODING)}
+            title={`Send error ${Proximity.ErrorCode.CBOR_DECODING} (${Proximity.ErrorCode[Proximity.ErrorCode.CBOR_DECODING]})`}
+            onPress={() => sendError(Proximity.ErrorCode.CBOR_DECODING)}
           />
           <Button
-            title={`Send error ${ErrorCode.SESSION_ENCRYPTION} (${ErrorCode[ErrorCode.SESSION_ENCRYPTION]})`}
-            onPress={() => sendError(ErrorCode.SESSION_ENCRYPTION)}
+            title={`Send error ${Proximity.ErrorCode.SESSION_ENCRYPTION} (${Proximity.ErrorCode[Proximity.ErrorCode.SESSION_ENCRYPTION]})`}
+            onPress={() => sendError(Proximity.ErrorCode.SESSION_ENCRYPTION)}
           />
           <Button
-            title={`Send error ${ErrorCode.SESSION_TERMINATED} (${ErrorCode[ErrorCode.SESSION_TERMINATED]})`}
-            onPress={() => sendError(ErrorCode.SESSION_TERMINATED)}
+            title={`Send error ${Proximity.ErrorCode.SESSION_TERMINATED} (${Proximity.ErrorCode[Proximity.ErrorCode.SESSION_TERMINATED]})`}
+            onPress={() => sendError(Proximity.ErrorCode.SESSION_TERMINATED)}
           />
         </>
       )}

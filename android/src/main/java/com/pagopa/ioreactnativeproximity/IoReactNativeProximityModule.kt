@@ -285,7 +285,8 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
       }
 
       override fun onError(error: Throwable) {
-        val data = error.message ?: ""
+        val data: WritableMap = Arguments.createMap()
+        data.putString("error", error.message ?: "")
         sendEvent("onError", data)
       }
 

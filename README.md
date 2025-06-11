@@ -20,7 +20,7 @@ This library emits the following events:
 | onDeviceConnected | `undefined` | Event dispatched when the verifier app is connected. |
 | onDocumentRequestReceived | `{ data: string } \| undefined` | Event dispatched when the consumer app receives a new request, contained in the data payload. It can be parsed via the `parseVerifierRequest` provided [here](src/schema.ts). |
 | onDeviceDisconnected | `undefined` | Event dispatched when the verifier app disconnects. |
-| onError | `{ error: string } \| undefined` | Event dispatched when an error occurs which is contained in the error payload. |
+| onError | `{ error: string } \| undefined` | Event dispatched when an error occurs which is contained in the error payload. It can be parsed via the `parseError` provided [here](src/schema.ts). |
 
 Listeners can be added using the `addListener` method and removed using the `removeListener` method.
 
