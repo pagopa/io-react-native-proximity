@@ -275,6 +275,9 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
    */
   private fun setupProximityHandler() {
     qrEngagement?.withListener(object : QrEngagementListener {
+      /**
+       * This event currently doesn't get called due to an issue with the underlying native library.
+       */
       override fun onDeviceConnecting() {
         sendEvent("onDeviceConnecting", "")
       }

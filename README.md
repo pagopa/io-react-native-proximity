@@ -16,7 +16,7 @@ npm install @pagopa/io-react-native-proximity
 This library emits the following events:
 | Event | Payload | Description |
 |---------------------------|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| onDeviceConnecting | `undefined` | Event dispatched when the verifier app is connecting |
+| onDeviceConnecting (iOS only) | `undefined` | Event dispatched when the verifier app is connecting |
 | onDeviceConnected | `undefined` | Event dispatched when the verifier app is connected. |
 | onDocumentRequestReceived | `{ data: string } \| undefined` | Event dispatched when the consumer app receives a new request, contained in the data payload. It can be parsed via the `parseVerifierRequest` provided [here](src/schema.ts). |
 | onDeviceDisconnected | `undefined` | Event dispatched when the verifier app disconnects. |

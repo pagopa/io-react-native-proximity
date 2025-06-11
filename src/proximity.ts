@@ -22,7 +22,7 @@ const eventEmitter = new NativeEventEmitter(IoReactNativeProximity);
 
 /**
  * Events emitted by the native module:
- * - `onDeviceConnecting`: Emitted when the device is connecting to the verifier app.
+ * - `onDeviceConnecting`: (iOS only) Emitted when the device is connecting to the verifier app.
  * - `onDeviceConnected`: Emitted when the device is connected to the verifier app.
  * - `onDocumentRequestReceived`: Emitted when a document request is received from the verifier app. Carries a payload containing the request data.
  * - `onDeviceDisconnected`: Emitted when the device is disconnected from the verifier app.
