@@ -4,15 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
 import { KEYTAG, mdlMock, WELL_KNOWN_CREDENTIALS } from './mocks';
 import {
-  Proximity,
   parseError,
   parseVerifierRequest,
+  Proximity,
   type VerifierRequest,
 } from '@pagopa/io-react-native-proximity';
 import {
   generateAcceptedFields,
   generateKeyIfNotExists,
-  isRequestMdl,
   requestBlePermissions,
 } from './utils';
 
@@ -61,7 +60,14 @@ const App: React.FC = () => {
    */
   const sendDocument = async (verifierRequest: VerifierRequest['request']) => {
     await generateKeyIfNotExists(KEYTAG);
+    await generateKeyIfNotExists('WIA_KEYTAG');
     const documents: Array<Proximity.Document> = [
+      {
+        alias: 'WIA_KEYTAG',
+        docType: 'org.iso.18013.5.1.IT.WalletAttestation',
+        issuerSignedContent:
+          'uQACamlzc3VlckF1dGiEQ6EBJqIEWCtRMXlWeUdaUTloRkUyTUVjc1pOX3ItMldjY3JoS1BnaXJwWlItcENrb00wGCGAWQIP2BhZAgq5AAZndmVyc2lvbmMxLjBvZGlnZXN0QWxnb3JpdGhtZ1NIQS0yNTZsdmFsdWVEaWdlc3RzoXRvcmcuaXNvLjE4MDEzLjUuMS5JVKQAWCAi87HROT5p3ZKLZfoHAF6tl9wfdLMP/1g2X2AsjUYTsQFYIKvRF3tA2MHtnHtJrbzpAzhOEQ6TEMyqO33sHHKMCpByAlgg0R9ydpXHU5cVof8iMDHXIs/ubh2vp38clo/C/63e9MIDWCALZcOFmnqdBGgMsQCAY4aWt3PA+3JURLjh+UFV8+cQw21kZXZpY2VLZXlJbmZvuQABaWRldmljZUtleaUgAQJ4KzBRMV9jUEQyS2dkUW9zRF9PeWVqQjg5LWRPUUJGdjdMeG9abzNqOFFuQzgBAiFYIAt4kkV2huMDs/w6Zg9vOLYwuZh02jhEjl1KH9EoD4pnIlghAL0X4oA8ZI9pX7GhZdhOoqaIxOmOspQ0asf9ofrZO+r7Z2RvY1R5cGV4Jm9yZy5pc28uMTgwMTMuNS4xLklULldhbGxldEF0dGVzdGF0aW9ubHZhbGlkaXR5SW5mb7kAA2ZzaWduZWTAdDIwMjUtMDctMDhUMTM6NTk6MDBaaXZhbGlkRnJvbcB0MjAyNS0wNy0wOFQxMzo1OTowMFpqdmFsaWRVbnRpbMB0MjAyNS0wNy0wOFQxNDo1OTowMFpYQP9oKhhMgso3+chSUcS4DKhPo/l9LrJAxJWXed9AS2XeUtEDoNDsEjEf8eI8tmxVvzAh20UjfgFS+h2t5ufDXOlqbmFtZVNwYWNlc6F0b3JnLmlzby4xODAxMy41LjEuSVSE2BhYfqRoZGlnZXN0SUQAcWVsZW1lbnRJZGVudGlmaWVyY2FhbGxlbGVtZW50VmFsdWV4JWh0dHBzOi8vd2FsbGV0LmlvLnBhZ29wYS5pdC9Mb0EvYmFzaWNmcmFuZG9tWCAMu4wnxw8hveQFL+9FdOsWWssxErtE4XiE8cjdhZsweNgYWISkaGRpZ2VzdElEAXFlbGVtZW50SWRlbnRpZmllcmNzdWJsZWxlbWVudFZhbHVleCswUTFfY1BEMktnZFFvc0RfT3llakI4OS1kT1FCRnY3THhvWm8zajhRbkM4ZnJhbmRvbVggX3dwX3Bdi6Q7JUVBjp6KXOo0diru4OfINCLrhgKKe4nYGFh8pGhkaWdlc3RJRAJxZWxlbWVudElkZW50aWZpZXJrd2FsbGV0X2xpbmtsZWxlbWVudFZhbHVleBtodHRwczovL3dhbGxldC5pby5wYWdvcGEuaXRmcmFuZG9tWCA8VKpAwByrFnwKjSt+2t6vP9R/APh9GqMBvXFF/Ss+T9gYWGmkaGRpZ2VzdElEA3FlbGVtZW50SWRlbnRpZmllcmt3YWxsZXRfbmFtZWxlbGVtZW50VmFsdWVpSVQgV2FsbGV0ZnJhbmRvbVggbT/OKdYgyA6ixFQ5MBECuWjBnp6YDHAlxTi1eFPcoLE=',
+      },
       {
         alias: KEYTAG,
         docType: WELL_KNOWN_CREDENTIALS.mdl,
@@ -188,7 +194,9 @@ const App: React.FC = () => {
         console.log('Parsed JSON:', parsedJson);
         const parsedResponse = parseVerifierRequest(parsedJson);
         console.log('Parsed response:', JSON.stringify(parsedResponse));
+        /*
         isRequestMdl(Object.keys(parsedResponse.request));
+*/
         console.log('MDL request found');
         setRequest(parsedResponse.request);
         setStatus(PROXIMITY_STATUS.PRESENTING);
@@ -215,7 +223,9 @@ const App: React.FC = () => {
       return;
     }
     try {
-      await Proximity.start(); // Peripheral mode
+      await Proximity.start({
+        certificates: [],
+      });
       // Register listeners
       Proximity.addListener('onDeviceConnecting', handleOnDeviceConnecting);
       Proximity.addListener('onDeviceConnected', handleOnDeviceConnected);

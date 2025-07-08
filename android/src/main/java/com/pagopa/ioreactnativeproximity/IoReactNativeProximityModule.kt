@@ -17,7 +17,7 @@ import it.pagopa.io.wallet.proximity.request.DocRequested
 import it.pagopa.io.wallet.proximity.response.ResponseGenerator
 import it.pagopa.io.wallet.proximity.session_data.SessionDataStatus
 import it.pagopa.io.wallet.proximity.wrapper.DeviceRetrievalHelperWrapper
-
+import it.pagopa.io.wallet.proximity.ProximityLogger
 
 class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -47,6 +47,7 @@ class IoReactNativeProximityModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     try {
+      ProximityLogger.enabled = true
       val retrievalMethod = BleRetrievalMethod(
         peripheralServerMode = peripheralMode,
         centralClientMode = centralClientMode,
